@@ -1,0 +1,22 @@
+{
+  "name": "rugby-union",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kim-montano/rugby-union.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kim-montano/rugby-union/issues"
+  },
+  "homepage": "https://github.com/kim-montano/rugby-union#readme",
+  "dependencies": {
+    "react": "^16.2.0"
+  }
+}
