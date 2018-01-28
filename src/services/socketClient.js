@@ -1,8 +1,7 @@
 import openSocket from 'socket.io-client';
 
 // initialize connection to socket server
-// move this uri to a config
-const socket = openSocket('http://localhost:58784');
+const socket = openSocket(window.appConfig.socketServerUrl);
 
 function ping(callback) {
   socket.on('myEvent', (message) => {

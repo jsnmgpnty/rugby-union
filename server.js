@@ -3,15 +3,18 @@ var express = require('express');
 var app = express();
 var router = express.Router();
 
+// server variables
 var path = __dirname + '/build/';
-var port = 58784;
+var port = 8080;
 
+// rugby game variables
 var games = [];
 var players = [];
-var clientFunctions = {};
 
 // setup socket io
-var io = require('socket.io').listen(app.listen(port));
+var io = require('socket.io').listen(app.listen(port, function () {
+  console.log("Server now running at port " + port);
+}));
 io.set('transports', [
   'polling'
   , 'websocket'
@@ -20,21 +23,6 @@ io.set('transports', [
   , 'xhr-polling'
   , 'jsonp-polling'
 ]);
-
-// server request handler
-router.use(function (req, res, next) {
-  console.log('/' + req.method);
-  next();
-});
-
-// main page request handler
-router.get('/', function(req, res){
-  res.sendFile(path + 'index.html');
-});
-
-// url route handlers
-app.use('/', router);
-app.use('/static', express.static(path + 'static/'));
 
 // on socket connection
 io.on('connection', function (socket) {
@@ -47,5 +35,12 @@ io.on('connection', function (socket) {
   });
 });
 
+// setup routes
+var indexRoute = require('./server/routes/index');
+
+// url route handlers
+app.use('/', indexRoute);
+app.use('/static', express.static(path + 'static/'));
+app.use('/service-worker.js', express.static(path + '/service-worker.js'));
+
 module.exports = app;
- 
