@@ -24,5 +24,4 @@ To run the app using Docker, make sure you have docker-cli installed. Next, run 
 $ docker build -t rugby-union .
 $ docker run -p <port>:8080 -e "REACT_APP_RUNTIME_PORT=<port>" rugby-union
 ```
-Make sure that the ports you used matches. The server will run at port 8080 and the client will use the REACT_APP_RUNTIME
-_PORT environment variable which should be the bound port docker used to 8080.
+Make sure that the ports you used match. The server will run at port 8080 and bound to the port you passed in the docker run command. The client will use the REACT_APP_RUNTIME_PORT environment which should connect to the server.
