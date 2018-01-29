@@ -1,5 +1,10 @@
-// express server setup
 var express = require('express');
+var bodyParser = require('body-parser')
+var uuid = require('uuid');
+var _ = require('lodash');
+var gameService = require('./server/services/gameService');
+
+// express server setup
 var app = express();
 var router = express.Router();
 
@@ -7,11 +12,14 @@ var router = express.Router();
 var path = __dirname + '/build/';
 var port = 8080;
 
-// rugby game variables
-var games = [];
-var players = [];
+// apply request parsers
+app.use(bodyParser.json({ type: 'application/*+json' }));
+app.use(bodyParser.text({ type: 'text/html' }))
 
-// setup socket io
+// ======================================
+// socket io setup
+// ======================================
+
 var io = require('socket.io').listen(app.listen(port, function () {
   console.log("Server now running at port " + port);
 }));
@@ -30,15 +38,31 @@ io.on('connection', function (socket) {
   socket.emit('connected', { message: 'hello world' });
 
   // test event to check if client is connecting to this socket server (2 way communication)
-  socket.on('myEvent', function(data) {
+  socket.on('myEvent', function (data) {
     socket.emit('myEvent', { message: 'pong' });
+  });
+
+  socket.on('game:create', function (data) {
+    var game = gameService.createGame();
+
+    if (game && game.id) {
+      io.sockets.join(game.id);
+      io.sockets.emit('game:created', game);
+    }
+  });
+
+  socket.on('game:join', function (data) {
+    var joinGameResult = gameService.joinGame(data);
+
+    if (!joinGameResult.error) {
+      io.sockets.in(joinGameResult.gameId).emit('game:joined', { gameId: joinGameResult.gameId, teamId: joinGameResult.teamid, username: joinGameResult.username });
+    }
   });
 });
 
-// setup routes
+var gameApiRoutes = require('./server/routes/gameApi')(io);
+app.use('/api', gameApiRoutes);
 var indexRoute = require('./server/routes/index');
-
-// url route handlers
 app.use('/', indexRoute);
 app.use('/static', express.static(path + 'static/'));
 app.use('/service-worker.js', express.static(path + '/service-worker.js'));
