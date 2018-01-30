@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Switch, Route } from 'react-router';
 import { Container } from 'reactstrap';
+import VotingDemo from './voting/VotingDemo';
 
 import { ping } from './services/socketClient';
 
@@ -22,7 +23,7 @@ class App extends Component {
     });
   }
 
-  render() {
+	render() {
 		return (
 			<div className="App">
 				<header className="App-header">
@@ -34,9 +35,10 @@ class App extends Component {
 						<Route path="/list" exact component={gameList}/>
 					</Switch>
 				</Container>
+				<VotingDemo />
 			</div>
 		);
-  }
+	}
 }
 
 export default App;

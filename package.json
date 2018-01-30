@@ -27,6 +27,8 @@
     "uuid": "^3.2.1"
   },
   "devDependencies": {
+    "mongodb": "^3.0.2",
+    "nodemon": "^1.14.11",
     "react-scripts": "1.1.0"
   },
   "scripts": {
@@ -34,7 +36,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "server": "react-scripts build && node server.js",
-    "server:fixedport": "set REACT_APP_RUNTIME_PORT=8080 && react-scripts build && node server.js"
+    "server": "nodemon server.js",
+    "stack": "react-scripts build && nodemon server.js",
+    "server:fixedport": "set REACT_APP_RUNTIME_PORT=8080 && react-scripts build && nodemon server.js"
   }
 }

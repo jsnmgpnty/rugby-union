@@ -1,39 +1,45 @@
-var express = require('express');
-var router = express.Router();
-var gameService = require('../services/gameService');
+const express = require('express');
+const router = express.Router();
+const GameService = require('../services/gameService');
+const gameService = new GameService();
 
 // ======================================
 // API routes
 // ======================================
 
-var routes = function (io) {
+const routes = function () {
   // get games
-  router.route('/game/all').get(function (req, res) {
-    var game = gameService.getGamesList();
+  router.get('/game/all', async (req, res) => {
+    var game = await gameService.getGamesList();
 
     res.setHeader('Content-Type', 'application/json');
     res.json(game);
   });
 
   // get game
-  router.route('/game/:gameId').get(function (req, res) {
-    var game = gameService.getGame(req.params.gameId);
+  router.get('/game/:gameId', async (req, res) => {
+    var game = await gameService.getGame(req.params.gameId);
 
     res.setHeader('Content-Type', 'application/json');
     res.json(game);
   });
 
   // create game
-  router.route('/game').post(function (req, res) {
-    var game = gameService.createGame();
+  router.post('/game', async (req, res) => {
+    try {
+      var data = req.body;
+      var game = await gameService.createGame(data);
 
-    res.setHeader('Content-Type', 'application/json');
-    res.json(game);
+      res.setHeader('Content-Type', 'application/json');
+      res.json(game);
+    } catch (error) {
+      console.log(error);
+    }
   });
 
-  router.route('/game/join').post(function (req, res) {
+  router.post('/game/join', async (req, res) => {
     var data = request.body;
-    var result = gameService.joinGame(data);
+    var result = await gameService.joinGame(data);
 
     res.setHeader('Content-Type', 'application/json');
     res.json(result);
