@@ -60,8 +60,10 @@ io.on('connection', function (socket) {
   });
 });
 
-var gameApiRoutes = require('./server/routes/gameApi')(io);
+var gameApiRoutes = require('./server/routes/gameApi')();
 app.use('/api', gameApiRoutes);
+var countryApiRoutes = require('./server/routes/countryApi')();
+app.use('/api', countryApiRoutes);
 var indexRoute = require('./server/routes/index');
 app.use('/', indexRoute);
 app.use('/static', express.static(path + 'static/'));

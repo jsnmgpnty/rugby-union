@@ -25,7 +25,8 @@ var routes = function (io) {
 
   // create game
   router.route('/game').post(function (req, res) {
-    var game = gameService.createGame();
+    var data = req.body;
+    var game = gameService.createGame(data);
 
     res.setHeader('Content-Type', 'application/json');
     res.json(game);

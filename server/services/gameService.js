@@ -1,5 +1,8 @@
 var uuid = require('uuid');
 var _ = require('lodash');
+const MongoClient = require('mongodb').MongoClient;
+
+var mongoDbPort = 27017;
 
 // rugby game variables
 var games = [];
@@ -8,6 +11,20 @@ var gameStatus = {
   pending: 'PENDING',
   completed: 'COMPLETED',
 };
+var turnStatus = {
+  voting: 'VOTING',
+  passing: 'PASSING',
+  completed: 'COMPLETED',
+};
+
+// setup database
+var db;
+
+MongoClient.connect('mongodb://mongo:' + mongoDbPort + '/rugby-union', function (err, database) {
+  if (err) return console.log(err);
+
+  db = database;
+});
 
 // ======================================
 // private methods and functionalities
@@ -20,7 +37,7 @@ function getGamesList() {
 
 // get game
 function getGame(io, gameId) {
-  var game = _.find(games, function (g) {
+  var game = _.find(db.collection('games'), function (g) {
     return g.id === gameId;
   });
 
@@ -28,7 +45,12 @@ function getGame(io, gameId) {
 }
 
 // create game
-function createGame() {
+// {
+//   firstTeamCountry: 'England',
+//   secondTeamCountry: 'Austria',
+//   username: 'kim',
+// }
+function createGame(data) {
   var gameId = uuid();
   var firstTeamId = uuid();
   var secondTeamId = uuid();
@@ -41,31 +63,45 @@ function createGame() {
     teams: [
       {
         id: firstTeamId,
-        sortOrder: 1,
+        country: data.firstTeamCountry,
+        players: [],
+        isBallHandler: false,
       },
       {
         id: secondTeamId,
-        sortOrder: 2,
+        country: data.secondTeamCountry,
+        players: [],
+        isBallHandler: false,
       },
     ],
     status: gameStatus.pending,
     winningTeam: null,
     createdDate: new Date(),
+    createdBy: data.username,
   };
 
-  games.push(game);
-
-  return game;
+  db.collection('games').save(game, (err, result) => {
+    if (err) {
+      return { error: 'game:join failed to create game. maybe your fault. we dont make mistakes you know' };
+    }
+    
+    return result;
+  });
 }
-
-// join game
+// create game
+// {
+//   gameId: 'string',
+//   teamId: 'string',
+//   username: 'string',
+//   avatarId: 'string'
+// }
 function joinGame(data) {
-  if (!data || !data.gameId || !data.username || !data.teamId) {
+  if (!data || !data.gameId || !data.username || !data.avatarId || !data.teamId) {
     console.log('game:join invalid parameter');
     return { error: 'game:join invalid parameter' };
   }
 
-  var game = _.find(games, function (g) {
+  var game = _.find(db.collection('games'), function (g) {
     return g.id == data.gameId;
   });
 
@@ -76,7 +112,7 @@ function joinGame(data) {
 
   for (var t = 0; t < game.teams.length; t++) {
     if (game.teams[t].id === data.teamId) {
-      var existingPlayer = _.find(game.teams[i].players, function (p) {
+      var existingPlayer = _.find(game.teams[t].players, function (p) {
         return p.username === data.username;
       });
 
@@ -88,12 +124,38 @@ function joinGame(data) {
       game.teams[t].players.push({
         username: data.username,
       });
+    } else {
+      // if different team from request, we'll check if player exist from this team and remove user
+      var existingPlayer = _.find(game.teams[t].players, function (p) {
+        return p.username === data.username;
+      });
 
-      return data;
+      if (existingPlayer.length > 0) {
+        var index = _.indexOf(game.teams[i].players, existingPlayer);
+        game.teams[i].players.splice(index, 1);
+      }
     }
   }
 
-  return { error: 'game:join failed to join user ' + data.username + ' due to unknown reasons. maybe your fault. we dont make mistakes you know' };
+  db.collection('games').save(game, (err, result) => {
+    if (err) {
+      return { error: 'game:join failed to join user ' + data.username + ' due to unknown reasons. maybe your fault. we dont make mistakes you know' };
+    }
+    
+    return result;
+  });
+}
+
+function getCountries() {
+  return db.collection('countries');
+}
+
+function getCountry(countryName) {
+  var country = _.find(getCountries(), function (c) {
+    return c.name === countryName;
+  });
+
+  return country[0];
 }
 
 module.exports = {
@@ -101,4 +163,6 @@ module.exports = {
   getGamesList: getGamesList,
   getGame: getGame,
   joinGame: joinGame,
+  getCountries: getCountries,
+  getCountry: getCountry,
 };
