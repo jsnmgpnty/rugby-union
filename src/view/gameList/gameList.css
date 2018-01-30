@@ -1,0 +1,17 @@
+.game-list{
+	margin-top: 75px;
+}
+
+.game-label{
+	font-size: 19px;
+    padding: 0px 0px 0px 25px;
+	margin-bottom: 45px;
+}
+.game-label h6{
+	font-size: 19px;
+}
+
+.game-btns button{
+	width: 42%;
+    padding: 12px;
+}
