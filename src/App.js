@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
+import VotingDemo from './voting/VotingDemo';
 
 import { ping } from './services/socketClient';
 
@@ -33,6 +34,8 @@ class App extends Component {
           <small>Connected</small> :
           <small>Not connected</small>
         }
+
+        <VotingDemo />
       </div>
     );
   }
