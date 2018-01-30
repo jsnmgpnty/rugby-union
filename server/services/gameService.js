@@ -1,168 +1,151 @@
-var uuid = require('uuid');
-var _ = require('lodash');
-const MongoClient = require('mongodb').MongoClient;
+const uuid = require('uuid');
+const _ = require('lodash');
+const BaseService = require('./baseService');
+const GameRepository = require('../database/gameRepository');
+const CountryRepository = require('../database/countryRepository');
 
-var mongoDbPort = 27017;
+const databaseCollections = {
+  games: 'games',
+  countries: 'countries',
+};
+
+const gameRepository = new GameRepository(databaseCollections.games);
+const countryRepository = new CountryRepository(databaseCollections.countries);
 
 // rugby game variables
-var games = [];
-var gameStatus = {
+const gameStatus = {
   inProgress: 'INPROGRESS',
   pending: 'PENDING',
   completed: 'COMPLETED',
 };
-var turnStatus = {
+const turnStatus = {
   voting: 'VOTING',
   passing: 'PASSING',
   completed: 'COMPLETED',
 };
 
-// setup database
-var db;
-
-MongoClient.connect('mongodb://mongo:' + mongoDbPort + '/rugby-union', function (err, database) {
-  if (err) return console.log(err);
-
-  db = database;
-});
-
-// ======================================
-// private methods and functionalities
-// ======================================
-
-// get games list
-function getGamesList() {
-  return games;
-}
-
-// get game
-function getGame(io, gameId) {
-  var game = _.find(db.collection('games'), function (g) {
-    return g.id === gameId;
-  });
-
-  return game[0];
-}
-
-// create game
-// {
-//   firstTeamCountry: 'England',
-//   secondTeamCountry: 'Austria',
-//   username: 'kim',
-// }
-function createGame(data) {
-  var gameId = uuid();
-  var firstTeamId = uuid();
-  var secondTeamId = uuid();
-
-  var game = {
-    id: gameId,
-    name: 'Game ' + gameId,
-    turns: [],
-    players: [],
-    teams: [
-      {
-        id: firstTeamId,
-        country: data.firstTeamCountry,
-        players: [],
-        isBallHandler: false,
-      },
-      {
-        id: secondTeamId,
-        country: data.secondTeamCountry,
-        players: [],
-        isBallHandler: false,
-      },
-    ],
-    status: gameStatus.pending,
-    winningTeam: null,
-    createdDate: new Date(),
-    createdBy: data.username,
+class GameService extends BaseService {
+  async getGamesList() {
+    try {
+      const result = await gameRepository.getList();
+      return result;
+    } catch (error) {
+      return this.handleError(error);
+    }
   };
 
-  db.collection('games').save(game, (err, result) => {
-    if (err) {
-      return { error: 'game:join failed to create game. maybe your fault. we dont make mistakes you know' };
+  async getGame(gameId) {
+    try {
+      var result = await gameRepository.getItem({ id: gameId });
+      return result;
+    } catch (error) {
+      return this.handleError(error);
     }
-    
-    return result;
-  });
-}
-// create game
-// {
-//   gameId: 'string',
-//   teamId: 'string',
-//   username: 'string',
-//   avatarId: 'string'
-// }
-function joinGame(data) {
-  if (!data || !data.gameId || !data.username || !data.avatarId || !data.teamId) {
-    console.log('game:join invalid parameter');
-    return { error: 'game:join invalid parameter' };
-  }
+  };
 
-  var game = _.find(db.collection('games'), function (g) {
-    return g.id == data.gameId;
-  });
+  async createGame (data) {
+    const gameId = uuid();
+    const firstTeamId = uuid();
+    const secondTeamId = uuid();
+    const gameName = data.gameName || 'Game ' + gameId;
 
-  if (!game) {
-    console.log('game:join game with id ' + data.gameId + ' cannot be found');
-    return { error: 'game:join game with id ' + data.gameId + ' cannot be found' };
-  }
+    const game = {
+      id: gameId,
+      name: gameName,
+      turns: [],
+      players: [],
+      teams: [
+        {
+          id: firstTeamId,
+          country: data.firstTeamCountry,
+          players: [],
+          isBallHandler: false,
+        },
+        {
+          id: secondTeamId,
+          country: data.secondTeamCountry,
+          players: [],
+          isBallHandler: false,
+        },
+      ],
+      status: gameStatus.pending,
+      winningTeam: null,
+      createdDate: new Date(),
+      createdBy: data.username,
+    };
 
-  for (var t = 0; t < game.teams.length; t++) {
-    if (game.teams[t].id === data.teamId) {
-      var existingPlayer = _.find(game.teams[t].players, function (p) {
-        return p.username === data.username;
-      });
+    try {
+      const savedItem = await gameRepository.save(game);
+      return savedItem;
+    } catch (error) {
+      return this.handleError(error);
+    }
+  };
 
-      if (existingPlayer.length > 0) {
-        console.log('game:join failed as user ' + data.username + ' is already in team ' + game.teams[t].id);
-        return { error: 'game:join failed as user ' + data.username + ' is already in team ' + game.teams[t].id };
+  async joinGame(data) {
+    if (!data || !data.gameId || !data.username || !data.avatarId || !data.teamId) {
+      console.log('game:join invalid parameter');
+      return { error: 'game:join invalid parameter' };
+    }
+
+    let game = await this.getGame(data.gameId);
+    if (!game || game.error) {
+      console.log('game:join game with id ' + data.gameId + ' cannot be found');
+      return { error: 'game:join game with id ' + data.gameId + ' cannot be found' };
+    }
+
+    for (let t = 0; t < game.teams.length; t++) {
+      if (game.teams[t].id === data.teamId) {
+        let existingPlayer = _.find(game.teams[t].players, function (p) {
+          return p.username === data.username;
+        });
+
+        if (existingPlayer.length > 0) {
+          console.log('game:join failed as user ' + data.username + ' is already in team ' + game.teams[t].id);
+          return { error: 'game:join failed as user ' + data.username + ' is already in team ' + game.teams[t].id };
+        }
+
+        game.teams[t].players.push({
+          username: data.username,
+        });
+      } else {
+        // if different team from request, we'll check if player exist from this team and remove user
+        var existingPlayer = _.find(game.teams[t].players, function (p) {
+          return p.username === data.username;
+        });
+
+        if (existingPlayer.length > 0) {
+          var index = _.indexOf(game.teams[i].players, existingPlayer);
+          game.teams[i].players.splice(index, 1);
+        }
       }
-
-      game.teams[t].players.push({
-        username: data.username,
-      });
-    } else {
-      // if different team from request, we'll check if player exist from this team and remove user
-      var existingPlayer = _.find(game.teams[t].players, function (p) {
-        return p.username === data.username;
-      });
-
-      if (existingPlayer.length > 0) {
-        var index = _.indexOf(game.teams[i].players, existingPlayer);
-        game.teams[i].players.splice(index, 1);
-      }
     }
-  }
 
-  db.collection('games').save(game, (err, result) => {
-    if (err) {
-      return { error: 'game:join failed to join user ' + data.username + ' due to unknown reasons. maybe your fault. we dont make mistakes you know' };
+    try {
+      const savedItem = await gameRepository.save(game);
+      return savedItem;
+    } catch (error) {
+      return this.handleError(error);
     }
-    
-    return result;
-  });
+  };
+
+  async getCountries() {
+    try {
+      const countries = await countryRepository.getList();
+      return countries;
+    } catch (error) {
+      return this.handleError(error);
+    }
+  };
+
+  async getCountry(countryName) {
+    try {
+      const country = await countryRepository.getItem({ name: countryName });
+      return country;
+    } catch (error) {
+      return this.handleError(error);
+    }
+  };
 }
 
-function getCountries() {
-  return db.collection('countries');
-}
-
-function getCountry(countryName) {
-  var country = _.find(getCountries(), function (c) {
-    return c.name === countryName;
-  });
-
-  return country[0];
-}
-
-module.exports = {
-  createGame: createGame,
-  getGamesList: getGamesList,
-  getGame: getGame,
-  joinGame: joinGame,
-  getCountries: getCountries,
-  getCountry: getCountry,
-};
+module.exports = GameService;

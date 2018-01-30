@@ -32,7 +32,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "server": "react-scripts build && node server.js",
+    "server": "nodemon server.js",
+    "stack": "react-scripts build && nodemon server.js",
     "server:fixedport": "set REACT_APP_RUNTIME_PORT=8080 && react-scripts build && nodemon server.js"
   }
 }

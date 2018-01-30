@@ -1,16 +1,17 @@
-var express = require('express');
-var bodyParser = require('body-parser')
-var uuid = require('uuid');
-var _ = require('lodash');
-var gameService = require('./server/services/gameService');
+const express = require('express');
+const bodyParser = require('body-parser')
+const uuid = require('uuid');
+const _ = require('lodash');
+const GameService = require('./server/services/gameService');
+const gameService = new GameService();
 
 // express server setup
-var app = express();
-var router = express.Router();
+const app = express();
+const router = express.Router();
 
 // server variables
-var path = __dirname + '/build/';
-var port = 8080;
+const path = __dirname + '/build/';
+const port = 8080;
 
 // apply request parsers
 app.use(bodyParser.json({ type: 'application/*+json' }));
@@ -20,7 +21,7 @@ app.use(bodyParser.text({ type: 'text/html' }))
 // socket io setup
 // ======================================
 
-var io = require('socket.io').listen(app.listen(port, function () {
+const io = require('socket.io').listen(app.listen(port, function () {
   console.log("Server now running at port " + port);
 }));
 io.set('transports', [
@@ -33,30 +34,44 @@ io.set('transports', [
 ]);
 
 // on socket connection
-io.on('connection', function (socket) {
+io.on('connection', (socket) => {
   // once connected, we emit to client that they are connected (server only communication)
   socket.emit('connected', { message: 'hello world' });
 
   // test event to check if client is connecting to this socket server (2 way communication)
-  socket.on('myEvent', function (data) {
+  socket.on('myEvent', (data) => {
     socket.emit('myEvent', { message: 'pong' });
   });
 
-  socket.on('game:create', function (data) {
-    var game = gameService.createGame();
+  socket.on('game:create', async (data) => {
+    try {
+      const game = await gameService.createGame(data);
 
-    if (game && game.id) {
-      io.sockets.join(game.id);
-      io.sockets.emit('game:created', game);
+      if (game && game.gameId) {
+        io.sockets.join(game.gameId);
+        io.sockets.join(game.teams[0].teamId);
+        io.sockets.join(game.teams[1].teamId);
+        io.sockets.emit('game:created', game);
+      }
+    } catch (error) {
+      console.log(error);
     }
   });
 
-  socket.on('game:join', function (data) {
-    var joinGameResult = gameService.joinGame(data);
+  socket.on('game:join', async (data) => {
+    try {
+      const joinGameResult = await gameService.joinGame(data);
 
-    if (!joinGameResult.error) {
-      io.sockets.in(joinGameResult.gameId).emit('game:joined', { gameId: joinGameResult.gameId, teamId: joinGameResult.teamid, username: joinGameResult.username });
+      if (!joinGameResult.error) {
+        io.sockets.in(joinGameResult.gameId).emit('game:joined', { gameId: joinGameResult.gameId, teamId: joinGameResult.teamId, username: joinGameResult.username });
+      }
+    } catch (error) {
+      console.log(error);
     }
+  });
+
+  socket.on('team:join', async (data) => {
+    
   });
 });
 
