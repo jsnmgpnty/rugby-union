@@ -1,30 +1,44 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Button } from 'reactstrap';
+import { Link } from 'react-router-dom';
+import { Col, Row, Button, UncontrolledButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 
 import './gameList.css';
 
-class GameListComponent extends Component {
+class GameCreateComponent extends Component {
+	
     render(){
         return (
-			<Row className="game-list">
-				<Col xs="5" className="game-label"><label>GAME 1 </label><h6>FRANCE VS ENGLAND</h6></Col>
-				<Col xs="7" className="text-center game-btns">
-					<Button color="primary" size="md" className="view-btn">VIEW</Button>{' '}
-					<Button color="success" size="md" className="join-btn">JOIN</Button>
+			<Row className="createGame-cont">
+				<Col md="6">
+				  <UncontrolledButtonDropdown>
+					<DropdownToggle caret>
+					  Country
+					</DropdownToggle>
+					<DropdownMenu>
+					  <DropdownItem>Country 1</DropdownItem>
+					  <DropdownItem>Country 2</DropdownItem>
+					</DropdownMenu>
+				  </UncontrolledButtonDropdown>
 				</Col>
-				<Col xs="5" className="game-label"><label>GAME 1 </label><h6>FRANCE VS ENGLAND</h6></Col>
-				<Col xs="7" className="text-center game-btns">
-					<Button color="primary" size="md" className="view-btn">VIEW</Button>{' '}
-					<Button color="success" size="md" className="join-btn">JOIN</Button>
+				<Col md="6">
+				  <UncontrolledButtonDropdown>
+					<DropdownToggle caret>
+					  Country
+					</DropdownToggle>
+					<DropdownMenu>
+					  <DropdownItem>Country 1</DropdownItem>
+					  <DropdownItem>Country 2</DropdownItem>
+					</DropdownMenu>
+				  </UncontrolledButtonDropdown>
 				</Col>
-				<Col xs="5" className="game-label"><label>GAME 1 </label><h6>FRANCE VS ENGLAND</h6></Col>
-				<Col xs="7" className="text-center game-btns">
-					<Button color="primary" size="md" className="view-btn">VIEW</Button>{' '}
-					<Button color="success" size="md" className="join-btn">JOIN</Button>
+				<Col xs="12">
+					<Link to="">
+						<Button color="success" className="createGame-btn">Create Game</Button>
+					</Link>
 				</Col>
 			</Row>
 		);
     }
 }
 
-export default GameListComponent
+export default GameCreateComponent

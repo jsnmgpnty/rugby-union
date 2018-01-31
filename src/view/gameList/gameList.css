@@ -15,3 +15,42 @@
 	width: 42%;
     padding: 12px;
 }
+
+.createGame-cont{
+	margin:50px 0;
+}
+
+.btn-group{
+    width: 100%;
+}
+
+.btn-group button{
+	color: #a9a9a9!important;
+    background-color: #fff!important;
+    border-radius: 0;
+    text-align: left;
+	width: 100%;
+    border-color: #a9a9a9!important;
+}
+
+.btn-group button:after{
+	display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 0.255em;
+    vertical-align: 0.255em;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+    float: right;
+    margin-top: 10px;
+}
+
+.createGame-btn{
+	width: 100%;
+    margin-top: 40px;
+    padding: 10px 0px;
+    text-transform: uppercase;
+}
