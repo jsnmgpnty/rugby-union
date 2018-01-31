@@ -38,6 +38,6 @@
     "eject": "react-scripts eject",
     "server": "nodemon server.js",
     "stack": "react-scripts build && nodemon server.js",
-    "server:fixedport": "set REACT_APP_RUNTIME_PORT=8080 && react-scripts build && nodemon server.js"
+    "stack:fixedport": "set REACT_APP_RUNTIME_PORT=8080 && react-scripts build && nodemon server.js"
   }
 }

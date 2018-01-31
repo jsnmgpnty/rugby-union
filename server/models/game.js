@@ -2,6 +2,8 @@ const BaseModel = require('./baseModel');
 
 class Game extends BaseModel {
   constructor(model) {
+    super();
+
     this.gameId = model.gameId;
     this.name = model.name;
     this.turns = model.turns;
