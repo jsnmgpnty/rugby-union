@@ -9,3 +9,5 @@ class BaseModel {
     return JSON.parse(jsonString);
   }
 }
+
+module.exports = BaseModel;

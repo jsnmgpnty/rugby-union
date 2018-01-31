@@ -1,8 +1,9 @@
 const BaseModel = require('./baseModel');
 
 class User extends BaseModel {
-  constructor(userId, username) {
-    this.userId = userId;
+  constructor(username) {
+    super();
+
     this.username = username;
   }
 }

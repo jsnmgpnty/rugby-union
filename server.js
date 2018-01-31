@@ -14,8 +14,8 @@ const path = __dirname + '/build/';
 const port = 8080;
 
 // apply request parsers
-app.use(bodyParser.json({ type: 'application/*+json' }));
-app.use(bodyParser.text({ type: 'text/html' }))
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
 // ======================================
 // socket io setup
@@ -63,7 +63,7 @@ io.on('connection', (socket) => {
       const joinGameResult = await gameService.joinGame(data);
 
       if (!joinGameResult.error) {
-        io.sockets.in(joinGameResult.gameId).emit('game:joined', { gameId: joinGameResult.gameId, teamId: joinGameResult.teamId, username: joinGameResult.username });
+        io.sockets.in(joinGameResult.gameId).emit('game:joined', { gameId: joinGameResult.gameId, username: joinGameResult.username });
       }
     } catch (error) {
       console.log(error);
@@ -71,7 +71,15 @@ io.on('connection', (socket) => {
   });
 
   socket.on('team:join', async (data) => {
-    
+    try {
+      const joinGameResult = await gameService.joinGame(data);
+
+      if (!joinGameResult.error) {
+        io.sockets.in(data.teamId).emit('team:joined', { gameId: data.gameId, teamId: data.teamId,  username: data.username });
+      }
+    } catch (error) {
+      console.log(error);
+    }
   });
 });
 
