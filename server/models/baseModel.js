@@ -1,3 +1,10 @@
+const parseToJson = (jsonString) => {
+  const obj = JSON.parse(jsonString);
+  return typeof obj === 'string' || obj instanceof String ?
+    parseToJson(obj) :
+    obj;
+}
+
 class BaseModel {
   toJson() {
     const jsonString = JSON.stringify(this, (key, value) => {
@@ -6,7 +13,7 @@ class BaseModel {
         : JSON.stringify(value);
     });
 
-    return JSON.parse(jsonString);
+    return parseToJson(jsonString);
   }
 }
 

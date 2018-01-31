@@ -12,16 +12,21 @@
     "url": "https://github.com/kim-montano/rugby-union/issues"
   },
   "dependencies": {
+    "axios": "^0.17.1",
     "body-parser": "^1.18.2",
     "bootstrap": "^4.0.0",
     "express": "^4.16.2",
     "lodash": "^4.17.4",
+    "query-string": "^5.0.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "react-redux": "^5.0.6",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "react-scripts": "^1.1.0",
     "reactstrap": "^5.0.0-alpha.4",
+    "redux": "^3.7.2",
+    "redux-thunk": "^2.2.0",
     "socket.io": "^2.0.4",
     "socket.io-client": "^2.0.4",
     "uuid": "^3.2.1"

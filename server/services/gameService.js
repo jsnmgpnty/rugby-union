@@ -27,26 +27,34 @@ const turnStatus = {
   completed: 'COMPLETED',
 };
 
-const isPlayerInTeam = (teams, username) => {
-  const existingPlayer = _.find(team, function (t) {
+const isPlayerInTeam = (team, username) => {
+  if (!team.players || team.players.length === 0) {
+    return false;
+  }
+
+  const existingPlayer = team.players.find((t) => {
     return t.username === username;
   });
 
-  return existingPlayer && existingPlayer.length > 0;
+  return !_.isNil(existingPlayer);
 };
 
 const isPlayerPartOfGame = (game, username) => {
-  const existingPlayer = _.find(game.players, function (t) {
+  if (!game.players || game.players.length === 0) {
+    return false;
+  }
+
+  const existingPlayer = game.players.find((t) => {
     return t.username === username;
   });
 
-  return existingPlayer && existingPlayer.length > 0;
+  return !_.isNil(existingPlayer);
 }
 
 const removePlayerFromTeams = (game, username) => {
   if (!game) return false;
 
-  const player = _.find(game.players, (player) => { return player.username === username; })[0];
+  const player = game.players.find((player) => { return player.username === username; });
   if (player) {
     const playerIndex = _.indexOf(game.players, player);
     game.players.splice(playerIndex, 1);
@@ -67,11 +75,14 @@ const randomlyAssignPlayerToTeam = (game, username) => {
 
   if (game.teams[0].players.length > game.teams[1].players.length) {
     game.teams[0].players = [...game.teams[0].players, user];
+    return game.teams[0].teamId;
   } else if (game.teams[1].players.length > game.teams[0].players.length) {
     game.teams[1].players = [...game.teams[1].players, user];
+    return game.teams[1].teamId;
   } else {
     const randomIndex = (Math.floor(Math.random() * 2) + 1) - 1;
     game.teams[randomIndex].players = [...game.teams[randomIndex].players, user];
+    return game.teams[randomIndex].teamId;
   }
 };
 
@@ -87,7 +98,7 @@ class GameService extends BaseService {
 
   async getGame(gameId) {
     try {
-      var result = await gameRepository.getItem({ id: gameId });
+      var result = await gameRepository.getItem({ gameId: gameId });
       return result;
     } catch (error) {
       return this.handleError(error);
@@ -101,7 +112,7 @@ class GameService extends BaseService {
     const gameName = data.gameName || 'Game ' + gameId;
 
     const game = new Game({
-      id: gameId,
+      gameId: gameId,
       name: gameName,
       turns: [],
       players: [],
@@ -119,7 +130,8 @@ class GameService extends BaseService {
 
     try {
       const savedItem = await gameRepository.save(game);
-      return savedItem;
+      const savedGame = await gameRepository.getItem({ gameId: gameId });
+      return savedGame;
     } catch (error) {
       return this.handleError(error);
     }
@@ -137,40 +149,44 @@ class GameService extends BaseService {
       return { error: 'game:join game with id ' + data.gameId + ' cannot be found' };
     }
 
-    if (!isPlayerPartOfGame(game, data.username)) {
-      console.log('game:join user ' + data.username + ' is not part of the game yet');
-      return { error: 'game:join user ' + data.username + ' is not part of the game yet' };
-    }
-
     // remove player first from game and all teams in a game
     removePlayerFromTeams(game, data.username);
 
     if (!data.teamId) {
-      randomlyAssignPlayerToTeam(game, data.username);
-      return game;
+      const teamId = randomlyAssignPlayerToTeam(game, data.username);
+      return { gameId: game.gameId, teamId: teamId, username: data.username };
     }
 
-    const team = _.find(game.teams, (team) => { return team.teamId === data.teamId; })[0];
+    const team = game.teams.find((team) => { return team.teamId === data.teamId; });
     if (!team) {
       console.log('game:join g with id ' + data.gameId + ' does not have a team ' + data.teamId);
       return { error: 'game:join g with id ' + data.gameId + ' does not have a team ' + data.teamId };
     }
 
-    const isPlayerOnThisTeam = isPlayerInTeam(game.teams[t], data.username);
+    const isPlayerOnThisTeam = isPlayerInTeam(team, data.username);
     if (isPlayerOnThisTeam) {
       console.log('game:join failed as user ' + data.username + ' is already in team ' + team.teamId);
       return { error: 'game:join failed as user ' + data.username + ' is already in team ' + team.teamId };
     }
 
-    if (!isPlayerPartOfGame(game, username)) {
-      game.players = [...game.players, new User(data.username).toJson()];
+    if (_.isNil(game.players)) {
+      game.players = [];
     }
 
-    team.players = [...team.players, new User(data.username).toJson()];
+    if (!isPlayerPartOfGame(game, data.username)) {
+      game.players.push(new User(data.username).toJson());
+    }
+
+    if (_.isNil(team.players)) {
+      team.players = [];
+    }
+
+    team.players.push(new User(data.username).toJson());
 
     try {
-      const savedItem = await gameRepository.save(game);
-      return savedItem;
+      await gameRepository.save(game);
+      const savedGame = await gameRepository.getItem({ gameId: data.gameId });
+      return { gameId: savedGame.gameId, teamId: team.teamId, username: data.username };
     } catch (error) {
       return this.handleError(error);
     }

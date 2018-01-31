@@ -54,14 +54,8 @@ class DbRepository {
 			db.collection(this.collectionName).save(document, (err, result) => {
 				if (err) {
 					reject(err);
-				}
-
-				var savedItem = result && result.ops ? result.ops[0] : { error: 'saving to ' + this.collectionName + 'failed. maybe your fault. we dont make mistakes you know' };
-
-				if (savedItem.error) {
-					reject(savedItem.error);
 				} else {
-					resolve(savedItem);
+					resolve();
 				}
 			});
 		});

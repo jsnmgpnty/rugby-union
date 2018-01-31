@@ -48,10 +48,10 @@ io.on('connection', (socket) => {
       const game = await gameService.createGame(data);
 
       if (game && game.gameId) {
-        io.sockets.join(game.gameId);
-        io.sockets.join(game.teams[0].teamId);
-        io.sockets.join(game.teams[1].teamId);
-        io.sockets.emit('game:created', game);
+        socket.join(game.gameId);
+        socket.join(game.teams[0].teamId);
+        socket.join(game.teams[1].teamId);
+        socket.emit('game:created', game);
       }
     } catch (error) {
       console.log(error);
@@ -63,19 +63,14 @@ io.on('connection', (socket) => {
       const joinGameResult = await gameService.joinGame(data);
 
       if (!joinGameResult.error) {
-        io.sockets.in(joinGameResult.gameId).emit('game:joined', { gameId: joinGameResult.gameId, username: joinGameResult.username });
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  });
+        socket.join(joinGameResult.gameId);
+        socket.join(joinGameResult.teamId);
 
-  socket.on('team:join', async (data) => {
-    try {
-      const joinGameResult = await gameService.joinGame(data);
-
-      if (!joinGameResult.error) {
-        io.sockets.in(data.teamId).emit('team:joined', { gameId: data.gameId, teamId: data.teamId,  username: data.username });
+        io.to(joinGameResult.gameId).emit('game:joined', {
+          gameId: joinGameResult.gameId,
+          teamId: joinGameResult.teamId,
+          username: joinGameResult.username,
+        });
       }
     } catch (error) {
       console.log(error);
@@ -83,12 +78,12 @@ io.on('connection', (socket) => {
   });
 });
 
+var indexRoute = require('./server/routes/index');
+app.use('/', indexRoute);
 var gameApiRoutes = require('./server/routes/gameApi')();
 app.use('/api', gameApiRoutes);
 var countryApiRoutes = require('./server/routes/countryApi')();
 app.use('/api', countryApiRoutes);
-var indexRoute = require('./server/routes/index');
-app.use('/', indexRoute);
 app.use('/static', express.static(path + 'static/'));
 app.use('/service-worker.js', express.static(path + '/service-worker.js'));
 
