@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
 
 import GameListComponent from './gamelistComponent';
+import GameCreateComponent from './gameCreateComponent';
 
 class GameList extends Component {
     render(){
         return (
-			<GameListComponent />
+			<div>
+				<GameListComponent />
+				<GameCreateComponent />
+			</div>
 		);
     }
 }

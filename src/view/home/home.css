@@ -5,15 +5,15 @@
 	width: 100%;
 	height: 320px;
 }
-form{
+.join-form form{
 	width: 100%;
 }
-form input{
+.join-form form input{
 	border: 1px solid #000;
     border-radius: 0px;
 	padding: 10px;
 }
-form button{
+.join-form form button{
 	width: 100%;
 	margin-top: 40px;
 	padding: 10px 0px;
