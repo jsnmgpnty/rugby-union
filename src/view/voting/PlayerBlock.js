@@ -11,10 +11,10 @@ export default class PlayerBlock extends PureComponent {
     return (
       <div className="playerBlock">
         <div className="playerStatus">
-          <VoteCount count="5" type="total" />
-          <VoteCount count="1" type="user" />
+          <VoteCount count={5} type="total" />
+          <VoteCount count={1} type="user" />
         </div>
-        <span className="playerName">{this.props.name}</span>
+        <div className="playerName">{this.props.name}</div>
       </div>
     );
   }

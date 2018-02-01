@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router';
 import { connect } from 'react-redux';
 import { Container } from 'reactstrap';
-import VotingDemo from './voting/VotingDemo';
+import VotingDemo from './view/voting/VotingDemo';
 
 import { setCountries } from 'actions/countries';
 import { ping } from 'services/socketClient';
@@ -61,6 +61,7 @@ class App extends Component {
 						<Route path="/" exact component={Home} />
 						<Route path="/list" exact component={GameList} />
 						<Route path="/game/:gameId" exact component={GameLobby} />
+						<Route path="/voting" exact component={VotingDemo} />
 					</Switch>
 				</Container>
 			</div>
