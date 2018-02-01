@@ -15,7 +15,7 @@ const port = 8080;
 
 // apply request parsers
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // ======================================
 // socket io setup
@@ -36,21 +36,16 @@ io.set('transports', [
 // on socket connection
 io.on('connection', (socket) => {
   // once connected, we emit to client that they are connected (server only communication)
-  socket.emit('connected', { message: 'hello world' });
-
-  // test event to check if client is connecting to this socket server (2 way communication)
-  socket.on('myEvent', (data) => {
-    socket.emit('myEvent', { message: 'pong' });
-  });
+  socket.emit('connected', { message: 'You are connected to Rugby Union! Whooooo!' });
 
   socket.on('game:create', async (data) => {
     try {
       const game = await gameService.createGame(data);
 
       if (game && game.gameId) {
+        // join game and extend socket
         socket.join(game.gameId);
-        socket.join(game.teams[0].teamId);
-        socket.join(game.teams[1].teamId);
+        socket.currentGameId = game.gameId;
         socket.emit('game:created', game);
       }
     } catch (error) {
@@ -63,8 +58,17 @@ io.on('connection', (socket) => {
       const joinGameResult = await gameService.joinGame(data);
 
       if (!joinGameResult.error) {
-        socket.join(joinGameResult.gameId);
-        socket.join(joinGameResult.teamId);
+        if (socket.gameId !== data.gameId) {
+          socket.join(joinGameResult.gameId);
+          socket.currentGameId = game.gameId;
+        }
+
+        if (socket.teamId !== data.teamId) {
+          socket.join(joinGameResult.teamId);
+          socket.teamId = data.teamId;
+        } else {
+          socket.leave(joinGameResult.gameId);
+        }
 
         io.to(joinGameResult.gameId).emit('game:joined', {
           gameId: joinGameResult.gameId,
@@ -76,6 +80,29 @@ io.on('connection', (socket) => {
       console.log(error);
     }
   });
+
+  socket.on('game:leave', async (data) => {
+    try {
+      const gameLeaveResult = await gameService.leaveGame(data);
+
+      if (!gameLeaveResult.error) {
+        socket.leave(gameLeaveResult.gameId);
+        socket.currentGameId = null;
+
+        io.to(joinGameResult.gameId).emit('game:leave', {
+          gameId: joinGameResult.gameId,
+          teamId: joinGameResult.teamId,
+          username: joinGameResult.username,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  socket.on('disconnection', async () => {
+
+  })
 });
 
 var indexRoute = require('./server/routes/index');

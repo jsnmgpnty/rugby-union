@@ -25,8 +25,14 @@ class GameLobby extends PureComponent {
 			if (data.teamId) {
         game.teams.forEach(team => {
           if (team.teamId === data.teamId) {
-            if (!team.players) team.players = [];
-            team.players.push({ username: data.username });
+            if (!team.players) {
+              team.players = [];
+            }
+
+            const existingPlayer = team.players.find((t) => { t.username === data.username });
+            if (!existingPlayer) {
+              team.players.push({ username: data.username });
+            }
           } else {
             remove(team.players, (player) => {
               return player.username === data.username;
