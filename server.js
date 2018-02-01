@@ -43,6 +43,14 @@ io.on('connection', (socket) => {
     socket.emit('myEvent', { message: 'pong' });
   });
 
+  socket.on('user:create', (data) => {
+    if (!data) {
+      
+    }
+    console.log("Data: " + data.name);
+    // console.log("Data: " + data.username + " " + data.userid);
+  });
+
   socket.on('game:create', async (data) => {
     try {
       const game = await gameService.createGame(data);

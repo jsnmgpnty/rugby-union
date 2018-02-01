@@ -1,7 +1,10 @@
+import uuid from 'uuid';
 import openSocket from 'socket.io-client';
 
 // initialize connection to socket server
 const socket = openSocket(window.appConfig.socketServerUrl);
+
+
 
 socket.on('connected', (data) => {
   console.log(data);
@@ -36,8 +39,18 @@ function onGameJoin(message) {
   socket.emit('game:join', message);
 }
 
+function onUserCreate(username) {
+  const user = {
+    name : username,
+    userid : uuid(),
+  }
+  socket.emit('user:create', user);
+}
+
+
 export {
   ping,
   onGameJoin,
   onGameJoined,
+  onUserCreate,
 };

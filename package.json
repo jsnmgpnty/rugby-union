@@ -38,6 +38,7 @@
   },
   "scripts": {
     "start": "set REACT_APP_RUNTIME_PORT=8080 && react-scripts start",
+    "startstrong": "REACT_APP_RUNTIME_PORT=8080 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",

@@ -63,7 +63,6 @@ class App extends Component {
 						<Route path="/game/:gameId" exact component={GameLobby} />
 					</Switch>
 				</Container>
-				<VotingDemo />
 			</div>
 		);
 	}
