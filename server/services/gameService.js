@@ -6,6 +6,7 @@ const CountryRepository = require('../database/countryRepository');
 const Game = require('../models/game');
 const Team = require('../models/team');
 const User = require('../models/user');
+const { countries } = require('../models/seedData');
 
 const databaseCollections = {
   games: 'games',
@@ -18,6 +19,7 @@ const countryRepository = new CountryRepository(databaseCollections.countries);
 // rugby game variables
 const gameStatus = {
   inProgress: 'INPROGRESS',
+  paused: 'PAUSED',
   pending: 'PENDING',
   completed: 'COMPLETED',
 };
@@ -105,6 +107,11 @@ class GameService extends BaseService {
     }
   };
 
+  // {
+  //   username: string,
+  //   firstTeamCountry: string,
+  //   secondTeamCountry: string,
+  // }
   async createGame(data) {
     const gameId = uuid();
     const firstTeamId = uuid();
@@ -137,6 +144,14 @@ class GameService extends BaseService {
     }
   };
 
+  // 
+
+  // {
+  //   username: string,
+  //   gameId: string,
+  //   teamId: string,
+  //   avatarId: string,
+  // }
   async joinGame(data) {
     if (!data || !data.gameId || !data.username) {
       console.log('game:join invalid parameter');
@@ -149,6 +164,11 @@ class GameService extends BaseService {
       return { error: 'game:join game with id ' + data.gameId + ' cannot be found' };
     }
 
+    if (game.status !== gameStatus.pending) {
+      console.log('game:join game with id ' + data.gameId + ' has already started');
+      return { error: 'game:join game with id ' + data.gameId + ' has already started' };
+    }
+
     // remove player first from game and all teams in a game
     removePlayerFromTeams(game, data.username);
 
@@ -159,8 +179,8 @@ class GameService extends BaseService {
 
     const team = game.teams.find((team) => { return team.teamId === data.teamId; });
     if (!team) {
-      console.log('game:join g with id ' + data.gameId + ' does not have a team ' + data.teamId);
-      return { error: 'game:join g with id ' + data.gameId + ' does not have a team ' + data.teamId };
+      console.log('game:join game with id ' + data.gameId + ' does not have a team ' + data.teamId);
+      return { error: 'game:join game with id ' + data.gameId + ' does not have a team ' + data.teamId };
     }
 
     const isPlayerOnThisTeam = isPlayerInTeam(team, data.username);
@@ -192,10 +212,41 @@ class GameService extends BaseService {
     }
   };
 
+  // {
+  //   username: string,
+  //   gameId: string,
+  //   teamId: string,
+  // }
+  async leaveGame(data) {
+    if (!data || !data.gameId || !data.username) {
+      console.log('game:join invalid parameter');
+      return { error: 'game:join invalid parameter' };
+    }
+
+    let game = await this.getGame(data.gameId);
+    if (!game || game.error) {
+      console.log('game:leave game with id ' + data.gameId + ' cannot be found');
+      return { error: 'game:leave game with id ' + data.gameId + ' cannot be found' };
+    }
+
+    removePlayerFromTeams(game, data.username);
+
+    try {
+      await gameRepository.save(game);
+      const savedGame = await gameRepository.getItem({ gameId: data.gameId });
+      return { gameId: savedGame.gameId, teamId: team.teamId, username: data.username };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
   async getCountries() {
     try {
-      const countries = await countryRepository.getList();
-      return countries;
+      // const countries = await countryRepository.getList();
+      // return countries;
+      return new Promise((resolve) => {
+        resolve(countries);
+      });
     } catch (error) {
       return this.handleError(error);
     }
@@ -203,8 +254,12 @@ class GameService extends BaseService {
 
   async getCountry(countryName) {
     try {
-      const country = await countryRepository.getItem({ name: countryName });
-      return country;
+      // const country = await countryRepository.getItem({ name: countryName });
+      // return country;
+      const country = countries.find((c) => c.name === countryName);
+      return new Promise((resolve) => {
+        resolve(country);
+      });
     } catch (error) {
       return this.handleError(error);
     }

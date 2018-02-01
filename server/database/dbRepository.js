@@ -6,7 +6,7 @@ const databaseName = 'rugby-union';
 
 const getDatabase = () => {
 	return new Promise((resolve, reject) => {
-		MongoClient.connect('mongodb://localhost:' + mongoDbPort, function (err, client) {
+		MongoClient.connect('mongodb://mongodb:' + mongoDbPort, function (err, client) {
 			if (err) {
 				reject(err);
 			}
