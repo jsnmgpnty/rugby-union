@@ -18,4 +18,4 @@ COPY . /app
 
 EXPOSE 8080
 
-CMD [ "npm", "run", "server" ]
+CMD [ "npm", "run", "stack" ]
