@@ -5,7 +5,7 @@ import { remove } from 'lodash';
 import uuid from 'uuid';
 
 import gameApi from 'services/GameApi';
-import { onGameJoin, onGameJoined } from 'services/socketClient';
+import { onGameJoin, onGameJoined } from 'services/SocketClient';
 import TeamSelector from 'components/TeamSelector/TeamSelector';
 import './GameLobby.css';
 

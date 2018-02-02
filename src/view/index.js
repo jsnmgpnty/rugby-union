@@ -1,3 +1,3 @@
-export { default as GameLobby } from './gameLobby/GameLobby';
-export { default as Home } from './home/Home';
-export { default as GameList } from './gameList/gameList';
+export { default as GameLobby } from './GameLobby/GameLobby';
+export { default as Home } from './Home/Home';
+export { default as GameList } from './GameList/GameList';

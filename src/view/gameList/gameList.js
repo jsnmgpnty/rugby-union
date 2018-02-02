@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
-import GameListComponent from './gamelistComponent';
-import GameCreateComponent from './gameCreateComponent';
+import GameListComponent from './GameListComponent';
+import GameCreateComponent from './GameCreateComponent';
 
 class GameList extends Component {
     render(){

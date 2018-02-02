@@ -4,8 +4,6 @@ import openSocket from 'socket.io-client';
 // initialize connection to socket server
 const socket = openSocket(window.appConfig.socketServerUrl);
 
-
-
 socket.on('connected', (data) => {
   console.log(data);
 });
@@ -46,7 +44,6 @@ function onUserCreate(username) {
   }
   socket.emit('user:create', user);
 }
-
 
 export {
   ping,

@@ -6,7 +6,7 @@ import { Container } from 'reactstrap';
 import VotingDemo from './view/voting/VotingDemo';
 
 import { setCountries } from 'actions/countries';
-import { ping } from 'services/socketClient';
+import { ping } from 'services/SocketClient';
 import { Home, GameList, GameLobby } from 'view';
 
 import './App.css';
