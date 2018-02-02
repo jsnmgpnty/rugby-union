@@ -3,12 +3,11 @@ import { Link } from 'react-router-dom';
 import { Button, Form, FormGroup, Input, Row, Col } from 'reactstrap';
 
 import './Home.css';
-import { onUserCreate } from '../../services/socketClient.js'
+import { onUserCreate } from 'services/socketClient.js'
 
 class Home extends Component {
 	constructor(props){
 		super(props);
-		// this.handleNameChange = this.handleNameChange.bind(this);
 		this.state = {
 			username: "",
 		};
