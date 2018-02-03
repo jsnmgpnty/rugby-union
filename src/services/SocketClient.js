@@ -39,15 +39,24 @@ function onGameJoin(message) {
 
 function onUserCreate(username) {
   const user = {
-    name : username,
-    userid : uuid(),
-  }
+    username,
+    userId : uuid(),
+  };
   socket.emit('user:create', user);
+}
+
+function onUserCreated(callback) {
+  socket.on('user:created', (message) => {
+    callback(message);
+  });
 }
 
 export {
   ping,
   onGameJoin,
   onGameJoined,
+  onGameCreate,
+  onGameCreated,
   onUserCreate,
+  onUserCreated,
 };

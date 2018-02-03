@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // ======================================
 
 const io = require('socket.io').listen(app.listen(port, function () {
-  console.log("Server now running at port " + port);
+  console.log('Server now running at port ' + port);
 }));
 io.set('transports', [
   'polling'
@@ -39,11 +39,14 @@ io.on('connection', (socket) => {
   socket.emit('connected', { message: 'You are connected to Rugby Union! Whooooo!' });
 
   socket.on('user:create', (data) => {
-    if (!data) {
-      
+    if (data && data.userId && data.username) {
+      socket.user = data;
+      socket.join(data.userId);
+      socket.emit('user:created', data);
+      socket.broadcast.emit('user:created', data);
+    } else {
+      socket.emit('user:created', { error: 'Failed to sign in your username. Please try again.' });
     }
-    console.log("Data: " + data.name);
-    // console.log("Data: " + data.username + " " + data.userid);
   });
 
   socket.on('game:create', async (data) => {
@@ -71,9 +74,9 @@ io.on('connection', (socket) => {
           socket.currentGameId = game.gameId;
         }
 
-        if (socket.teamId !== data.teamId) {
+        if (socket.currentTeamId !== data.teamId) {
           socket.join(joinGameResult.teamId);
-          socket.teamId = data.teamId;
+          socket.currentTeamId = data.teamId;
         } else {
           socket.leave(joinGameResult.gameId);
         }
@@ -91,7 +94,12 @@ io.on('connection', (socket) => {
 
   socket.on('game:leave', async (data) => {
     try {
-      const gameLeaveResult = await gameService.leaveGame(data);
+      const request = {
+        gameId: data.gameId || socket.currentGameId,
+        teamId: data.teamId || socket.currentTeamId,
+        username: data.username || _.get(socket, 'user.username', ''),
+      };
+      const gameLeaveResult = await gameService.leaveGame(request);
 
       if (!gameLeaveResult.error) {
         socket.leave(gameLeaveResult.gameId);

@@ -1,23 +1,27 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Switch, Route } from 'react-router';
+import { Switch, Route, Redirect } from 'react-router';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Container } from 'reactstrap';
-import VotingDemo from './view/voting/VotingDemo';
+import { reactLocalStorage } from 'reactjs-localstorage';
 
 import { setCountries } from 'actions/countries';
-import { ping } from 'services/SocketClient';
-import { Home, GameList, GameLobby } from 'view';
+import { setUser } from 'actions/user';
+import { onUserCreate, onUserCreated } from 'services/SocketClient'
+import { Home, GameList, GameLobby, VotingDemo } from 'view';
 
 import './App.css';
 
 const mapDispatchToProps = dispatch => ({
-  setCountries: countries => dispatch(setCountries(countries)),
+	setCountries: countries => dispatch(setCountries(countries)),
+	setUser: user => dispatch(setUser(user)),
 });
 
 class App extends Component {
 	static propTypes = {
 		setCountries: PropTypes.func.isRequired,
+		setUser: PropTypes.func.isRequired,
 	};
 
 	state = {
@@ -27,14 +31,17 @@ class App extends Component {
 	constructor(props) {
 		super(props);
 
-		ping((data) => {
-			this.setState({ isConnectedToSocketServer: data.message === 'pong' });
+		onUserCreated((data) => {
+			if (!data.error) {
+				this.props.setUser(data);
+				reactLocalStorage.setObject('user', data);
+			}
 		});
-  }
+	}
 
-  async componentDidMount() {
-    await this.getCountries();
-  }
+	async componentDidMount() {
+		await this.getCountries();
+	}
 
 	async getCountries() {
 		try {
@@ -50,6 +57,16 @@ class App extends Component {
 		}
 	}
 
+	isUserSignedIn = (RenderableComponent) => {
+		const user = reactLocalStorage.getObject('user');
+		if (user && user.userId && user.username) {
+			onUserCreate(user.username);
+			return <RenderableComponent {...this.props.location} />
+		} else {
+			return <Redirect to="/" />
+		}
+	}
+
 	render() {
 		return (
 			<div className="App">
@@ -59,9 +76,9 @@ class App extends Component {
 				<Container>
 					<Switch>
 						<Route path="/" exact component={Home} />
-						<Route path="/list" exact component={GameList} />
-						<Route path="/game/:gameId" exact component={GameLobby} />
-						<Route path="/voting" exact component={VotingDemo} />
+						<Route path="/list" exact render={() => this.isUserSignedIn(GameList)} />
+						<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GameLobby)} />
+						<Route path="/voting" exact render={() => this.isUserSignedIn(VotingDemo)} />
 					</Switch>
 				</Container>
 			</div>
@@ -69,5 +86,5 @@ class App extends Component {
 	}
 }
 
-export default connect(null, mapDispatchToProps)(App);
+export default withRouter(connect(null, mapDispatchToProps)(App));
 export { App as PlainApp };

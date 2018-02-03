@@ -6,7 +6,7 @@ import uuid from 'uuid';
 
 import gameApi from 'services/GameApi';
 import { onGameJoin, onGameJoined } from 'services/SocketClient';
-import TeamSelector from 'components/TeamSelector/TeamSelector';
+import { TeamSelector } from 'components';
 import './GameLobby.css';
 
 const username = uuid();
@@ -29,7 +29,7 @@ class GameLobby extends PureComponent {
               team.players = [];
             }
 
-            const existingPlayer = team.players.find((t) => { t.username === data.username });
+            const existingPlayer = team.players.find((t) => { return t.username === data.username });
             if (!existingPlayer) {
               team.players.push({ username: data.username });
             }

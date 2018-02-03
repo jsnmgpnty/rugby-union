@@ -5,31 +5,31 @@ import { Col, Row, Button, UncontrolledButtonDropdown, DropdownToggle, DropdownM
 import './GameList.css';
 
 class GameCreateComponent extends Component {
-	
-    render(){
-        return (
+
+	render() {
+		return (
 			<Row className="createGame-cont">
 				<Col md="6">
-				  <UncontrolledButtonDropdown>
-					<DropdownToggle caret>
-					  Country
+					<UncontrolledButtonDropdown>
+						<DropdownToggle caret>
+							Country
 					</DropdownToggle>
-					<DropdownMenu>
-					  <DropdownItem>Country 1</DropdownItem>
-					  <DropdownItem>Country 2</DropdownItem>
-					</DropdownMenu>
-				  </UncontrolledButtonDropdown>
+						<DropdownMenu>
+							<DropdownItem>Country 1</DropdownItem>
+							<DropdownItem>Country 2</DropdownItem>
+						</DropdownMenu>
+					</UncontrolledButtonDropdown>
 				</Col>
 				<Col md="6">
-				  <UncontrolledButtonDropdown>
-					<DropdownToggle caret>
-					  Country
+					<UncontrolledButtonDropdown>
+						<DropdownToggle caret>
+							Country
 					</DropdownToggle>
-					<DropdownMenu>
-					  <DropdownItem>Country 1</DropdownItem>
-					  <DropdownItem>Country 2</DropdownItem>
-					</DropdownMenu>
-				  </UncontrolledButtonDropdown>
+						<DropdownMenu>
+							<DropdownItem>Country 1</DropdownItem>
+							<DropdownItem>Country 2</DropdownItem>
+						</DropdownMenu>
+					</UncontrolledButtonDropdown>
 				</Col>
 				<Col xs="12">
 					<Link to="">
@@ -38,7 +38,7 @@ class GameCreateComponent extends Component {
 				</Col>
 			</Row>
 		);
-    }
+	}
 }
 
-export default GameCreateComponent
+export default GameCreateComponent;

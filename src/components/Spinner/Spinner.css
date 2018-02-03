@@ -1,0 +1,9 @@
+.spinner-block {
+  width: 100%;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.Loader__message > * {
+  margin: 0 auto;
+}

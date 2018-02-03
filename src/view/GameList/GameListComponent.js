@@ -4,8 +4,8 @@ import { Row, Col, Button } from 'reactstrap';
 import './GameList.css';
 
 class GameListComponent extends Component {
-    render(){
-        return (
+	render() {
+		return (
 			<Row className="game-list">
 				<Col xs="5" className="game-label"><label>GAME 1 </label><h6>FRANCE VS ENGLAND</h6></Col>
 				<Col xs="7" className="text-center game-btns">
@@ -24,7 +24,7 @@ class GameListComponent extends Component {
 				</Col>
 			</Row>
 		);
-    }
+	}
 }
 
-export default GameListComponent
+export default GameListComponent;
