@@ -32,24 +32,26 @@ class Home extends Component {
 	}
 
 	componentDidMount() {
-		onUserCreated((data) => {
-			if (data.error) {
-				this.setState({
-					errorMessage: data.error,
-					isLoading: false,
-					isSuccessSignIn: false,
-				});
-			} else {
-				this.props.setUser(data);
-				reactLocalStorage.setObject('user', data);
-				this.setState({
-					errorMessage: null,
-					isLoading: false,
-					isSuccessSignIn: true,
-				});
-			}
-		});
+		onUserCreated(this.handleUserCreated);
 	}
+
+	handleUserCreated = (data) => {
+		if (data.error) {
+			this.setState({
+				errorMessage: data.error,
+				isLoading: false,
+				isSuccessSignIn: false,
+			});
+		} else {
+			this.props.setUser(data);
+			reactLocalStorage.setObject('user', data);
+			this.setState({
+				errorMessage: null,
+				isLoading: false,
+				isSuccessSignIn: true,
+			});
+		}
+	};
 
 	handleNameChange = (event) => {
 		this.setState({ username: event.target.value });

@@ -144,8 +144,6 @@ class GameService extends BaseService {
     }
   };
 
-  // 
-
   // {
   //   username: string,
   //   gameId: string,
@@ -215,6 +213,161 @@ class GameService extends BaseService {
   // {
   //   username: string,
   //   gameId: string,
+  // }
+  async startGame(data) {
+    if (!data || !data.gameId) {
+      console.log('game:start invalid parameter');
+      return { error: 'game:start invalid parameter' };
+    }
+
+    let game = await this.getGame(data.gameId);
+    if (!game || game.error) {
+      console.log('game:start game with id ' + data.gameId + ' cannot be found');
+      return { error: 'game:start game with id ' + data.gameId + ' cannot be found' };
+    }
+
+    game.status = gameStatus.inProgress;
+
+    if (!game.turns) {
+      game.turns = [];
+    }
+
+    game.turns.push({
+      ballHandler: { sentBy: null, passedTo: null },
+      tacklers: [],
+      status: turnStatus.passing,
+      sortOrder: game.turns.length + 1,
+    });
+
+    const latestTurn = game.turns[game.turns.length - 1];
+
+    try {
+      await gameRepository.save(game);
+      const savedGame = await gameRepository.getItem({ gameId: data.gameId });
+      return { gameId: savedGame.gameId, username: data.username, latestTurn: savedGame.turns[savedGame.turns.length - 1] };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  // {
+  //   username: string,
+  //   ballHandler: string,
+  //   gameId: string,
+  // }
+  async guessBallHandler(data) {
+    if (!data || !data.gameId || !data.username || data.ballHandler) {
+      console.log('game:guess:ball invalid parameter');
+      return { error: 'game:guess:ball invalid parameter' };
+    }
+
+    let game = await this.getGame(data.gameId);
+    if (!game || game.error) {
+      console.log('game:guess:ball game with id ' + data.gameId + ' cannot be found');
+      return { error: 'game:guess:ball game with id ' + data.gameId + ' cannot be found' };
+    }
+
+    if (game.status !== gameStatus.inProgress) {
+      console.log('game:guess:ball game with id ' + data.gameId + ' is not running');
+      return { error: 'game:guess:ball game with id ' + data.gameId + ' is not running' };
+    }
+
+    const latestTurn = game.turns[game.turns.length - 1];
+    if (!latestTurn) {
+      console.log('game:guess:ball invalid turn');
+      return { error: 'game:guess:ball invalid turn' };
+    }
+
+    if (!latestTurn.tacklers) {
+      latestTurn.tacklers = [];
+      latestTurn.tacklers.push({
+        sentBy: data.username,
+        guessedBallHandler: data.ballHandler,
+      });
+    } else {
+      const existingPlayer = latestTurn.tacklers.find((t) => {
+        return t.sentBy === data.username;
+      });
+
+      if (_.isNil(existingPlayer)) {
+        latestTurn.tacklers.push({
+          sentBy: data.username,
+          guessedBallHandler: data.ballHandler,
+        });
+      } else {
+        for (let i = 0; i < latestTurn.tacklers.length; i++) {
+          if (latestTurn.tacklers[i].sentBy === data.username) {
+            latestTurn.tacklers[i].guessedBallHandler = data.ballHandler;
+            break;
+          }
+        }
+      }
+    }
+
+    try {
+      await gameRepository.save(game);
+      const savedGame = await gameRepository.getItem({ gameId: data.gameId });
+      return { gameId: savedGame.gameId, username: data.username, latestTurn: savedGame.turns[savedGame.turns.length - 1] };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  // {
+  //   username: string,
+  //   passTo: string,
+  //   gameId: string,
+  // }
+  async passBall(data) {
+    if (!data || !data.gameId || !data.username || data.passTo) {
+      console.log('game:guess:ball invalid parameter');
+      return { error: 'game:guess:ball invalid parameter' };
+    }
+
+    let game = await this.getGame(data.gameId);
+    if (!game || game.error) {
+      console.log('game:guess:ball game with id ' + data.gameId + ' cannot be found');
+      return { error: 'game:guess:ball game with id ' + data.gameId + ' cannot be found' };
+    }
+
+    if (game.status !== gameStatus.inProgress) {
+      console.log('game:guess:ball game with id ' + data.gameId + ' is not running');
+      return { error: 'game:guess:ball game with id ' + data.gameId + ' is not running' };
+    }
+
+    const latestTurn = game.turns[game.turns.length - 1];
+    if (!latestTurn) {
+      console.log('game:guess:ball invalid turn');
+      return { error: 'game:guess:ball invalid turn' };
+    }
+
+    if (!latestTurn.ballHandler) {
+      latestTurn.ballHandler = {
+        sentBy: data.username,
+        passedTo: data.passTo,
+      };
+    } else {
+      if (latestTurn.ballHandler.sentBy !== data.username) {
+        console.log('game:guess:ball you are not holding the ball. dafuq u cheating');
+        return { error: 'game:guess:ball you are not holding the ball. dafuq u cheating' };
+      } else {
+        latestTurn.ballHandler.sentBy = data.username;
+        receivedBy.ballHandler.passedTo = data.passTo;
+      }
+    }
+
+    try {
+      await gameRepository.save(game);
+      const savedGame = await gameRepository.getItem({ gameId: data.gameId });
+      return { gameId: savedGame.gameId, username: data.username, latestTurn: savedGame.turns[savedGame.turns.length - 1] };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  // {
+  //   username: string,
+  //   gameId: string,
   //   teamId: string,
   // }
   async leaveGame(data) {
@@ -266,4 +419,4 @@ class GameService extends BaseService {
   };
 }
 
-module.exports = GameService;
+module.exports = d;
