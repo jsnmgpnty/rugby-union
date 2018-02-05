@@ -6,7 +6,13 @@ const CountryRepository = require('../database/countryRepository');
 const Game = require('../models/game');
 const Team = require('../models/team');
 const User = require('../models/user');
+const GameResult = require('../models/gameResult');
+const turnStatus = require('../models/turnStatusEnum');
+const gameStatus = require('../models/gameStatusEnum');
 const { countries } = require('../models/seedData');
+
+const maxGameTurnsToResult = 6;
+const allowableGuessDivisor = 2;
 
 const databaseCollections = {
   games: 'games',
@@ -17,17 +23,6 @@ const gameRepository = new GameRepository(databaseCollections.games);
 const countryRepository = new CountryRepository(databaseCollections.countries);
 
 // rugby game variables
-const gameStatus = {
-  inProgress: 'INPROGRESS',
-  paused: 'PAUSED',
-  pending: 'PENDING',
-  completed: 'COMPLETED',
-};
-const turnStatus = {
-  voting: 'VOTING',
-  passing: 'PASSING',
-  completed: 'COMPLETED',
-};
 
 const isPlayerInTeam = (team, username) => {
   if (!team.players || team.players.length === 0) {
@@ -89,15 +84,24 @@ const randomlyAssignPlayerToTeam = (game, username) => {
 };
 
 class GameService extends BaseService {
-  async getGamesList() {
+  // status : gameStatus ['INPROGRESS', 'PENDING', 'PAUSED', 'COMPLETED']
+  // get games list
+  async getGamesList(status) {
     try {
       const result = await gameRepository.getList();
+
+      if (status) {
+        return result.filter((r) => r.status === status);
+      }
+
       return result;
     } catch (error) {
       return this.handleError(error);
     }
   };
 
+  // gameId : string
+  // get full game details by id
   async getGame(gameId) {
     try {
       var result = await gameRepository.getItem({ gameId: gameId });
@@ -211,7 +215,6 @@ class GameService extends BaseService {
   };
 
   // {
-  //   username: string,
   //   gameId: string,
   // }
   async startGame(data) {
@@ -239,12 +242,18 @@ class GameService extends BaseService {
       sortOrder: game.turns.length + 1,
     });
 
+    // randomize who ball handler is
+    const randomIndex = (Math.floor(Math.random() * 2) + 1) - 1;
+    game.teams[randomIndex].isBallHandler = true;
+
     const latestTurn = game.turns[game.turns.length - 1];
+    const ballHandlerTeam = game.teams.find(a => a.isBallHandler === true);
+    const tacklingTeam = game.teams.find(a => a.isBallHandler === false);
 
     try {
       await gameRepository.save(game);
       const savedGame = await gameRepository.getItem({ gameId: data.gameId });
-      return { gameId: savedGame.gameId, username: data.username, latestTurn: savedGame.turns[savedGame.turns.length - 1] };
+      return new GameResult(savedGame.gameId, ballHandlerTeam.teamId, tacklingTeam.teamId, savedGame.turns[savedGame.turns.length - 1], savedGame.turns.length).toJson();
     } catch (error) {
       return this.handleError(error);
     }
@@ -283,6 +292,7 @@ class GameService extends BaseService {
       latestTurn.tacklers.push({
         sentBy: data.username,
         guessedBallHandler: data.ballHandler,
+        createdDateTime: new Date(),
       });
     } else {
       const existingPlayer = latestTurn.tacklers.find((t) => {
@@ -293,21 +303,26 @@ class GameService extends BaseService {
         latestTurn.tacklers.push({
           sentBy: data.username,
           guessedBallHandler: data.ballHandler,
+          createdDateTime: new Date(),
         });
       } else {
         for (let i = 0; i < latestTurn.tacklers.length; i++) {
           if (latestTurn.tacklers[i].sentBy === data.username) {
             latestTurn.tacklers[i].guessedBallHandler = data.ballHandler;
+            latestTurn.tacklers[i].createdDateTime = new Date();
             break;
           }
         }
       }
     }
 
+    const ballHandlerTeam = game.teams.find(a => a.isBallHandler === true);
+    const tacklingTeam = game.teams.find(a => a.isBallHandler === false);
+
     try {
       await gameRepository.save(game);
       const savedGame = await gameRepository.getItem({ gameId: data.gameId });
-      return { gameId: savedGame.gameId, username: data.username, latestTurn: savedGame.turns[savedGame.turns.length - 1] };
+      return new GameResult(savedGame.gameId, ballHandlerTeam.teamId, tacklingTeam.teamId, savedGame.turns[savedGame.turns.length - 1], savedGame.turns.length).toJson();
     } catch (error) {
       return this.handleError(error);
     }
@@ -356,10 +371,15 @@ class GameService extends BaseService {
       }
     }
 
+    latestTurn.status = turnStatus.voting;
+
+    const ballHandlerTeam = game.teams.find(a => a.isBallHandler === true);
+    const tacklingTeam = game.teams.find(a => a.isBallHandler === false);
+
     try {
       await gameRepository.save(game);
       const savedGame = await gameRepository.getItem({ gameId: data.gameId });
-      return { gameId: savedGame.gameId, username: data.username, latestTurn: savedGame.turns[savedGame.turns.length - 1] };
+      return new GameResult(savedGame.gameId, ballHandlerTeam.teamId, tacklingTeam.teamId, savedGame.turns[savedGame.turns.length - 1], savedGame.turns.length).toJson();
     } catch (error) {
       return this.handleError(error);
     }
@@ -388,6 +408,128 @@ class GameService extends BaseService {
       await gameRepository.save(game);
       const savedGame = await gameRepository.getItem({ gameId: data.gameId });
       return { gameId: savedGame.gameId, teamId: team.teamId, username: data.username };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  // gameId: string
+  async evaluateGameResult(gameId) {
+    if (!data || !data.gameId) {
+      console.log('game:result:evaluate invalid parameter');
+      return { error: 'game:result:evaluate invalid parameter' };
+    }
+
+    let game = await this.getGame(data.gameId);
+    if (!game || game.error) {
+      console.log('game:result:evaluate game with id ' + data.gameId + ' cannot be found');
+      return { error: 'game:result:evaluate game with id ' + data.gameId + ' cannot be found' };
+    }
+
+    if (game.status !== gameStatus.inProgress) {
+      console.log('game:result:evaluate game with id ' + data.gameId + ' is not running');
+      return { error: 'game:result:evaluate game with id ' + data.gameId + ' is not running' };
+    }
+
+    const latestTurn = game.turns[game.turns.length - 1];
+    if (!latestTurn) {
+      console.log('game:guess:ball invalid turn');
+      return { error: 'game:guess:ball invalid turn' };
+    }
+
+    const ballHandlerTeam = game.teams.find(a => a.isBallHandler === true);
+    const tacklingTeam = game.teams.find(a => a.isBallHandler === false);
+
+    // count number of players in the voting team so we can get number of allowable guesses they have
+    const votingTeamPlayerCount = tacklingTeam.players.length;
+    const numberOfAllowableGuesses = Math.floor(votingTeamPlayerCount / allowableGuessDivisor);
+
+    // get total number of voters and add 1 to count the ball passer
+    const votersCount = votingTeamPlayerCount + 1;
+
+    // get total number of actual voters in the turn and add 1 to count ball passer if any
+    const numberOfPlayersWhoVoted = latestTurn.tacklers.length + (latestTurn.ballHandler.passedTo ? 1 : 0);
+
+    // if total voters equals the number of players in game
+    // it means we need to evaluate result
+    if (numberOfPlayersWhoVoted === votersCount) {
+      // lets group and order the votes by the selected user the team voted for
+      const groupedByVote = _.groupBy(latestTurn.tacklers, (tackler) => {
+        return tackler.guessedBallHandler;
+      });
+      const orderedVotes = _.orderBy(groupedByVote, (tackler) => {
+        return tackler.length;
+      }, 'desc');
+      const getTopVotedUsers = orderedVotes.slice(0, numberOfAllowableGuesses);
+
+      const usersList = getTopVotedUsers.map((votedUsers) => {
+        return _.uniq(_.map(votedUsers, function (a) {
+          return a.guessedBallHandler;
+        }))[0];
+      });
+
+      let winningTeam = null;
+      let isTouchdown = false;
+      let isTackled = false;
+
+      // THE MOMENT OF TRUTH 
+      // we check if the voted users match with the ball handler
+      if (usersList.includes(latestTurn.ballHandler.passedTo)) {
+        // ball handler has been guessed. game is over yo!
+        game.status = gameStatus.completed;
+        winningTeam = tacklingTeam;
+        isTackled = true;
+      } else {
+        // ball handler survived. 
+        // let's check if ball handler touched down or not
+        if (game.turns.length >= maxGameTurnsToResult) {
+          // ball handler has touched down
+          game.status = gameStatus.completed;
+          winningTeam = ballHandlerTeam;
+          isTouchdown = true;
+        } else {
+          winningTeam = null;
+          game.status = gameStatus.inProgress;
+          game.turns.push
+        }
+      }
+
+      // regardless of the turn outcome, we set the latest turn to completed
+      latestTurn.status = turnStatus.completed;
+      
+      // add a new turn to initialize next round
+      game.turns.push({
+        ballHandler: { sentBy: null, passedTo: null },
+        tacklers: [],
+        status: turnStatus.passing,
+        sortOrder: game.turns.length + 1,
+      });
+    }
+
+    try {
+      await gameRepository.save(game);
+      const savedGame = await gameRepository.getItem({ gameId: data.gameId });
+
+      if (game.status === gameStatus.completed) {
+        return {
+          gameId: savedGame.gameId, 
+          status: game.status,
+          ballHandlerTeam: ballHandlerTeam.teamId,
+          tacklingTeam: tacklingTeam.teamId,
+          totalTurns: savedGame.turns.length,
+          isTackled,
+          isTouchdown,
+          winningTeam
+        };
+      }
+
+      return new GameResult(
+        savedGame.gameId,
+        ballHandlerTeam.teamId,
+        tacklingTeam.teamId,
+        savedGame.turns[savedGame.turns.length - 1],
+        savedGame.turns.length
+      ).toJson();
     } catch (error) {
       return this.handleError(error);
     }
