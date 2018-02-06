@@ -1,11 +1,15 @@
-.App-header {
-  background-color: #2d9cdb;
-  padding: 5px 20px;
-  color: white;
+@font-face {
+  font-family: 'WHHoxtonWeb';
+  src: url(./assets/WHHoxtonWeb-Regular.woff) format("woff");
+  font-weight: normal;
+  font-style: normal
 }
 
-.App-title {
-  font-size: 1.5em;
+@font-face {
+  font-family: 'WHHoxtonWeb';
+  src: url(./assets/WHHoxtonWeb-Bold.woff) format("woff");
+  font-weight: 700;
+  font-style: normal
 }
 
 .App-intro {
@@ -14,23 +18,30 @@
 
 .rugby-main {
   display: flex;
-  align-items: stretch;
-  align-content: stretch;
+  flex-direction: row;
 }
 
 .rugby-content {
+  background: url(./assets/bg_home.png) no-repeat center center fixed;
+  background-size: cover;
+  flex: 1;
   flex-grow: 1;
   overflow-y: auto;
 }
 
 .rugby-nav {
-  width: 25%;
-  overflow: none;
+  overflow: hidden;
+  width: 85px;
 }
 
 html, body, .App, #root, .rugby-main {
   height: 100%;
-  overflow: none;
+  overflow: hidden;
+}
+
+body {
+  background-color: #0a1533;
+  font-family: 'WHHoxtonWeb';
 }
 
 @keyframes App-logo-spin {

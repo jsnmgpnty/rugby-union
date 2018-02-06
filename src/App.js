@@ -9,7 +9,7 @@ import { setCountries } from 'actions/countries';
 import { setUser } from 'actions/user';
 import { onUserCreate, onUserCreated } from 'services/SocketClient';
 import { Navigator } from 'components';
-import { Join, GameList, GameCreate, GameLobby, VotingDemo, Lobby } from 'view';
+import { Join, GameCreate, GameLobby, VotingDemo, Lobby } from 'view';
 
 import './App.css';
 
@@ -83,12 +83,11 @@ class App extends Component {
 				<div className="rugby-main">
 					<div className="rugby-content">
 						<Switch>
-							<Route path="/" exact render={() => this.isUserSignedIn(GameList)} />
+							<Route path="/" exact render={() => this.isUserSignedIn(Lobby)} />
 							<Route path="/create" exact render={() => this.isUserSignedIn(GameCreate)} />
 							<Route path="/join" exact component={() => this.isUserAlreadySignedIn()} />
 							<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GameLobby)} />
 							<Route path="/voting" exact render={() => this.isUserSignedIn(VotingDemo)} />
-							<Route path="/lobby" exact render={() => this.isUserSignedIn(Lobby)} />
 						</Switch>
 					</div>
 					<div className="rugby-nav">

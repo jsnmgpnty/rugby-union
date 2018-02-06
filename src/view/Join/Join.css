@@ -1,19 +1,42 @@
-.join-form{
+.join-view {
 	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	height: 320px;
-}
-.join-form form{
 	width: 100%;
 }
-.join-form form input{
+
+.join-view__hero {
+	background: url(../../assets/hero_join.png) no-repeat;
+	background-size: cover;
+	height: 229px;
+}
+
+.join-view__title {
+	text-align: left;
+	padding: 1rem;
+	text-transform: uppercase;
+}
+
+.join-view__title h2 {
+	color: #fff101;
+	font-weight: 700;
+	margin: 0 0;
+}
+
+.join-view__title h4 {
+	color: #fff;
+	font-weight: 700;
+}
+
+.join-view form {
+	width: 100%;
+}
+
+.join-view form input {
 	border: 1px solid #000;
     border-radius: 0px;
 	padding: 10px;
 }
-.join-form form button{
+
+.join-view form button {
 	width: 100%;
 	margin-top: 40px;
 	padding: 10px 0px;

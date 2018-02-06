@@ -27,6 +27,7 @@ class Join extends Component {
 			username: '',
 			isLoading: false,
 			isSuccessSignIn: false,
+			isCreatingGame: false,
 			errorMessage: null,
 		};
 	}
@@ -57,18 +58,28 @@ class Join extends Component {
 		this.setState({ username: event.target.value });
 	}
 
-	signInUser = () => {
+	signInUser = (isCreatingGame) => {
 		const { username } = this.state;
-		this.setState({ isLoading: true, username }, onUserCreate(username));
+		this.setState({ isLoading: true, username, isCreatingGame }, onUserCreate(username));
 	}
 
 	render() {
-		const { isLoading, isSuccessSignIn, errorMessage } = this.state;
+		const {
+			isLoading,
+			isSuccessSignIn,
+			errorMessage,
+			isCreatingGame,
+		} = this.state;
 
 		return (
 			<Row>
-				<Col md="12" className="join-form">
+				<Col md="12" className="join-view">
 					<Spinner isLoading={isLoading}>
+						<div className="join-view__hero" />
+						<div className="join-view__title">
+							<h2>Six Nations</h2>
+							<h4>Touchdown</h4>
+						</div>
 						<Form>
 							{
 								errorMessage && <Alert color="danger">{errorMessage}</Alert>
@@ -78,11 +89,19 @@ class Join extends Component {
 							</FormGroup>
 							<Button
 								color="success"
-								onClick={(e) => this.signInUser()}>
+								onClick={(e) => this.signInUser(false)}>
+								<i className="" />SELECT A GAME
+							</Button>
+							<Button
+								color="success"
+								onClick={(e) => this.signInUser(true)}>
 								SELECT A GAME
 							</Button>
 							{
-								isSuccessSignIn && <Redirect to="/" />
+								isSuccessSignIn && isCreatingGame && <Redirect to="/create" />
+							}
+							{
+								isSuccessSignIn && !isCreatingGame && <Redirect to="/" />
 							}
 						</Form>
 					</Spinner>
