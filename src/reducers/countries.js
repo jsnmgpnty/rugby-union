@@ -7,7 +7,7 @@ const initialState = {
 const countries = (state = initialState, action) => {
   switch (action.type) {
     case SET_COUNTRIES:
-      return { ...state, ...action.countries };
+      return [...state, ...action.countries];
     default:
       return state;
   }

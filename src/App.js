@@ -9,7 +9,7 @@ import { reactLocalStorage } from 'reactjs-localstorage';
 import { setCountries } from 'actions/countries';
 import { setUser } from 'actions/user';
 import { onUserCreate, onUserCreated } from 'services/SocketClient'
-import { Home, GameList, GameLobby, VotingDemo } from 'view';
+import { Home, GameList, GameCreate, GameLobby, VotingDemo } from 'view';
 
 import './App.css';
 
@@ -76,6 +76,7 @@ class App extends Component {
 				<Container>
 					<Switch>
 						<Route path="/" exact component={Home} />
+						<Route path="/create" exact render={() => this.isUserSignedIn(GameCreate)} />
 						<Route path="/list" exact render={() => this.isUserSignedIn(GameList)} />
 						<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GameLobby)} />
 						<Route path="/voting" exact render={() => this.isUserSignedIn(VotingDemo)} />
