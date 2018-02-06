@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import Country from './Country';
-import './BoundedCountry.css';
+import './BoundedCountry.scss';
 
 export default class BoundedCountry extends PureComponent {
   render() {

@@ -11,7 +11,7 @@ import { onUserCreate, onUserCreated } from 'services/SocketClient';
 import { Navigator } from 'components';
 import { Join, GameCreate, GameLobby, VotingDemo, Lobby } from 'view';
 
-import './App.css';
+import './App.scss';
 
 const mapDispatchToProps = dispatch => ({
 	setCountries: countries => dispatch(setCountries(countries)),

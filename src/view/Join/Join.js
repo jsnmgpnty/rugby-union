@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import { Redirect } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Alert, Button, Form, FormGroup, Input, Row, Col } from 'reactstrap';
+import { Button, Form, FormGroup, Input } from 'reactstrap';
 import { reactLocalStorage } from 'reactjs-localstorage';
 
-import './Join.css';
+import './Join.scss';
 import { setUser } from 'actions/user';
 import { onUserCreate, onUserCreated } from 'services/SocketClient.js'
 import { Spinner } from 'components';
@@ -29,6 +29,8 @@ class Join extends Component {
 			isSuccessSignIn: false,
 			isCreatingGame: false,
 			errorMessage: null,
+			isUsernameValid: false,
+			isUsernamePristine: true,
 		};
 	}
 
@@ -55,7 +57,18 @@ class Join extends Component {
 	};
 
 	handleNameChange = (event) => {
+		if (!this.state.isUsernamePristine) {
+			this.validateUsername(event);
+		}
 		this.setState({ username: event.target.value });
+	}
+
+	validateUsername = (event) => {
+		if (event.target.value.length < 6) {
+			this.setState({ isUsernameValid: false, errorMessage: 'Invalid username length', isUsernamePristine: false });
+		} else {
+			this.setState({ isUsernameValid: true, errorMessage: null, isUsernamePristine: false });
+		}
 	}
 
 	signInUser = (isCreatingGame) => {
@@ -69,44 +82,52 @@ class Join extends Component {
 			isSuccessSignIn,
 			errorMessage,
 			isCreatingGame,
+			isUsernameValid,
 		} = this.state;
 
 		return (
-			<Row>
-				<Col md="12" className="join-view">
-					<Spinner isLoading={isLoading}>
-						<div className="join-view__hero" />
-						<div className="join-view__title">
-							<h2>Six Nations</h2>
-							<h4>Touchdown</h4>
-						</div>
-						<Form>
-							{
-								errorMessage && <Alert color="danger">{errorMessage}</Alert>
-							}
-							<FormGroup>
-								<Input type="text" name="name" id="name" placeholder="TYPE YOUR NAME HERE" onChange={this.handleNameChange} />
-							</FormGroup>
-							<Button
-								color="success"
-								onClick={(e) => this.signInUser(false)}>
-								<i className="" />SELECT A GAME
-							</Button>
-							<Button
-								color="success"
-								onClick={(e) => this.signInUser(true)}>
-								SELECT A GAME
-							</Button>
-							{
-								isSuccessSignIn && isCreatingGame && <Redirect to="/create" />
-							}
-							{
-								isSuccessSignIn && !isCreatingGame && <Redirect to="/" />
-							}
-						</Form>
-					</Spinner>
-				</Col>
-			</Row>
+			<div className="join-view">
+				<Spinner isLoading={isLoading}>
+					<div className="join-view__hero" />
+					<div className="join-view__title">
+						<h2>Six Nations</h2>
+						<h4>Touchdown</h4>
+					</div>
+					<Form>
+						<FormGroup>
+							<Input
+								className={errorMessage && 'has-error'}
+								type="text"
+								name="name"
+								id="name"
+								placeholder="Enter Name"
+								onBlur={this.validateUsername}
+								onChange={this.handleNameChange}
+							/>
+						</FormGroup>
+						<Button
+							color="success"
+							disabled={!isUsernameValid}
+							onClick={(e) => this.signInUser(true)}>
+							<span className="create" />
+							<span className="btn-text-content">Create Game</span>
+						</Button>
+						<Button
+							color="primary"
+							disabled={!isUsernameValid}
+							onClick={(e) => this.signInUser(false)}>
+							<span className="join" />
+							<span className="btn-text-content">Join Game</span>
+						</Button>
+						{
+							isSuccessSignIn && isCreatingGame && <Redirect to="/create" />
+						}
+						{
+							isSuccessSignIn && !isCreatingGame && <Redirect to="/" />
+						}
+					</Form>
+				</Spinner>
+			</div>
 		);
 	}
 }

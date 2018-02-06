@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import './TeamPlayer.css';
+import './TeamPlayer.scss';
 
 const propTypes = {
   username: PropTypes.string.isRequired,

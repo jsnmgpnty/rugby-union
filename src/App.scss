@@ -1,0 +1,23 @@
+
+
+.App-intro {
+  font-size: large;
+}
+
+.rugby-main {
+  display: flex;
+  flex-direction: row;
+}
+
+.rugby-content {
+  background: url(./assets/bg_home.png) no-repeat center center fixed;
+  background-size: cover;
+  flex: 1;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.rugby-nav {
+  overflow: hidden;
+  width: 85px;
+}

@@ -4,7 +4,7 @@ import { Redirect } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import './Navigator.css';
+import './Navigator.scss';
 
 const mapStateToProps = (state) => ({
   isGameCreated: state.isGameCreated,

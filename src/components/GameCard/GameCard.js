@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import './GameCard.css';
+import './GameCard.scss';
 import { BoundedCountry } from 'components';
 
 export default class GameCard extends PureComponent {

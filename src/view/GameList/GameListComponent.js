@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Row, Col, Button } from 'reactstrap';
 
-import './GameList.css';
+import './GameList.scss';
 
 class GameListComponent extends Component {
 	render() {

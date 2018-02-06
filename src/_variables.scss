@@ -1,0 +1,115 @@
+// colors
+$wh-primary-text-color: #fff101;
+
+// bootstrap color overrides
+$blue:    #00aeef !default;
+$indigo:  #6610f2 !default;
+$purple:  #6f42c1 !default;
+$pink:    #e83e8c !default;
+$red:     #dc3545 !default;
+$orange:  #fd7e14 !default;
+$yellow:  #ffc107 !default;
+$green:   #76c043 !default;
+$teal:    #20c997 !default;
+$cyan:    #17a2b8 !default;
+
+$theme-colors: (
+);
+
+// mixin mediaqueries: breakpoint value;
+@mixin media($point: xs, $isLandscape: false) {
+  @if ($point == lg and $isLandscape == false) {
+    @media screen and (min-width: $screen-lg) {
+      @content;
+    }
+  }
+  @else if ($point == lg and $isLandscape == true) {
+    @media screen and (min-width: $screen-lg) and (orientation: landscape) {
+      @content;
+    }
+  }
+
+  @if ($point == md and $isLandscape == false) {
+    @media screen and (min-width: $screen-md) {
+      @content;
+    }
+  }
+  @else if ($point == md and $isLandscape == true) {
+    @media screen and (min-width: $screen-md) and (orientation: landscape) {
+      @content;
+    }
+  }
+
+  @if ($point == sm and $isLandscape == false) {
+    @media screen and (min-width: $screen-sm) {
+      @content;
+    }
+  }
+  @else if ($point == sm and $isLandscape == true) {
+    @media screen and (min-width: $screen-sm) and (orientation: landscape) {
+      @content;
+    }
+  }
+  @else if ($point == xs and $isLandscape == false) {
+    @media screen and (max-width: $screen-xs-max) {
+      @content;
+    }
+  }
+  @else if($point == xs and $isLandscape == true) {
+    @media screen and (max-width: $screen-xs-max) and (orientation: landscape) {
+      @content;
+    }
+  }
+}
+
+// mixin ellipsis text
+@mixin ellipsis-text {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+// mixin center
+@mixin center {
+  margin: 0 auto;
+  text-align: center;
+}
+
+// mixin for active element
+@mixin active-element {
+  -moz-transition: all 0.4s ease-in-out;
+  -o-transition: all 0.4s ease-in-out;
+  -webkit-transition: all 0.4s ease-in-out;
+  transition: all 0.4s ease-in-out;
+
+  &.active {
+    @content;
+  }
+
+  &[disabled] {
+    &:hover, &:focus, &:active, &:active:focus, &:active:hover, &:hover:focus {
+      @content;
+    }
+  }
+
+  &:hover, &:focus, &:active, &:active:focus, &:active:hover, &:hover:focus {
+    @content;
+  }
+}
+
+// mixin vertical align
+@mixin vertical-align ($alignment: 50%) {
+  position: relative;
+  top: $alignment;
+  transform: translateY(-$alignment);
+}
+
+// mixin vertical and horizontal align
+@mixin xy-align {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@import "./bootstrap/scss/bootstrap";

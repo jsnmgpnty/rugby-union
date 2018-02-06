@@ -1,0 +1,38 @@
+@import './variables';
+
+html, body, .App, #root, .rugby-main {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: #0a1533;
+  font-family: 'WHHoxtonWeb';
+  font-size: 18px;
+  margin: 0;
+  padding: 0;
+}
+
+.caps {
+  text-transform: uppercase;
+}
+
+*.has-error {
+  border-bottom: 1.5px solid $danger !important;
+  color: $danger !important;
+
+  &::placeholder {
+    color: $danger !important;
+  }
+}
+
+*:focus, *:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+::placeholder {
+  color: $white;
+}
+
+@import 'variables';

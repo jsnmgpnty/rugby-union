@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Button } from 'reactstrap';
 
 import TeamPlayer from './TeamPlayer';
-import './TeamSelector.css';
+import './TeamSelector.scss';
 
 const propTypes = {
   teamId: PropTypes.string.isRequired,

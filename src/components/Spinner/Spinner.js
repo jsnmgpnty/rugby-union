@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { BarLoader } from 'react-spinners';
 import Loader from 'react-loader-advanced';
 
-import './Spinner.css';
+import './Spinner.scss';
 
 const propTypes = {
   isLoading: PropTypes.bool,

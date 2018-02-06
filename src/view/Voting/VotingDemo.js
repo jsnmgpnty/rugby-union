@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import './Voting.css';
+import './Voting.scss';
 import Players from './Players';
 import { Container, Row, Col, Button } from 'reactstrap';
 

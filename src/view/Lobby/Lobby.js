@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import './Lobby.css';
+import './Lobby.scss';
 import LobbyHeader from './LobbyHeader';
 import { GameCard } from 'components';
 

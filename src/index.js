@@ -4,8 +4,7 @@ import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 
-import './index.css';
-import './bootstrap/dist/css/bootstrap.css';
+import './index.scss';
 
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';

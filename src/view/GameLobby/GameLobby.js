@@ -8,7 +8,7 @@ import uuid from 'uuid';
 import gameApi from 'services/GameApi';
 import { onGameJoin, onGameJoined } from 'services/SocketClient';
 import { TeamSelector } from 'components';
-import './GameLobby.css';
+import './GameLobby.scss';
 
 const username = uuid();
 
