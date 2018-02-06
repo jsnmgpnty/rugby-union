@@ -1,0 +1,27 @@
+.country-bounds {
+  display: inline-block;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.country-bounds {
+  width: 80%;
+}
+.country-bounds::after {
+  border-radius: 50%;
+  content: "";
+  display: block;
+  height: 0;
+  margin-bottom: 20px;
+  padding-bottom: 100%;
+  width: 100%;
+}
+.country-bounds div {
+  color: white;
+  float: left;
+  line-height: 1em;
+  margin-top: -0.5em;
+  padding-top: 50%;
+  text-align: center;
+  width: 100%;
+}
