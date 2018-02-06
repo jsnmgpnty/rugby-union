@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { Row, Col } from 'reactstrap';
 import { remove } from 'lodash';
 import uuid from 'uuid';
@@ -102,5 +103,5 @@ class GameLobby extends PureComponent {
   }
 }
 
-export default connect(mapStateToProps, null)(GameLobby);
+export default withRouter(connect(mapStateToProps, null)(GameLobby));
 export { GameLobby as PlainGameLobby };

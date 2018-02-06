@@ -561,4 +561,4 @@ class GameService extends BaseService {
   };
 }
 
-module.exports = d;
+module.exports = GameService;

@@ -3,6 +3,7 @@ const _ = require('lodash');
 const Game = require('../models/game');
 const Team = require('../models/team');
 const User = require('../models/user');
+const BaseService = require('./baseService');
 const GameService = require('./gameService');
 const gameService = new GameService();
 
@@ -18,7 +19,7 @@ const EmittableTopics = {
 };
 
 class IoService extends BaseService {
-  onUserCreate = (io, socket, data) => {
+  onUserCreate (io, socket, data) {
     if (data && data.userId && data.username) {
       socket.user = data;
       socket.join(data.userId);
@@ -29,7 +30,7 @@ class IoService extends BaseService {
     }
   }
 
-  onGameCreate = async (io, socket, data) => {
+  async onGameCreate (io, socket, data) {
     try {
       const game = await gameService.createGame(data);
 
@@ -44,7 +45,7 @@ class IoService extends BaseService {
     }
   }
 
-  onGameJoin = async (io, socket, data) => {
+  async onGameJoin (io, socket, data) {
     try {
       const joinGameResult = await gameService.joinGame(data);
 
@@ -72,7 +73,7 @@ class IoService extends BaseService {
     }
   }
 
-  onGameLeave = async (io, socket, data) => {
+  async onGameLeave (io, socket, data) {
     try {
       const request = {
         gameId: data.gameId || socket.currentGameId,
@@ -96,7 +97,7 @@ class IoService extends BaseService {
     }
   }
 
-  onGameStart = async (io, socket, data) => {
+  async onGameStart (io, socket, data) {
     try {
       const gameStartResult = await gameService.startGame(data);
 
@@ -116,7 +117,7 @@ class IoService extends BaseService {
     }
   }
 
-  onBallPass = async (io, socket, data) => {
+  async onBallPass (io, socket, data) {
     try {
       const passResult = await gameService.passBall(data);
 
@@ -135,7 +136,7 @@ class IoService extends BaseService {
     }
   }
 
-  onGuessBallHandler = async (io, socket, data) => {
+  async onGuessBallHandler (io, socket, data) {
     try {
       const guessResult = await gameService.guessBallHandler(data);
 

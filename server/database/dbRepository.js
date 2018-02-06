@@ -3,10 +3,11 @@ const _ = require('lodash');
 
 const mongoDbPort = 27017;
 const databaseName = 'rugby-union';
+const mongoDbHost = process.env.REACT_RUNTIME_DB_HOST || 'mongodb';
 
 const getDatabase = () => {
 	return new Promise((resolve, reject) => {
-		MongoClient.connect('mongodb://mongodb:' + mongoDbPort, function (err, client) {
+		MongoClient.connect('mongodb://' + mongoDbHost.trim() + ':' + mongoDbPort, function (err, client) {
 			if (err) {
 				reject(err);
 			}

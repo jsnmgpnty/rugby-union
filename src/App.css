@@ -12,6 +12,27 @@
   font-size: large;
 }
 
+.rugby-main {
+  display: flex;
+  align-items: stretch;
+  align-content: stretch;
+}
+
+.rugby-content {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.rugby-nav {
+  width: 200px;
+  overflow: none;
+}
+
+html, body, .App, #root, .rugby-main {
+  height: 100%;
+  overflow: none;
+}
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import { Switch, Route, Redirect } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Container } from 'reactstrap';
 import { reactLocalStorage } from 'reactjs-localstorage';
 
 import { setCountries } from 'actions/countries';
 import { setUser } from 'actions/user';
-import { onUserCreate, onUserCreated } from 'services/SocketClient'
-import { Home, GameList, GameLobby, VotingDemo } from 'view';
+import { onUserCreate, onUserCreated } from 'services/SocketClient';
+import { Navigator } from 'components';
+import { Join, GameList, GameLobby, VotingDemo } from 'view';
 
 import './App.css';
 
@@ -63,24 +63,36 @@ class App extends Component {
 			onUserCreate(user.username);
 			return <RenderableComponent {...this.props.location} />
 		} else {
+			return <Redirect to="/join" />
+		}
+	}
+
+	isUserAlreadySignedIn = () => {
+		const user = reactLocalStorage.getObject('user');
+		if (user && user.userId && user.username) {
+			onUserCreate(user.username);
 			return <Redirect to="/" />
+		} else {
+			return <Join {...this.props.location} />
 		}
 	}
 
 	render() {
 		return (
 			<div className="App">
-				<header className="App-header">
-					<h1 className="App-title">Enter your name</h1>
-				</header>
-				<Container>
-					<Switch>
-						<Route path="/" exact component={Home} />
-						<Route path="/list" exact render={() => this.isUserSignedIn(GameList)} />
-						<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GameLobby)} />
-						<Route path="/voting" exact render={() => this.isUserSignedIn(VotingDemo)} />
-					</Switch>
-				</Container>
+				<div className="rugby-main">
+					<div className="rugby-content">
+						<Switch>
+							<Route path="/" exact render={() => this.isUserSignedIn(GameList)} />
+							<Route path="/join" exact component={() => this.isUserAlreadySignedIn()} />
+							<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GameLobby)} />
+							<Route path="/voting" exact render={() => this.isUserSignedIn(VotingDemo)} />
+						</Switch>
+					</div>
+					<div className="rugby-nav">
+						<Navigator />
+					</div>
+				</div>
 			</div>
 		);
 	}
