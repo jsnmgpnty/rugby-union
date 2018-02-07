@@ -6,6 +6,7 @@ const CountryRepository = require('../database/countryRepository');
 const Game = require('../models/game');
 const Team = require('../models/team');
 const User = require('../models/user');
+const UserAvatar = require('../models/userAvatar');
 const GameResult = require('../models/gameResult');
 const turnStatus = require('../models/turnStatusEnum');
 const gameStatus = require('../models/gameStatusEnum');
@@ -203,19 +204,19 @@ class GameService extends BaseService {
     }
 
     if (!isPlayerPartOfGame(game, data.username)) {
-      game.players.push(new User(data.username).toJson());
+      game.players.push(new UserAvatar(data.username, data.avatarId).toJson());
     }
 
     if (_.isNil(team.players)) {
       team.players = [];
     }
 
-    team.players.push(new User(data.username).toJson());
+    team.players.push(new UserAvatar(data.username, data.avatarId).toJson());
 
     try {
       await gameRepository.save(game);
       const savedGame = await gameRepository.getItem({ gameId: data.gameId });
-      return { gameId: savedGame.gameId, teamId: team.teamId, username: data.username };
+      return { gameId: savedGame.gameId, teamId: team.teamId, username: data.username, avatarId: data.avatarId };
     } catch (error) {
       return this.handleError(error);
     }

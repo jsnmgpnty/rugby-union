@@ -7,13 +7,12 @@ import uuid from 'uuid';
 
 import gameApi from 'services/GameApi';
 import { onGameJoin, onGameJoined } from 'services/SocketClient';
-import { TeamSelector } from 'components';
+import { TeamSelector, Spinner } from 'components';
 import './GamePrepare.scss';
-
-const username = uuid();
 
 const mapStateToProps = state => ({
   countries: state.countries,
+  user: state.user,
 });
 
 class GameLobby extends PureComponent {
@@ -23,7 +22,7 @@ class GameLobby extends PureComponent {
     onGameJoined((data) => {
       const { game } = this.state;
 
-			if (data.teamId) {
+      if (data.teamId) {
         game.teams.forEach(team => {
           if (team.teamId === data.teamId) {
             if (!team.players) {
@@ -33,6 +32,10 @@ class GameLobby extends PureComponent {
             const existingPlayer = team.players.find((t) => { return t.username === data.username });
             if (!existingPlayer) {
               team.players.push({ username: data.username });
+            } else {
+              if (existingPlayer.avatarId !== data.avatarId) {
+                existingPlayer.avatarId = data.avatarId;
+              }
             }
           } else {
             remove(team.players, (player) => {
@@ -41,63 +44,107 @@ class GameLobby extends PureComponent {
           }
         });
 
-        this.setState({ game: {...game }});
+        this.setState({ game: { ...game } });
       }
-		});
+    });
   }
 
   state = {
     gameId: null,
     game: null,
+    isBusy: false,
   };
 
   async componentDidMount() {
+    const { user } = this.props;
     const { params } = this.props.match;
     this.setState({ gameId: params.gameId });
     await this.getGame(params.gameId);
-    onGameJoin({ gameId: params.gameId, username: username });
   }
 
   getGame = async (gameId) => {
+    const { isBusy } = this.state;
+    if (isBusy) {
+      return;
+    }
+
+    this.setState({ isBusy: true });
+
     try {
       const game = await gameApi.getGame(gameId);
       if (game) {
-        this.setState({ game });
+        this.setState({ game, isBusy: false });
       }
     } catch (error) {
+      this.setState({ isBusy: false });
       console.log(error);
     }
-  }
+  };
 
-  joinGame = (teamId) => {
+  joinGame = (username, teamId, avatarId) => {
     const { game } = this.state;
-    onGameJoin({ teamId, gameId: game.gameId, username: username });
-  }
+    const { user } = this.props;
+
+    onGameJoin({ teamId, gameId: game.gameId, username: user.username, avatarId });
+  };
+
+  getCountry = (countryId) => {
+    const { countries } = this.props;
+    const country = countries.find((c) => c.countryId === countryId);
+
+    return country || { countryId: 99, name: 'Unknown', players: [] };
+  };
+
+  getLobbySubTitle = () => {
+    const { game } = this.state;
+
+    if (!game) {
+      return '';
+    }
+
+    const firstCountry = this.getCountry(game.teams[0].countryId);
+    const secondCountry = this.getCountry(game.teams[1].countryId);
+
+    return `${firstCountry.name} vs ${secondCountry.name}`;
+  };
 
   render() {
-    const { gameId, game } = this.state;
+    const {
+      gameId,
+      game,
+      isBusy,
+    } = this.state;
+
     const { countries } = this.props;
 
     return (
-      <div id={`game-lobby__${gameId}`}>
-        <div className="game-lobby__teams">
-          <Row>
-            {
-              game ?
-                game.teams.map((team) => (
-                  <Col xs="6" key={team.teamId}>
-                    <TeamSelector
-                      teamId={team.teamId}
-                      players={team.players}
-                      country={countries[0]}
-                      onJoin={this.joinGame}
-                    />
-                  </Col>
-                ))
-                : <p>No game found</p>
-            }
-          </Row>
-        </div>
+      <div id={`game-prepare__${gameId}`} className="game-prepare__view">
+        <Spinner isLoading={isBusy}>
+          {
+            game ? (
+              <div className="game-prepare__content">
+                <div className="game-prepare__header">
+                  <h2>{game.gameId}</h2>
+                  <h4>{this.getLobbySubTitle()}</h4>
+                </div>
+                <div className="game-prepare__teams">
+                  {
+                    game.teams.map((team) => (
+                      <div className="game-prepare__teams-item" key={team.teamId}>
+                        <TeamSelector
+                          teamId={team.teamId}
+                          players={team.players}
+                          country={this.getCountry(team.countryId)}
+                          onJoin={this.joinGame}
+                        />
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+            ) : <p>No game found</p>
+          }
+        </Spinner>
       </div>
     )
   }

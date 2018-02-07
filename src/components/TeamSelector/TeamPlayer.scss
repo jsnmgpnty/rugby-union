@@ -1,0 +1,50 @@
+@import '../../variables';
+
+.team-player {
+  border-bottom: 1px solid $gray-700;
+  color: $white;
+  transition: 0.5s;
+
+  @include active-element {
+    box-shadow: inset 0 -1rem 2rem 0.5rem rgba($blue, 0.4);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .team-player__avatar {
+    float: left;
+    padding: 0.475rem 0;
+
+    .team-player__avatar-pic {
+      background-size: cover;
+      display: block;
+      float: left;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 100%;
+      border: 1.5px solid $white;
+    }
+  }
+
+  .team-player__user {
+    padding-left: 2.5rem;
+
+    p {
+      margin: 0;
+    }
+
+    .team-player__user-avatar {
+      @include ellipsis-text;
+    }
+
+    .team-player__user-name {
+      color: $gray-500;
+
+      &.player-taken {
+        color: $blue;
+      }
+    }
+  }
+}
