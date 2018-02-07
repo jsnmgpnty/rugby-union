@@ -8,11 +8,14 @@ import { reactLocalStorage } from 'reactjs-localstorage';
 
 import './Join.scss';
 import { setUser } from 'actions/user';
+import { setCurrentPage } from 'actions/navigation';
+import pageNames from 'lib/pageNames';
 import { onUserCreate, onUserCreated } from 'services/SocketClient.js'
 import { Spinner } from 'components';
 
 const mapDispatchToProps = dispatch => ({
 	setUser: user => dispatch(setUser(user)),
+	setCurrentPage: () => dispatch(setCurrentPage(pageNames.join)),
 });
 
 class Join extends Component {
@@ -35,6 +38,7 @@ class Join extends Component {
 	}
 
 	componentDidMount() {
+		this.props.setCurrentPage(pageNames.join);
 		onUserCreated(this.handleUserCreated);
 	}
 
@@ -60,7 +64,13 @@ class Join extends Component {
 		if (!this.state.isUsernamePristine) {
 			this.validateUsername(event);
 		}
-		this.setState({ username: event.target.value });
+
+		const username = event.target.value;
+		if (username.length >= 6) {
+			this.setState({ username, isUsernameValid: true });
+		} else {
+			this.setState({ username, isUsernameValid: false });
+		}
 	}
 
 	validateUsername = (event) => {

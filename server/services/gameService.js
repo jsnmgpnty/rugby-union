@@ -88,13 +88,20 @@ class GameService extends BaseService {
   // get games list
   async getGamesList(status) {
     try {
-      const result = await gameRepository.getList();
-
-      if (status) {
-        return result.filter((r) => r.status === status);
-      }
+      const result = status ?
+        await gameRepository.getList() :
+        await gameRepository.getFilteredList({ status });
 
       return result;
+    } catch (error) {
+      return this.handleError(error);
+    }
+  };
+
+  async getActiveList() {
+    try {
+      const result = await gameRepository.getList();
+      return result.filter((r) => r.status !== gameStatus.completed);
     } catch (error) {
       return this.handleError(error);
     }

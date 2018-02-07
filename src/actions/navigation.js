@@ -23,7 +23,7 @@ const isGameReadyToStart = (payload) => ({ type: IS_GAME_READY_TO_START, payload
 const setCurrentPage = (payload) => ({ type: SET_CURRENT_PAGE, payload });
 
 export {
-  isGameCreated,
+  isCreatingGame,
   isTeamsSelectedOnCreateGame,
   isGameSelectedOnLobby,
   isDeleteEnabledOnLobby,
