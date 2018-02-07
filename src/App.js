@@ -9,7 +9,7 @@ import { setCountries } from 'actions/countries';
 import { setUser } from 'actions/user';
 import { onUserCreate, onUserCreated } from 'services/SocketClient';
 import { Navigator } from 'components';
-import { Join, GameCreate, GameLobby, Lobby, GameDetails } from 'view';
+import { Join, GameCreate, GamePrepare, Lobby, GameDetails } from 'view';
 
 import './App.scss';
 
@@ -86,7 +86,7 @@ class App extends Component {
 							<Route path="/" exact render={() => this.isUserSignedIn(Lobby)} />
 							<Route path="/create" exact render={() => this.isUserSignedIn(GameCreate)} />
 							<Route path="/join" exact component={() => this.isUserAlreadySignedIn()} />
-							<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GameLobby)} />
+							<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GamePrepare)} />
 							<Route path="/game/:gameId/details" exact render={() => this.isUserSignedIn(GameDetails)} />
 						</Switch>
 					</div>

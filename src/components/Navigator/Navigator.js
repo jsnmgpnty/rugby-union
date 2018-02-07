@@ -1,16 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router';
-import { withRouter } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
+import { reactLocalStorage } from 'reactjs-localstorage';
 
 import pageNames from 'lib/pageNames';
 import './Navigator.scss';
 
 const mapStateToProps = (state) => ({
   isCreatingGame: state.navigation.isCreatingGame,
-  isTeamsSelectedOnCreateGame: state.navigation.isTeamsSelectedOnCreateGame,
+  isTeamsSelectedOnGameCreate: state.navigation.isTeamsSelectedOnGameCreate,
   isGameSelectedOnLobby: state.navigation.isGameSelectedOnLobby,
   isDeleteEnabledOnLobby: state.navigation.isDeleteEnabledOnLobby,
   isGameWaitingForPlayers: state.navigation.isGameWaitingForPlayers,
@@ -19,10 +20,27 @@ const mapStateToProps = (state) => ({
 });
 
 class Navigator extends Component {
+  getBackButtonStyle = () => {
+    const { currentPage } = this.props;
+    return currentPage === pageNames.join ? 'disabled-link' : null;
+  };
+
+  getBackButtonLink = () => {
+    const { currentPage } = this.props;
+    return currentPage === pageNames.gameLobby ? '/join' : '/';
+  };
+
+  onBackButtonClick = () => {
+    const { currentPage } = this.props;
+    if (currentPage === pageNames.gameLobby) {
+      reactLocalStorage.setObject('user', null);
+    }
+  };
+
   render() {
     const {
       isCreatingGame,
-      isTeamsSelectedOnCreateGame,
+      isTeamsSelectedOnGameCreate,
       isGameSelectedOnLobby,
       isDeleteEnabledOnLobby,
       isGameWaitingForPlayers,
@@ -30,29 +48,39 @@ class Navigator extends Component {
       currentPage,
     } = this.props;
 
-    console.log(this.props);
-
     return (
       <div id='rugby-navigator'>
         <div className='rugby-navigator__top'>
           {
             currentPage !== pageNames.join &&
-            <Button
-              color="info"
-            >
-              <span className="back" />
-              <span className="btn-text-content">Back</span>
-            </Button>
+            <Link to={this.getBackButtonLink()} className={this.getBackButtonStyle()}>
+              <Button color="info" onClick={this.onBackButtonClick}>
+                <span className="back" />
+                <span className="btn-text-content">Back</span>
+              </Button>
+            </Link>
           }
         </div>
         <div className='rugby-navigator__bottom'>
           {
             currentPage === pageNames.gameCreate &&
-            <Button
-              color="success"
-            >
+            <Button color="success" disabled={!isTeamsSelectedOnGameCreate}>
               <span className="create" />
               <span className="btn-text-content">Create</span>
+            </Button>
+          }
+          {
+            currentPage === pageNames.gameLobby &&
+            <Button className="btn-view" color="success" disabled={!isGameSelectedOnLobby}>
+              <span className="view" />
+              <span className="btn-text-content">View</span>
+            </Button>
+          }
+          {
+            currentPage === pageNames.gameLobby &&
+            <Button className="btn-join" color="primary" disabled={!isGameSelectedOnLobby}>
+              <span className="join" />
+              <span className="btn-text-content">Join</span>
             </Button>
           }
         </div>

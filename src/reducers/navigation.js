@@ -1,6 +1,7 @@
 import {
   IS_CREATING_GAME,
   IS_TEAMS_SELECTED_ON_GAME_CREATE,
+  IS_IN_LOBBY,
   IS_GAME_SELECTED_ON_LOBBY,
   IS_DELETE_ENABLED_ON_LOBBY,
   IS_GAME_WAITING_FOR_PLAYERS,
@@ -9,7 +10,6 @@ import {
 } from 'lib/actionNames';
 
 const initialState = {
-  isCreatingGame: false,
   isTeamsSelectedOnGameCreate: false,
   isGameSelectedOnLobby: false,
   isDeleteEnabledOnLobby: false,
@@ -20,18 +20,51 @@ const initialState = {
 
 const navigation = (state = initialState, action) => {
   switch (action.type) {
-    case IS_CREATING_GAME:
-      return { ...state, isCreatingGame: action.payload };
     case IS_TEAMS_SELECTED_ON_GAME_CREATE:
-      return { ...state, isTeamsSelectedOnGameCreate: action.payload };
+      return {
+        ...state,
+        isTeamsSelectedOnGameCreate: action.payload,
+        isGameSelectedOnLobby: false,
+        isDeleteEnabledOnLobby: false,
+        isGameWaitingForPlayers: false,
+        isGameReadyToStart: false,
+      };
     case IS_GAME_SELECTED_ON_LOBBY:
-      return { ...state, isGameSelectedOnLobby: action.payload };
+      return {
+        ...state,
+        isTeamsSelectedOnGameCreate: false,
+        isGameSelectedOnLobby: action.payload,
+        isDeleteEnabledOnLobby: false,
+        isGameWaitingForPlayers: false,
+        isGameReadyToStart: false,
+      };
     case IS_DELETE_ENABLED_ON_LOBBY:
-      return { ...state, isDeleteEnabledOnLobby: action.payload };
+      return {
+        ...state,
+        isTeamsSelectedOnGameCreate: false,
+        isGameSelectedOnLobby: false,
+        isDeleteEnabledOnLobby: action.payload,
+        isGameWaitingForPlayers: false,
+        isGameReadyToStart: false,
+      };
     case IS_GAME_WAITING_FOR_PLAYERS:
-      return { ...state, isGameWaitingForPlayers: action.payload };
+      return {
+        ...state,
+        isTeamsSelectedOnGameCreate: false,
+        isGameSelectedOnLobby: false,
+        isDeleteEnabledOnLobby: false,
+        isGameWaitingForPlayers: action.payload,
+        isGameReadyToStart: false,
+      };
     case IS_GAME_READY_TO_START:
-      return { ...state, isGameReadyToStart: action.payload };
+      return {
+        ...state,
+        isTeamsSelectedOnGameCreate: false,
+        isGameSelectedOnLobby: false,
+        isDeleteEnabledOnLobby: false,
+        isGameWaitingForPlayers: false,
+        isGameReadyToStart: action.payload,
+      };
     case SET_CURRENT_PAGE:
       return { ...state, currentPage: action.payload };
     default:

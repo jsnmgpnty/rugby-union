@@ -6,8 +6,10 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 
   &:after {
+    content: "";
     height: 100%;
     position: absolute;
     top: 0;
@@ -15,19 +17,29 @@
     left: 0;
     right: 0;
     box-shadow: inset 0.5rem 0 0.5rem 0.2rem rgba(0, 0, 0, 0.3);
+    z-index: 0;
+  }
+
+  .disabled-link {
+    pointer-events: none;
   }
 
   .rugby-navigator__top {
     flex-grow: 1;
     margin: 0.5rem 0;
+    z-index: 100;
   }
 
   .rugby-navigator__bottom {
     flex-grow: 1;
     display: flex;
-    flex-direction: row;
+    flex-direction: column-reverse;
     align-items: flex-end;
-    margin: 0.5rem 0;
+    z-index: 100;
+
+    button {
+      margin: 0 0 0.5rem;
+    }
   }
 
   button {
@@ -35,6 +47,15 @@
     width: 100%;
     padding: 2rem .25rem .25rem;
     text-align: left;
+    box-shadow: 0.5rem 0 0.5rem 0.2rem rgba(0, 0, 0, 0.3);
+
+    &.btn-view {
+      order: 2;
+    }
+
+    &.btn-join {
+      order: 1;
+    }
 
     span {
       background-size: cover;
@@ -62,7 +83,10 @@
       &.create {
         background: url('../../assets/create_icon.svg');
       }
+      
+      &.view {
+        background: url('../../assets/view_icon.svg');
+      }
     }
-    
   }
 }

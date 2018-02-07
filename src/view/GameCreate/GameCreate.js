@@ -6,7 +6,7 @@ import { Form, Col, Row, Button, UncontrolledButtonDropdown, DropdownToggle, Dro
 
 import './GameCreate.scss';
 import pageNames from 'lib/pageNames';
-import { setCurrentPage, isCreatingGame } from 'actions/navigation';
+import { setCurrentPage } from 'actions/navigation';
 
 const mapStateToProps = state => ({
 	countries: state.countries,
@@ -15,13 +15,11 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
 	setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameCreate)),
-	isCreatingGame: () => dispatch(isCreatingGame(true)),
 });
 
 class GameCreate extends Component {
 	static propTypes = {
 		setCurrentPage: PropTypes.func.isRequired,
-		isCreatingGame: PropTypes.func.isRequired,
 	};
 
 	constructor(props) {
@@ -35,12 +33,10 @@ class GameCreate extends Component {
 
 	componentDidMount () {
 		const {
-			isCreatingGame,
 			setCurrentPage,
 		} = this.props;
 
-		isCreatingGame();
-		setCurrentPage('GAMECREATE');
+		setCurrentPage();
 	}
 
 	onCountrySelect = (e) => {
