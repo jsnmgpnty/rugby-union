@@ -1,6 +1,9 @@
 .lobby {
   height: 100%;
-  background: linear-gradient(to right, rgb(56, 14, 44) , rgb(40, 20, 43));
+
+  .lobby-header{
+     margin-bottom: 2rem; 
+  }
 }
 
 .game-lobby {
@@ -11,8 +14,4 @@
 .select-game {
   color: white;
   display: block;
-}
-
-.game-list > * {
-  margin-top: 20px;
 }

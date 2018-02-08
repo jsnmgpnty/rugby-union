@@ -13,6 +13,9 @@ $green:   #76c043 !default;
 $teal:    #20c997 !default;
 $cyan:    #17a2b8 !default;
 
+//gradients
+$dark-purple: linear-gradient(to right, rgb(4 ,4 ,6) , rgb(12, 24, 40)) !default;
+
 $theme-colors: (
   "primary": #00aeef,
   "success": #76c043,

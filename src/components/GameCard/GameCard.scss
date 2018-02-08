@@ -1,32 +1,40 @@
+@import '../../variables';
+
 .game-card {
-  height: 170px;
   position: relative;
-}
+  margin-bottom: 1rem;
 
-.game-bg {
-  height: 38%;
-  background-color: blue;
-}
+  @include active-element{
+    .game-details {
+      background: $blue;
+    }
+  };
 
-.game-details {
-  height: 62%;
-  color: white;
-  font-size: 0.7em;
-  background: linear-gradient(to right, rgb(4 ,4 ,6) , rgb(12, 24, 40));
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  .game-bg {
+    height: 53px;
+    background: url(../../assets/gameholder_on.png) no-repeat center center;
+    background-size: contain;
+  }
+
+  .game-details {
+    height: 52%;
+    color: white;
+    font-size: 0.7em;
+    background: $dark-purple;
+    padding: 25px 10px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
 }
 
 .game-countries {
   position: absolute;
-  width: 52%;
-  height: 45%;
-  border: 1px solid yellow;
+  width: 60%;
+  height: 47%;
   z-index: 1000;
   top: 15%;
-  left: 45%;
+  left: 40%;
 
   display: flex;
   justify-content: space-around;
