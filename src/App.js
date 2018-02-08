@@ -56,6 +56,8 @@ class App extends Component {
 
 			this.setState({ hasInitialized: true });
 		}
+		
+		this.setState({ hasInitialized: true });
 	}
 
 	async getCountries() {
