@@ -1,14 +1,31 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { Link, withRouter } from 'react-router-dom';
+
 import './Lobby.scss';
+import pageNames from 'lib/pageNames';
+import { setCurrentPage } from 'actions/navigation';
 import LobbyHeader from './LobbyHeader';
 import { GameCard } from 'components';
 
-export default class Lobby extends PureComponent {
+const mapDispatchToProps = dispatch => ({
+	setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameLobby)),
+});
+
+class Lobby extends PureComponent {
   static propTypes = {
 
   };
 
+  componentDidMount() {
+    const {
+			setCurrentPage,
+		} = this.props;
+
+		setCurrentPage();
+  }
+  
   render() {
     return (
       <div className="lobby">
@@ -21,3 +38,5 @@ export default class Lobby extends PureComponent {
     );
   }
 }
+
+export default withRouter(connect(null, mapDispatchToProps)(Lobby));

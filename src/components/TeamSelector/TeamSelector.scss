@@ -1,0 +1,52 @@
+@import '../../variables';
+
+.team-selector {
+  display: flex;
+  margin: 0 0 2rem;
+
+  .team-selector__logo {
+    padding: 1rem 1rem 0.5rem 0;
+
+    .team-selector__logo-country {
+      display: block;
+      height: 5rem;
+      width: 5rem;
+      margin: 0 auto 1rem;
+  
+      &.england {
+        background: url('../../assets/england_icon.png') no-repeat center center;
+        background-size: contain;
+      }
+      
+      &.france {
+        background: url('../../assets/france_icon.png') no-repeat center center;
+        background-size: contain;
+      }
+      
+      &.italy {
+        background: url('../../assets/italy_icon.png') no-repeat center center;
+        background-size: contain;
+      }
+      
+      &.wales {
+        background: url('../../assets/wales_icon.png') no-repeat center center;
+        background-size: contain;
+      }
+      
+      &.scotland {
+        background: url('../../assets/scotland_icon.png') no-repeat center center;
+        background-size: contain;
+      }
+      
+      &.ireland {
+        background: url('../../assets/ireland_icon.png') no-repeat center center;
+        background-size: contain;
+      }
+    }
+  }
+
+  .team-selector__players {
+    @include ellipsis-text;
+    flex-grow: 1;
+  }
+}

@@ -6,7 +6,7 @@ $blue:    #00aeef !default;
 $indigo:  #6610f2 !default;
 $purple:  #6f42c1 !default;
 $pink:    #e83e8c !default;
-$red:     #dc3545 !default;
+$red:     #D52026 !default;
 $orange:  #fd7e14 !default;
 $yellow:  #ffc107 !default;
 $green:   #76c043 !default;
@@ -14,6 +14,10 @@ $teal:    #20c997 !default;
 $cyan:    #17a2b8 !default;
 
 $theme-colors: (
+  "primary": #00aeef,
+  "success": #76c043,
+  "danger": #D52026,
+  "info": #007284,
 );
 
 // mixin mediaqueries: breakpoint value;

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'reactstrap';
+import uuid from 'uuid';
 
 import TeamPlayer from './TeamPlayer';
 import './TeamSelector.scss';
@@ -11,29 +12,65 @@ const propTypes = {
     countryId: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
   }).isRequired,
-  players: PropTypes.arrayOf(PropTypes.shape({  
+  players: PropTypes.arrayOf(PropTypes.shape({
     username: PropTypes.string.isRequired,
-    avatar: PropTypes.shape({
-      playerId: PropTypes.string.isRequired,
-      logo: PropTypes.string.isRequired,
-    }).isRequired,
+    avatarId: PropTypes.number.isRequired,
   })),
   onJoin: PropTypes.func,
 };
 
 const defaultProps = {
   players: [],
-  onJoin: () => {},
+  onJoin: () => { },
+};
+
+const getCountryLogo = (country) => {
+  if (!country) {
+    return null;
+  }
+
+  switch (country.countryId) {
+    case 1:
+      return 'england';
+    case 2:
+      return 'france';
+    case 3:
+      return 'ireland';
+    case 4:
+      return 'italy';
+    case 5:
+      return 'scotland';
+    case 6:
+      return 'wales';
+    default:
+      return null;
+  }
+};
+
+const mapPlayersToAvatar = (players, avatars) => {
+  const mappedPlayers = avatars.map((avatar) => {
+    const player = players.find((p) => p.avatarId === avatar.playerId);
+    return {
+      username: player ? player.username : null,
+      avatar: avatar,
+    };
+  });
+
+  return mappedPlayers;
 };
 
 function TeamSelector(props) {
+  const players = mapPlayersToAvatar(props.players, props.country.players);
+
   return (
-    <div id={'team-selector_' + props.teamId}> 
-      <Button color="primary" block onClick={() => props.onJoin(props.teamId)}>Join</Button>
+    <div id={'team-selector_' + props.teamId} className="team-selector">
+      <div className="team-selector__logo">
+        <a onClick={() => props.onJoin(props.teamId)} className={`team-selector__logo-country ${getCountryLogo(props.country)}`} />
+      </div>
       <div className="team-selector__players">
         {
-          props.players && props.players.length > 0 ?
-            props.players.map((player) => <TeamPlayer key={player.username} username={player.username} />)
+          players && players.length > 0 ?
+            players.map((player) => <TeamPlayer key={uuid()} username={player.username} avatar={player.avatar} teamId={props.teamId} onJoin={props.onJoin} />)
             : <p>No players yet</p>
         }
       </div>

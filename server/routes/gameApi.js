@@ -16,6 +16,14 @@ const routes = function () {
     res.json(game);
   });
 
+  // get active
+  router.get('/game/active', async (req, res) => {
+    var game = await gameService.getActiveList();
+
+    res.setHeader('Content-Type', 'application/json');
+    res.json(game);
+  });
+
   // get game
   router.get('/game/:gameId', async (req, res) => {
     var game = await gameService.getGame(req.params.gameId);

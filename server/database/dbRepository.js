@@ -36,6 +36,19 @@ class DbRepository {
 		});
 	}
 
+	async getFilteredList(filter, options) {
+		const db = await getDatabase();
+		return new Promise((resolve, reject) => {
+			db.collection(this.collectionName).find(filter, options, (err, result) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(result);
+				}
+			});
+		});
+	}
+
 	async getItem(filter, options) {
 		const db = await getDatabase();
 		return new Promise((resolve, reject) => {

@@ -75,20 +75,23 @@ io.on('connection', (socket) => {
       if (!joinGameResult.error) {
         if (socket.gameId !== data.gameId) {
           socket.join(joinGameResult.gameId);
-          socket.currentGameId = game.gameId;
+          socket.currentGameId = joinGameResult.gameId;
         }
 
         if (socket.currentTeamId !== data.teamId) {
           socket.join(joinGameResult.teamId);
           socket.currentTeamId = data.teamId;
-        } else {
-          socket.leave(joinGameResult.gameId);
+        }
+
+        if (socket.currentAvatarId !== data.avatarId) {
+          socket.currentAvatarId = data.avatarId;
         }
 
         io.to(joinGameResult.gameId).emit('game:joined', {
           gameId: joinGameResult.gameId,
           teamId: joinGameResult.teamId,
           username: joinGameResult.username,
+          avatarId: joinGameResult.avatarId,
         });
       }
     } catch (error) {
