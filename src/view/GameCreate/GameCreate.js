@@ -40,6 +40,15 @@ class GameCreate extends Component {
 		updated.push(e);
 		this.setState({rules:updated});
 	}
+	
+	isCountryActive(country){
+		const countriesSelected = this.state.rules;
+		if(countriesSelected.indexOf(country.countryId) != '-1'){
+			return country.name + '_on';
+		}
+		else
+			return '';
+	}
 
 	componentDidMount () {
 		const {
@@ -52,21 +61,6 @@ class GameCreate extends Component {
 	render() {
 		const { countries, user } = this.props;
 		
-		const divStyle = (country) => {
-			const imageBG = {
-				// backgroundColor: '#00AEEF',
-				backgroundImage: 'url('+require('../../assets/teams/' + country + '_off.png')+')',
-				backgroundSize: 'contain',
-				backgroundRepeat: 'no-repeat',
-				position: 'relative'
-			}
-			
-			return imageBG;
-		}
-		
-		
-		console.log(this.state.rules);
-		
 		return (
 				<div>
 					<div className="gamecreate-header">
@@ -76,7 +70,7 @@ class GameCreate extends Component {
 					<div className="teamlist-div">
 						{
 						countries && countries.length > 0 && countries.map((country) => 
-							<div className="team-div" style={divStyle(country.name)} onClick={() => this.addNewRow(country.countryId)}>
+							<div className={`team-div ${country.name}_off ${this.isCountryActive(country)}`} onClick={() => this.addNewRow(country.countryId)}>
 								<label className="team-name">{country.name}</label>
 								<img src={require('../../assets/teams/'+ country.name +'_icon.png')} />
 							</div>

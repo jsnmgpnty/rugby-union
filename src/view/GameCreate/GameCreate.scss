@@ -18,10 +18,9 @@
 	.team-div{
 		text-align: center;
 		margin-bottom: .3rem;
-		
-		&:before{
-			background-color: rgba(255,0,0,0.5);
-		}
+		background-size: contain;
+		background-repeat: no-repeat;
+		position: relative;
 		
 		.team-name{    
 			float: left;
@@ -40,6 +39,48 @@
 		img{
 			width: 30%;
 		}
+	}
+	.england_off{
+		background-image: url('../../assets/teams/england_off.png');
+	}
+	.england_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/england_btn.png')!important;
+	}
+	.france_off{
+		background-image: url('../../assets/teams/france_off.png');
+	}
+	.france_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/france_btn.png');
+	}
+	.ireland_off{
+		background-image: url('../../assets/teams/ireland_off.png');
+	}
+	.ireland_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/ireland_btn.png');
+	}
+	.italy_off{
+		background-image: url('../../assets/teams/italy_off.png');
+	}
+	.italy_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/italy_btn.png');
+	}
+	.scotland_off{
+		background-image: url('../../assets/teams/scotland_off.png');
+	}
+	.scotland_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/scotland_btn.png');
+	}
+	.wales_off{
+		background-image: url('../../assets/teams/wales_off.png');
+	}
+	.wales_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/wales_btn.png');
 	}
 }
 
