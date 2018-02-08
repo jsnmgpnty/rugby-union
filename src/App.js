@@ -48,7 +48,7 @@ class App extends Component {
 			const countries = [
 				{ 
 					countryId: 1,
-					name: 'England',
+					name: 'england',
 					players: [
 						{
 							playerId: 1,
@@ -79,7 +79,7 @@ class App extends Component {
 				},
 				{
 					countryId: 2,
-					name: 'France',
+					name: 'france',
 					players: [
 						{
 							playerId: 6,
@@ -110,7 +110,7 @@ class App extends Component {
 				},
 				{
 					countryId: 3,
-					name: 'Ireland',
+					name: 'ireland',
 					players: [
 						{
 							playerId: 11,
@@ -141,7 +141,7 @@ class App extends Component {
 				},
 				{
 					countryId: 4,
-					name: 'Italy',
+					name: 'italy',
 					players: [
 						{
 							playerId: 16,
@@ -172,7 +172,7 @@ class App extends Component {
 				},
 				{
 					countryId: 5,
-					name: 'Scotland',
+					name: 'scotland',
 					players: [
 						{
 							playerId: 21,

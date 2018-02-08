@@ -1,3 +1,48 @@
+.gamecreate-header{
+	padding: 1rem;
+	
+	h2{
+		text-transform: uppercase;
+		color: #FFF200;
+		font-weight: 700;
+		margin-bottom: 0;
+	}
+	
+	p{
+		font-size: 1.34rem;
+		color: #FFF;
+		font-weight: 700;
+	}
+}
+.teamlist-div{
+	.team-div{
+		text-align: center;
+		margin-bottom: .3rem;
+		
+		&:before{
+			background-color: rgba(255,0,0,0.5);
+		}
+		
+		.team-name{    
+			float: left;
+			margin: 0;
+			width: 0;
+			font-weight: bold;
+			color: #fff;
+			text-transform: uppercase;
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			padding-left: .5rem;
+			font-size: 1.15rem;
+		}
+		
+		img{
+			width: 30%;
+		}
+	}
+}
+
 /* .game-list{
 	margin-top: 75px;
 }
