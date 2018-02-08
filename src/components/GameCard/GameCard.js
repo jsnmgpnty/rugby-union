@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import './GameCard.scss';
-import { BoundedCountry } from 'components';
+import { Country } from 'components';
 
 export default class GameCard extends PureComponent {
   static propTypes = {
@@ -21,9 +21,9 @@ export default class GameCard extends PureComponent {
           <span className="player-requirements">{this.props.playerCount} Players Inside (Minimum 12 players)</span>
         </div>
         <div className="game-countries">
-          <BoundedCountry />
+          <Country />
           <span className="game-vs">vs</span>
-          <BoundedCountry />
+          <Country />
         </div>
       </div>
     );
