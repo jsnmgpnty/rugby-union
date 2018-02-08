@@ -39,7 +39,6 @@ class GameCreate extends Component {
 		const updated = this.state.rules.slice(0,2);
 		updated.push(e);
 		this.setState({rules:updated});
-		};
 	}
 
 	componentDidMount () {
