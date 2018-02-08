@@ -46,10 +46,12 @@ class App extends Component {
 	async getCountries() {
 		try {
 			const countries = [
-				{ countryId: 1, name: 'England' },
-				{ countryId: 2, name: 'Australia' },
-				{ countryId: 3, name: 'New Zealand' },
-				{ countryId: 4, name: 'Philippines' },
+				{ countryId: 1, name: 'england' },
+				{ countryId: 2, name: 'ireland' },
+				{ countryId: 3, name: 'france' },
+				{ countryId: 4, name: 'wales' },
+				{ countryId: 5, name: 'scotland' },
+				{ countryId: 6, name: 'italy' },
 			];
 			this.props.setCountries(countries);
 		} catch (error) {
