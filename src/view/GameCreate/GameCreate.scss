@@ -1,3 +1,89 @@
+.gamecreate-header{
+	padding: 1rem;
+	
+	h2{
+		text-transform: uppercase;
+		color: #FFF200;
+		font-weight: 700;
+		margin-bottom: 0;
+	}
+	
+	p{
+		font-size: 1.34rem;
+		color: #FFF;
+		font-weight: 700;
+	}
+}
+.teamlist-div{
+	.team-div{
+		text-align: center;
+		margin-bottom: .3rem;
+		background-size: contain;
+		background-repeat: no-repeat;
+		position: relative;
+		
+		.team-name{    
+			float: left;
+			margin: 0;
+			width: 0;
+			font-weight: bold;
+			color: #fff;
+			text-transform: uppercase;
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			padding-left: .5rem;
+			font-size: 1.15rem;
+		}
+		
+		img{
+			width: 30%;
+		}
+	}
+	.england_off{
+		background-image: url('../../assets/teams/england_off.png');
+	}
+	.england_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/england_btn.png')!important;
+	}
+	.france_off{
+		background-image: url('../../assets/teams/france_off.png');
+	}
+	.france_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/france_btn.png');
+	}
+	.ireland_off{
+		background-image: url('../../assets/teams/ireland_off.png');
+	}
+	.ireland_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/ireland_btn.png');
+	}
+	.italy_off{
+		background-image: url('../../assets/teams/italy_off.png');
+	}
+	.italy_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/italy_btn.png');
+	}
+	.scotland_off{
+		background-image: url('../../assets/teams/scotland_off.png');
+	}
+	.scotland_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/scotland_btn.png');
+	}
+	.wales_off{
+		background-image: url('../../assets/teams/wales_off.png');
+	}
+	.wales_on{
+		background-color: #00AEEF;
+		background-image: url('../../assets/teams/wales_btn.png');
+	}
+}
+
 /* .game-list{
 	margin-top: 75px;
 }

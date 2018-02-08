@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Link, withRouter } from 'react-router-dom';
-import { Form, Col, Row, Button, UncontrolledButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import { Badge, Form, Col, Row, Button, UncontrolledButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 
 import './GameCreate.scss';
 import pageNames from 'lib/pageNames';
@@ -24,11 +24,30 @@ class GameCreate extends Component {
 
 	constructor(props) {
 		super(props);
-
+		
+		this.addNewRow = this.addNewRow.bind(this);
 		this.state = {
-			firstCountrySelected: '',
-			secondCountrySelected: '',
-		};
+		  rules:[]
+		}
+    }
+	
+	addNewRow(e){
+		if(this.state.rules.length > 1){
+			this.state.rules.shift();
+		}
+		
+		const updated = this.state.rules.slice(0,2);
+		updated.push(e);
+		this.setState({rules:updated});
+	}
+	
+	isCountryActive(country){
+		const countriesSelected = this.state.rules;
+		if(countriesSelected.indexOf(country.countryId) != '-1'){
+			return country.name + '_on';
+		}
+		else
+			return '';
 	}
 
 	componentDidMount () {
@@ -39,54 +58,26 @@ class GameCreate extends Component {
 		setCurrentPage();
 	}
 
-	onCountrySelect = (e) => {
-		console.log(e.name);
-	}
-
 	render() {
 		const { countries, user } = this.props;
-		const { firstCountrySelected, secondCountrySelected } = this.state;
-
+		
 		return (
-			<Form>
-				<Row className="createGame-cont">
-					<Col md="6">
-						<UncontrolledButtonDropdown>
-							<DropdownToggle>
-								{
-									firstCountrySelected
-								}
-							</DropdownToggle>
-							<DropdownMenu>
-								{
-									countries && countries.length > 0 && countries.map((country) =>
-										<DropdownItem onClick={() => this.onCountrySelect(country)} key={country.countryId}>{country.name}</DropdownItem>)
-								}
-							</DropdownMenu>
-						</UncontrolledButtonDropdown>
-					</Col>
-					<Col md="6">
-						<UncontrolledButtonDropdown>
-							<DropdownToggle>
-								{
-									secondCountrySelected
-								}
-							</DropdownToggle>
-							<DropdownMenu>
-								{
-									countries && countries.length > 0 &&
-									countries.map((country) => <DropdownItem key={country.countryId}>{country.name}</DropdownItem>)
-								}
-							</DropdownMenu>
-						</UncontrolledButtonDropdown>
-					</Col>
-					<Col xs="12">
-						<Link to="">
-							<Button color="success" className="createGame-btn">Create Game</Button>
-						</Link>
-					</Col>
-				</Row>
-			</Form>
+				<div>
+					<div className="gamecreate-header">
+						<h2>Create Game</h2>
+						<p>Select 2 teams</p>
+					</div>
+					<div className="teamlist-div">
+						{
+						countries && countries.length > 0 && countries.map((country) => 
+							<div className={`team-div ${country.name}_off ${this.isCountryActive(country)}`} onClick={() => this.addNewRow(country.countryId)}>
+								<label className="team-name">{country.name}</label>
+								<img src={require('../../assets/teams/'+ country.name +'_icon.png')} />
+							</div>
+							)
+						}
+					</div>
+				</div>
 		);
 	}
 }
