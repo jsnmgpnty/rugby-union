@@ -7,6 +7,7 @@ import { Button } from 'reactstrap';
 import { reactLocalStorage } from 'reactjs-localstorage';
 
 import pageNames from 'lib/pageNames';
+import { onGameLeave } from 'services/SocketClient';
 import './Navigator.scss';
 
 const mapStateToProps = (state) => ({
@@ -17,6 +18,8 @@ const mapStateToProps = (state) => ({
   isGameWaitingForPlayers: state.navigation.isGameWaitingForPlayers,
   isGameReadyToStart: state.navigation.isGameReadyToStart,
   currentPage: state.navigation.currentPage,
+  gameId: state.navigation.gameId,
+  user: state.user,
 });
 
 class Navigator extends Component {
@@ -31,9 +34,17 @@ class Navigator extends Component {
   };
 
   onBackButtonClick = () => {
-    const { currentPage } = this.props;
+    const { currentPage, gameId, user } = this.props;
+
     if (currentPage === pageNames.gameLobby) {
       reactLocalStorage.setObject('user', null);
+    }
+
+    if (currentPage === pageNames.gamePrepare) {
+      onGameLeave({
+        username: user.username,
+        gameId: gameId,
+      });
     }
   };
 
@@ -81,6 +92,13 @@ class Navigator extends Component {
             <Button className="btn-join" color="primary" disabled={!isGameSelectedOnLobby}>
               <span className="join" />
               <span className="btn-text-content">Join</span>
+            </Button>
+          }
+          {
+            currentPage === pageNames.gamePrepare &&
+            <Button className="btn-join" color="primary" disabled={!isGameReadyToStart}>
+              <span className="start" />
+              <span className="btn-text-content">Start</span>
             </Button>
           }
         </div>

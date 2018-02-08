@@ -3,6 +3,7 @@
 .game-prepare__view {
   .game-prepare__content {
     text-align: left;
+    overflow: hidden;
 
     .game-prepare__header {
       margin: 0 0 1rem;
@@ -21,8 +22,11 @@
       }	
     }
   }
+
   .game-prepare__teams {
     padding: 0 0 1rem 1rem;
+    overflow-x: hidden;
+    overflow-y: auto;
     
     .game-prepare__teams-item {
       

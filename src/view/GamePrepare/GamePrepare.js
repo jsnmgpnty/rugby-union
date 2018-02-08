@@ -1,14 +1,24 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
+import { Redirect } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import { Row, Col } from 'reactstrap';
 import { remove } from 'lodash';
 import uuid from 'uuid';
 
 import gameApi from 'services/GameApi';
-import { onGameJoin, onGameJoined } from 'services/SocketClient';
+import pageNames from 'lib/pageNames';
+import { onGameJoin, onGameJoined, onGameLeft, onGameStarted } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
+import { setCurrentPage, isGameReadyToStart } from 'actions/navigation';
 import './GamePrepare.scss';
+
+const defaultNumberOfPlayersPerTeam = 5;
+
+const mapDispatchToProps = dispatch => ({
+  setCurrentPage: () => dispatch(setCurrentPage(pageNames.gamePrepare)),
+  isGameReadyToStart: () => dispatch(isGameReadyToStart(true)),
+});
 
 const mapStateToProps = state => ({
   countries: state.countries,
@@ -19,45 +29,25 @@ class GameLobby extends PureComponent {
   constructor(props) {
     super(props);
 
-    onGameJoined((data) => {
-      const { game } = this.state;
-
-      if (data.teamId) {
-        game.teams.forEach(team => {
-          if (team.teamId === data.teamId) {
-            if (!team.players) {
-              team.players = [];
-            }
-
-            const existingPlayer = team.players.find((t) => { return t.username === data.username });
-            if (!existingPlayer) {
-              team.players.push({ username: data.username });
-            } else {
-              if (existingPlayer.avatarId !== data.avatarId) {
-                existingPlayer.avatarId = data.avatarId;
-              }
-            }
-          } else {
-            remove(team.players, (player) => {
-              return player.username === data.username;
-            });
-          }
-        });
-
-        this.setState({ game: { ...game } });
-      }
-    });
+    onGameJoined(this.handleGameJoin);
+    onGameLeft(this.handleGameLeft);
+    onGameStarted(this.handleGameStarted);
   }
 
   state = {
     gameId: null,
     game: null,
     isBusy: false,
+    currentAvatarId: null,
+    currentTeamId: null,
+    isGameStarting: false,
   };
 
   async componentDidMount() {
-    const { user } = this.props;
+    const { user, setCurrentPage } = this.props;
     const { params } = this.props.match;
+
+    setCurrentPage();
     this.setState({ gameId: params.gameId });
     await this.getGame(params.gameId);
   }
@@ -73,7 +63,7 @@ class GameLobby extends PureComponent {
     try {
       const game = await gameApi.getGame(gameId);
       if (game) {
-        this.setState({ game, isBusy: false });
+        this.setState({ game, isBusy: false }, this.isGameReady);
       }
     } catch (error) {
       this.setState({ isBusy: false });
@@ -81,11 +71,92 @@ class GameLobby extends PureComponent {
     }
   };
 
-  joinGame = (username, teamId, avatarId) => {
+  handleGameJoin = (data) => {
     const { game } = this.state;
+
+    if (data.teamId) {
+      game.teams.forEach(team => {
+        if (team.teamId === data.teamId) {
+          if (!team.players) {
+            team.players = [];
+          }
+
+          const existingPlayer = team.players.find((t) => { return t.username === data.username });
+          if (!existingPlayer) {
+            team.players.push({ username: data.username, avatarId: data.avatarId });
+          } else {
+            if (existingPlayer.avatarId !== data.avatarId) {
+              existingPlayer.avatarId = data.avatarId;
+            }
+          }
+        } else {
+          remove(team.players, (player) => {
+            return player.username === data.username;
+          });
+        }
+      });
+
+      const player = game.players.find(a => a.username === data.username);
+      if (player) {
+        if (player.avatarId !== data.avatarId) {
+          player.avatarId = data.avatarId;
+        }
+      }
+
+      this.setState({ game: { ...game } });
+    }
+  };
+
+  handleGameLeft = (data) => {
+    const { game } = this.state;
+
+    remove(game.players, (player) => {
+      return player.username === data.username;
+    });
+
+    game.teams.forEach((team) => {
+      remove(team.players, (player) => {
+        return player.username === data.username;
+      });
+    });
+  };
+
+  handleGameStarted = (data) => {
+    if (!data.error) {
+      this.setState({ isGameStarting: true });
+    }
+  };
+
+  isGameReady = () => {
+    const { game } = this.state;
+    const { isGameReadyToStart } = this.props;
+
+    const firstTeamPlayers = game.teams[0].players ? game.teams[0].players.length : 0;
+    const secondTeamPlayers = game.teams[1].players ? game.teams[1].players.length : 0;
+
+    if (firstTeamPlayers === defaultNumberOfPlayersPerTeam && secondTeamPlayers === defaultNumberOfPlayersPerTeam) {
+      isGameReadyToStart();
+    }
+  };
+
+  joinGame = (teamId, avatarId) => {
+    const { game, currentAvatarId, currentTeamId } = this.state;
     const { user } = this.props;
 
-    onGameJoin({ teamId, gameId: game.gameId, username: user.username, avatarId });
+    let isAvatarInUse = false;
+    game.teams.every((team) => {
+      const avatar = team.players.find(a => a.avatarId === avatarId);
+      if (avatar) {
+        isAvatarInUse = true;
+        return false;
+      }
+
+      return true;
+    });
+
+    if (!isAvatarInUse) {
+      onGameJoin({ teamId, gameId: game.gameId, username: user.username, avatarId });
+    }
   };
 
   getCountry = (countryId) => {
@@ -113,6 +184,7 @@ class GameLobby extends PureComponent {
       gameId,
       game,
       isBusy,
+      isGameStarting,
     } = this.state;
 
     const { countries } = this.props;
@@ -144,11 +216,14 @@ class GameLobby extends PureComponent {
               </div>
             ) : <p>No game found</p>
           }
+          {
+            isGameStarting && <Redirect to={`/game/${gameId}/details`} />
+          }
         </Spinner>
       </div>
     )
   }
 }
 
-export default withRouter(connect(mapStateToProps, null)(GameLobby));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(GameLobby));
 export { GameLobby as PlainGameLobby };

@@ -23,12 +23,7 @@ function onGameCreate(message) {
 
 function onGameCreated(callback) {
   socket.on('game:created', (message) => {
-    callback(message);
-  });
-}
-
-function onGameJoined(callback) {
-  socket.on('game:joined', (message) => {
+    console.log(`game:created ${JSON.stringify(message)}`);
     callback(message);
   });
 }
@@ -37,16 +32,47 @@ function onGameJoin(message) {
   socket.emit('game:join', message);
 }
 
-function onUserCreate(username) {
+function onGameJoined(callback) {
+  socket.on('game:joined', (message) => {
+    console.log(`game:join ${JSON.stringify(message)}`);
+    callback(message);
+  });
+}
+
+function onGameLeave(message) {
+  socket.emit('game:leave', message);
+}
+
+function onGameLeft(callback) {
+  socket.on('game:leave', (message) => {
+    console.log(`game:leave ${JSON.stringify(message)}`);
+    callback(message);
+  });
+}
+
+function onGameStart(message) {
+  socket.emit('game:start', message);
+}
+
+function onGameStarted(callback) {
+  socket.on('game:started', (message) => {
+    console.log(`game:started ${JSON.stringify(message)}`);
+    callback(message);
+  });
+}
+
+function onUserCreate(username, isReturningUser = true) {
   const user = {
     username,
     userId : uuid(),
+    isReturningUser,
   };
   socket.emit('user:create', user);
 }
 
 function onUserCreated(callback) {
   socket.on('user:created', (message) => {
+    console.log(`user:created ${JSON.stringify(message)}`);
     callback(message);
   });
 }
@@ -57,6 +83,10 @@ export {
   onGameJoined,
   onGameCreate,
   onGameCreated,
+  onGameStart,
+  onGameStarted,
+  onGameLeave,
+  onGameLeft,
   onUserCreate,
   onUserCreated,
 };

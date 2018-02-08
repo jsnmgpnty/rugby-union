@@ -39,7 +39,7 @@ class DbRepository {
 	async getFilteredList(filter, options) {
 		const db = await getDatabase();
 		return new Promise((resolve, reject) => {
-			db.collection(this.collectionName).find(filter, options, (err, result) => {
+			db.collection(this.collectionName).find(filter, options).toArray((err, result) => {
 				if (err) {
 					reject(err);
 				} else {

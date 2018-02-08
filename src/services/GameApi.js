@@ -14,6 +14,14 @@ class GameApi extends ApiClient {
   async getGame(gameId) {
     return this.get(`/game/${gameId}`);
   }
+
+  async getGamesByUser(username) {
+    return this.get(`/user/${username}/game/all`);
+  }
+
+  async getLatestGameByUser(username) {
+    return this.get(`/user/${username}/game/latest`);
+  }
 }
 
 export default new GameApi();

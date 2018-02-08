@@ -14,10 +14,6 @@ const mapDispatchToProps = dispatch => ({
 });
 
 class Lobby extends PureComponent {
-  static propTypes = {
-
-  };
-
   componentDidMount() {
     const {
 			setCurrentPage,

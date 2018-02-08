@@ -32,6 +32,30 @@ const routes = function () {
     res.json(game);
   });
 
+  // get user by username
+  router.get('/user/:username', async (req, res) => {
+    var game = await gameService.getUserByUsername(req.params.username);
+
+    res.setHeader('Content-Type', 'application/json');
+    res.json(game);
+  });
+
+  // get games by user
+  router.get('/user/:username/game/all', async (req, res) => {
+    var game = await gameService.getGamesByUser(req.params.username);
+
+    res.setHeader('Content-Type', 'application/json');
+    res.json(game);
+  });
+
+  // get latest active game by user
+  router.get('/user/:username/game/latest', async (req, res) => {
+    var game = await gameService.getActiveGameByUser(req.params.username);
+
+    res.setHeader('Content-Type', 'application/json');
+    res.json(game);
+  });
+
   // create game
   router.post('/game', async (req, res) => {
     try {

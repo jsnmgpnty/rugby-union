@@ -68,6 +68,11 @@ const removePlayerFromTeams = (game, username) => {
   });
 };
 
+const isAvatarInUse = (team, avatarId) => {
+  const avatar = team.players.find((p) => p.avatarId === avatarId);
+  return !_.isNil(avatar);
+}
+
 const randomlyAssignPlayerToTeam = (game, username) => {
   const user = new User(username).toJson();
 
@@ -99,10 +104,48 @@ class GameService extends BaseService {
     }
   };
 
+  // get active games
   async getActiveList() {
     try {
       const result = await gameRepository.getList();
       return result.filter((r) => r.status !== gameStatus.completed);
+    } catch (error) {
+      return this.handleError(error);
+    }
+  };
+
+  // get active game by user
+  async getActiveGameByUser(username) {
+    try {
+      const result = await this.getGamesByUser(username);
+      const activeGames = result.filter(a => a.status !== gameStatus.completed);
+      const orderedResult = _.orderBy(activeGames, (item) => item.createdDate, 'desc');
+      return orderedResult ? orderedResult[0] : null;
+    } catch (error) {
+      return this.handleError(error);
+    }
+  };
+
+  // get joined games by user
+  async getGamesByUser(username) {
+    try {
+      const result = await gameRepository.getFilteredList({ 'players.username': { $eq: username }});
+      return result;
+    } catch (error) {
+      return this.handleError(error);
+    }
+  };
+
+  // get joined games by user
+  async getUserByUsername(username) {
+    try {
+      const result = await gameRepository.getFilteredList({ 'players.username': { $eq: username }});
+      if (!result || result.length === 0) {
+        return null;
+      }
+
+      const user = result[0].players.find(a => a.username === username);
+      return user;
     } catch (error) {
       return this.handleError(error);
     }
@@ -197,6 +240,12 @@ class GameService extends BaseService {
     if (isPlayerOnThisTeam) {
       console.log('game:join failed as user ' + data.username + ' is already in team ' + team.teamId);
       return { error: 'game:join failed as user ' + data.username + ' is already in team ' + team.teamId };
+    }
+
+    const isAvatarInUseInTeam = isAvatarInUse(team, data.avatarId);
+    if (isAvatarInUseInTeam) {
+      console.log('game:join failed as user ' + data.avatarId + ' is already in use ');
+      return { error: 'game:join failed as user ' + data.avatarId + ' is already in use' };
     }
 
     if (_.isNil(game.players)) {

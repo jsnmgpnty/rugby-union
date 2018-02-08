@@ -83,7 +83,7 @@ class Join extends Component {
 
 	signInUser = (isCreatingGame) => {
 		const { username } = this.state;
-		this.setState({ isLoading: true, username, isCreatingGame }, onUserCreate(username));
+		this.setState({ isLoading: true, username, isCreatingGame }, onUserCreate(username, false));
 	}
 
 	render() {

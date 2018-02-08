@@ -42,7 +42,7 @@ const getProfilePic = (avatar) => {
 function TeamPlayer(props) {
   return (
     <div id={`team-player_${getTeamPlayerId(props.avatar)}`} className="team-player">
-      <a onClick={() => props.onJoin(props.username, props.teamId, props.avatar.playerId)}>
+      <a onClick={() => props.onJoin(props.teamId, props.avatar.playerId)}>
         <div className="team-player__avatar">
           <span className="team-player__avatar-pic" style={getProfilePic(props.avatar)} />
         </div>

@@ -42,12 +42,21 @@ io.on('connection', (socket) => {
   // once connected, we emit to client that they are connected (server only communication)
   socket.emit('connected', { message: 'You are connected to Rugby Union! Whooooo!' });
 
-  socket.on('user:create', (data) => {
+  socket.on('user:create', async (data) => {
     if (data && data.userId && data.username) {
+      if (!data.isReturningUser) {
+        const user = await gameService.getUserByUsername(data.username);
+        console.log(user);
+        
+        if (user) {
+          socket.emit('user:created', { error: 'Username is already in use' });
+          return;
+        }
+      }
+
       socket.user = data;
       socket.join(data.userId);
       socket.emit('user:created', data);
-      socket.broadcast.emit('user:created', data);
     } else {
       socket.emit('user:created', { error: 'Failed to sign in your username. Please try again.' });
     }
@@ -110,12 +119,14 @@ io.on('connection', (socket) => {
 
       if (!gameLeaveResult.error) {
         socket.leave(gameLeaveResult.gameId);
+        socket.leave(gameLeaveResult.teamId);
         socket.currentGameId = null;
+        socket.currentTeamId = null;
 
-        io.to(joinGameResult.gameId).emit('game:leave', {
-          gameId: joinGameResult.gameId,
-          teamId: joinGameResult.teamId,
-          username: joinGameResult.username,
+        io.to(gameLeaveResult.gameId).emit('game:leave', {
+          gameId: gameLeaveResult.gameId,
+          teamId: gameLeaveResult.teamId,
+          username: gameLeaveResult.username,
         });
       }
     } catch (error) {

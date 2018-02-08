@@ -1,7 +1,7 @@
 const pageNames = {
   gameCreate: 'GAMECREATE',
   gameLobby: 'GAMELOBBY',
-  gameList: 'GAMELIST',
+  gamePrepare: 'GAMEPREPARE',
   gameDetails: 'GAMEDETAILS',
   join: 'JOIN',
 };

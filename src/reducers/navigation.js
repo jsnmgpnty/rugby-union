@@ -7,6 +7,8 @@ import {
   IS_GAME_WAITING_FOR_PLAYERS,
   IS_GAME_READY_TO_START,
   SET_CURRENT_PAGE,
+  SET_GAME_ID,
+  SET_PLAYER_AVATAR,
 } from 'lib/actionNames';
 
 const initialState = {
@@ -16,6 +18,8 @@ const initialState = {
   isGameWaitingForPlayers: false,
   isGameReadyToStart: false,
   currentPage: null,
+  gameId: null,
+  avatar: null,
 };
 
 const navigation = (state = initialState, action) => {
@@ -67,6 +71,10 @@ const navigation = (state = initialState, action) => {
       };
     case SET_CURRENT_PAGE:
       return { ...state, currentPage: action.payload };
+    case SET_GAME_ID:
+      return { ...state, gameId: action.payload };
+    case SET_PLAYER_AVATAR:
+      return { ...state, avatar: action.payload };
     default:
       return state;
   }

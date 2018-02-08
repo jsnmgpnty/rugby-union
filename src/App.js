@@ -8,7 +8,8 @@ import { reactLocalStorage } from 'reactjs-localstorage';
 import { setCountries } from 'actions/countries';
 import { setUser } from 'actions/user';
 import { onUserCreate, onUserCreated } from 'services/SocketClient';
-import { Navigator } from 'components';
+import gameApi from 'services/GameApi';
+import { Navigator, Spinner } from 'components';
 import { Join, GameCreate, GamePrepare, Lobby, GameDetails } from 'view';
 
 import './App.scss';
@@ -26,6 +27,10 @@ class App extends Component {
 
 	state = {
 		isConnectedToSocketServer: false,
+		user: null,
+		activeGame: null,
+		isBusy: false,
+		hasInitialized: false,
 	};
 
 	constructor(props) {
@@ -41,12 +46,22 @@ class App extends Component {
 
 	async componentDidMount() {
 		await this.getCountries();
+
+		const user = reactLocalStorage.getObject('user');
+		if (user && user.userId && user.username) {
+			const game = await gameApi.getLatestGameByUser(user.username);
+			if (game && game.gameId) {
+				this.setState({ activeGame: game });
+			}
+
+			this.setState({ hasInitialized: true });
+		}
 	}
 
 	async getCountries() {
 		try {
 			const countries = [
-				{ 
+				{
 					countryId: 1,
 					name: 'England',
 					players: [
@@ -239,20 +254,31 @@ class App extends Component {
 		}
 	}
 
-	isUserSignedIn = (RenderableComponent) => {
+	isUserSignedIn(RenderableComponent, skipGameCheck = true) {
 		const user = reactLocalStorage.getObject('user');
 		if (user && user.userId && user.username) {
-			onUserCreate(user.username);
-			return <RenderableComponent {...this.props.location} />
+			this.props.setUser(user);
+
+			if (!skipGameCheck) {
+				const { activeGame } = this.state;
+
+				if (activeGame && activeGame.status === 'PENDING') {
+					return <Redirect to={`/game/${activeGame.gameId}`} />;
+				}
+
+				return <Redirect to={`/game/${activeGame.gameId}/details`} />;
+			}
+
+			return <RenderableComponent {...this.props.location} />;
 		} else {
-			return <Redirect to="/join" />
+			return <Redirect to="/join" />;
 		}
 	}
 
-	isUserAlreadySignedIn = () => {
+	isUserAlreadySignedIn() {
 		const user = reactLocalStorage.getObject('user');
 		if (user && user.userId && user.username) {
-			onUserCreate(user.username);
+			this.props.setUser(user);
 			return <Redirect to="/" />
 		} else {
 			return <Join {...this.props.location} />
@@ -264,13 +290,16 @@ class App extends Component {
 			<div className="App">
 				<div className="rugby-main">
 					<div className="rugby-content">
-						<Switch>
-							<Route path="/" exact render={() => this.isUserSignedIn(Lobby)} />
-							<Route path="/create" exact render={() => this.isUserSignedIn(GameCreate)} />
-							<Route path="/join" exact component={() => this.isUserAlreadySignedIn()} />
-							<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GamePrepare)} />
-							<Route path="/game/:gameId/details" exact render={() => this.isUserSignedIn(GameDetails)} />
-						</Switch>
+						{
+							this.state.hasInitialized &&
+							<Switch>
+								<Route path="/" exact render={() => this.isUserSignedIn(Lobby, false)} />
+								<Route path="/create" exact render={() => this.isUserSignedIn(GameCreate, false)} />
+								<Route path="/join" exact component={() => this.isUserAlreadySignedIn()} />
+								<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GamePrepare)} />
+								<Route path="/game/:gameId/details" exact render={() => this.isUserSignedIn(GameDetails)} />
+							</Switch>
+						}
 					</div>
 					<div className="rugby-nav">
 						<Navigator />
