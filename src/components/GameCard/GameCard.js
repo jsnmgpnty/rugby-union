@@ -5,7 +5,7 @@ import { Country } from 'components';
 
 export default class GameCard extends PureComponent {
   static propTypes = {
-    gameId: PropTypes.string.isRequired,
+    game: PropTypes.object.isRequired,
     number: PropTypes.number.isRequired,
     home: PropTypes.object.isRequired,
     away: PropTypes.object.isRequired,
@@ -21,7 +21,7 @@ export default class GameCard extends PureComponent {
   render() {
     return (
       <div className="game-card">
-        <a onClick={() => this.props.onSelect(this.props.gameId)}>
+        <a onClick={() => this.props.onSelect(this.props.game)}>
           <div className="game-bg"></div>
           <div className={`game-details ${this.props.isSelected ? 'is-selected' : ''}`}>
             <span className="game-number">Game {this.props.number}</span>

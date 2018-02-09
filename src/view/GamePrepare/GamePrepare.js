@@ -8,16 +8,16 @@ import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
 import { onGameJoin, onGameJoined, onGameLeft, onGameStarted } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
-import { setCurrentPage, setGameId, isGameReadyToStart, isPageLoading } from 'actions/navigation';
+import { setCurrentPage, setGame, isGameReadyToStart, isPageLoading } from 'actions/navigation';
 import './GamePrepare.scss';
 
 const defaultNumberOfPlayersPerTeam = 5;
 
 const mapDispatchToProps = dispatch => ({
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gamePrepare)),
-  isGameReadyToStart: () => dispatch(isGameReadyToStart(true)),
+  isGameReadyToStart: (ready) => dispatch(isGameReadyToStart(ready)),
   isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
-  setGameId: (gameId) => dispatch(setGameId(gameId)),
+  setGame: (game) => dispatch(setGame(game)),
 });
 
 const mapStateToProps = state => ({
@@ -50,6 +50,7 @@ class GameLobby extends PureComponent {
     const { params } = this.props.match;
 
     setCurrentPage();
+    isGameReadyToStart(false);
     this.setState({ gameId: params.gameId });
     await this.getGame(params.gameId);
   }
@@ -78,7 +79,7 @@ class GameLobby extends PureComponent {
             break;
         }
         
-        this.props.setGameId(game.gameId);
+        this.props.setGame(game);
         this.setState({ game, isBusy: false }, this.isGameReady);
       }
     } catch (error) {
@@ -156,7 +157,7 @@ class GameLobby extends PureComponent {
     const secondTeamPlayers = game.teams[1].players ? game.teams[1].players.length : 0;
 
     if (firstTeamPlayers === defaultNumberOfPlayersPerTeam && secondTeamPlayers === defaultNumberOfPlayersPerTeam) {
-      isGameReadyToStart();
+      isGameReadyToStart(true);
     }
   };
 
