@@ -66,8 +66,8 @@ class Lobby extends PureComponent {
                 <GameCard
                   key={index}
                   home={game.teams[0].name}
-                  away={games.teams[1].name}
-                  playerCount={games.players.length}
+                  away={game.teams[1].name}
+                  playerCount={game.players.length}
                 />
               )
             }
