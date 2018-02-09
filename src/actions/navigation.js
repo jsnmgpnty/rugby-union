@@ -4,6 +4,7 @@ import {
   IS_DELETE_ENABLED_ON_LOBBY,
   IS_GAME_WAITING_FOR_PLAYERS,
   IS_GAME_READY_TO_START,
+  IS_PAGE_LOADING,
   SET_CURRENT_PAGE,
   SET_GAME_ID,
   SET_PLAYER_AVATAR,
@@ -19,6 +20,8 @@ const isGameWaitingForPlayers = (payload) => ({ type: IS_GAME_WAITING_FOR_PLAYER
 
 const isGameReadyToStart = (payload) => ({ type: IS_GAME_READY_TO_START, payload });
 
+const isPageLoading = (payload) => ({ type: IS_PAGE_LOADING, payload });
+
 const setCurrentPage = (payload) => ({ type: SET_CURRENT_PAGE, payload });
 
 const setGameId = (payload) => ({ type: SET_GAME_ID, payload });
@@ -31,6 +34,7 @@ export {
   isDeleteEnabledOnLobby,
   isGameWaitingForPlayers,
   isGameReadyToStart,
+  isPageLoading,
   setCurrentPage,
   setGameId,
   setPlayerAvatar,

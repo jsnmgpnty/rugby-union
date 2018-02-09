@@ -6,6 +6,7 @@ import {
   IS_DELETE_ENABLED_ON_LOBBY,
   IS_GAME_WAITING_FOR_PLAYERS,
   IS_GAME_READY_TO_START,
+  IS_PAGE_LOADING,
   SET_CURRENT_PAGE,
   SET_GAME_ID,
   SET_PLAYER_AVATAR,
@@ -17,6 +18,7 @@ const initialState = {
   isDeleteEnabledOnLobby: false,
   isGameWaitingForPlayers: false,
   isGameReadyToStart: false,
+  isPageLoading: false,
   currentPage: null,
   gameId: null,
   avatar: null,
@@ -59,6 +61,11 @@ const navigation = (state = initialState, action) => {
         isDeleteEnabledOnLobby: false,
         isGameWaitingForPlayers: action.payload,
         isGameReadyToStart: false,
+      };
+    case IS_PAGE_LOADING:
+      return {
+        ...state,
+        isPageLoading: action.payload,
       };
     case IS_GAME_READY_TO_START:
       return {

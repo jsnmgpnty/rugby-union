@@ -7,6 +7,7 @@ import TeamPlayer from './TeamPlayer';
 import './TeamSelector.scss';
 
 const propTypes = {
+  currentUser: PropTypes.string.isRequired,
   teamId: PropTypes.string.isRequired,
   country: PropTypes.shape({
     countryId: PropTypes.number.isRequired,
@@ -70,7 +71,7 @@ function TeamSelector(props) {
       <div className="team-selector__players">
         {
           players && players.length > 0 ?
-            players.map((player) => <TeamPlayer key={uuid()} username={player.username} avatar={player.avatar} teamId={props.teamId} onJoin={props.onJoin} />)
+            players.map((player) => <TeamPlayer key={uuid()} currentUser={props.currentUser} username={player.username} avatar={player.avatar} teamId={props.teamId} onJoin={props.onJoin} />)
             : <p>No players yet</p>
         }
       </div>

@@ -3,6 +3,24 @@
 .team-player {
   color: $white;
   transition: 0.5s;
+
+  &.is-active {
+    background: $blue;
+    color: $white;
+
+    .team-player__user {
+      .team-player__user-name {
+        &.player-taken {
+          color: $white;
+        }
+      }
+    }
+
+    @include active-element {
+      box-shadow: none;
+      background: darken($blue, 5%);
+    }
+  }
   
   &:nth-child(odd) {
     box-shadow: inset -0.5rem -0.25rem 4.5rem  0.1rem rgba($black, 0.75);

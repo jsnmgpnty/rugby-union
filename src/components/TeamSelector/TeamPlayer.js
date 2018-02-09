@@ -5,6 +5,7 @@ import uuid from 'uuid';
 import './TeamPlayer.scss';
 
 const propTypes = {
+  currentUser: PropTypes.string.isRequired,
   username: PropTypes.string,
   teamId: PropTypes.string.isRequired,
   avatar: PropTypes.shape({
@@ -37,11 +38,19 @@ const getProfilePic = (avatar) => {
     backgroundSize: 'cover',
   };
   return style;
-}
+};
+
+const isCurrentUser = (username, currentUser) => {
+  if (!currentUser || !username) {
+    return false;
+  }
+
+  return username === currentUser;
+};
 
 function TeamPlayer(props) {
   return (
-    <div id={`team-player_${getTeamPlayerId(props.avatar)}`} className="team-player">
+    <div id={`team-player_${getTeamPlayerId(props.avatar)}`} className={`team-player ${isCurrentUser(props.username, props.currentUser) ? 'is-active' : null}`}>
       <a onClick={() => props.onJoin(props.teamId, props.avatar.playerId)}>
         <div className="team-player__avatar">
           <span className="team-player__avatar-pic" style={getProfilePic(props.avatar)} />

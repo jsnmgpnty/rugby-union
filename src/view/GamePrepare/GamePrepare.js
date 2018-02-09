@@ -10,7 +10,7 @@ import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
 import { onGameJoin, onGameJoined, onGameLeft, onGameStarted } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
-import { setCurrentPage, isGameReadyToStart } from 'actions/navigation';
+import { setCurrentPage, setGameId, isGameReadyToStart, isPageLoading } from 'actions/navigation';
 import './GamePrepare.scss';
 
 const defaultNumberOfPlayersPerTeam = 5;
@@ -18,6 +18,8 @@ const defaultNumberOfPlayersPerTeam = 5;
 const mapDispatchToProps = dispatch => ({
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gamePrepare)),
   isGameReadyToStart: () => dispatch(isGameReadyToStart(true)),
+  isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
+  setGameId: (gameId) => dispatch(setGameId(gameId)),
 });
 
 const mapStateToProps = state => ({
@@ -40,7 +42,8 @@ class GameLobby extends PureComponent {
     isBusy: false,
     currentAvatarId: null,
     currentTeamId: null,
-    isGameStarting: false,
+    isGameStarted: false,
+    isGameCompleted: false,
   };
 
   async componentDidMount() {
@@ -62,7 +65,21 @@ class GameLobby extends PureComponent {
 
     try {
       const game = await gameApi.getGame(gameId);
+
       if (game) {
+        switch (game.status) {
+          case 'INPROGRESS':
+          case 'PAUSED':
+            this.setState({ isGameStarted: true });
+            break;
+          case 'COMPLETED':
+            this.setState({ isGameCompleted: true });
+            break;
+          default:
+            break;
+        }
+        
+        this.props.setGameId(game.gameId);
         this.setState({ game, isBusy: false }, this.isGameReady);
       }
     } catch (error) {
@@ -123,7 +140,8 @@ class GameLobby extends PureComponent {
 
   handleGameStarted = (data) => {
     if (!data.error) {
-      this.setState({ isGameStarting: true });
+      this.props.isPageLoading(false);
+      this.setState({ isGameStarted: true });
     }
   };
 
@@ -184,10 +202,11 @@ class GameLobby extends PureComponent {
       gameId,
       game,
       isBusy,
-      isGameStarting,
+      isGameStarted,
+      isGameCompleted,
     } = this.state;
 
-    const { countries } = this.props;
+    const { countries, user } = this.props;
 
     return (
       <div id={`game-prepare__${gameId}`} className="game-prepare__view">
@@ -204,6 +223,7 @@ class GameLobby extends PureComponent {
                     game.teams.map((team) => (
                       <div className="game-prepare__teams-item" key={team.teamId}>
                         <TeamSelector
+                          currentUser={user.username}
                           teamId={team.teamId}
                           players={team.players}
                           country={this.getCountry(team.countryId)}
@@ -217,7 +237,10 @@ class GameLobby extends PureComponent {
             ) : <p>No game found</p>
           }
           {
-            isGameStarting && <Redirect to={`/game/${gameId}/details`} />
+            isGameStarted && <Redirect to={`/game/${gameId}/details`} />
+          }
+          {
+            isGameCompleted && <Redirect to="/" />
           }
         </Spinner>
       </div>

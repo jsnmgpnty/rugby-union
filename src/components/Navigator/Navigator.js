@@ -6,8 +6,9 @@ import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
 import { reactLocalStorage } from 'reactjs-localstorage';
 
+import { isPageLoading } from 'actions/navigation';
 import pageNames from 'lib/pageNames';
-import { onGameLeave } from 'services/SocketClient';
+import { onGameLeave, onGameStart } from 'services/SocketClient';
 import './Navigator.scss';
 
 const mapStateToProps = (state) => ({
@@ -22,7 +23,15 @@ const mapStateToProps = (state) => ({
   user: state.user,
 });
 
+const mapDispatchToProps = dispatch => ({
+  isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
+});
+
 class Navigator extends Component {
+  state = {
+    goToGameStart: false,
+  };
+
   getBackButtonStyle = () => {
     const { currentPage } = this.props;
     return currentPage === pageNames.join ? 'disabled-link' : null;
@@ -48,6 +57,18 @@ class Navigator extends Component {
     }
   };
 
+  onGameStart = () => {
+    const {
+      gameId,
+      isPageLoading,
+    } = this.props;
+
+    isPageLoading(true);
+
+    const requestPayload = { gameId };
+    onGameStart(requestPayload);
+  };
+
   render() {
     const {
       isCreatingGame,
@@ -57,7 +78,12 @@ class Navigator extends Component {
       isGameWaitingForPlayers,
       isGameReadyToStart,
       currentPage,
+      gameId,
     } = this.props;
+
+    const {
+      goToGameStart,
+    } = this.state;
 
     return (
       <div id='rugby-navigator'>
@@ -96,16 +122,19 @@ class Navigator extends Component {
           }
           {
             currentPage === pageNames.gamePrepare &&
-            <Button className="btn-join" color="primary" disabled={!isGameReadyToStart}>
+            <Button className="btn-join" onClick={this.onGameStart} color="primary" disabled={!isGameReadyToStart}>
               <span className="start" />
               <span className="btn-text-content">Start</span>
             </Button>
           }
         </div>
+        {
+          goToGameStart && <Redirect to={`/game/${gameId}/details`} />
+        }
       </div>
     )
   }
 }
 
-export default withRouter(connect(mapStateToProps)(Navigator));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Navigator));
 export { Navigator as PlainNavigator };

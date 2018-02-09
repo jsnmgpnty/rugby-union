@@ -7,6 +7,7 @@ import { reactLocalStorage } from 'reactjs-localstorage';
 
 import { setCountries } from 'actions/countries';
 import { setUser } from 'actions/user';
+import { setGameId } from 'actions/navigation';
 import { onUserCreate, onUserCreated } from 'services/SocketClient';
 import gameApi from 'services/GameApi';
 import { Navigator, Spinner } from 'components';
@@ -17,6 +18,12 @@ import './App.scss';
 const mapDispatchToProps = dispatch => ({
 	setCountries: countries => dispatch(setCountries(countries)),
 	setUser: user => dispatch(setUser(user)),
+	setGameId: gameId => dispatch(setGameId(gameId)),
+});
+
+const mapStateToProps = state => ({
+	isPageLoading: state.navigation.isPageLoading,
+	gameId: state.navigation.gameId,
 });
 
 class App extends Component {
@@ -51,12 +58,10 @@ class App extends Component {
 		if (user && user.userId && user.username) {
 			const game = await gameApi.getLatestGameByUser(user.username);
 			if (game && game.gameId) {
-				this.setState({ activeGame: game });
+				this.props.setGameId(game.gameId);
 			}
-
-			this.setState({ hasInitialized: true });
 		}
-		
+
 		this.setState({ hasInitialized: true });
 	}
 
@@ -262,13 +267,11 @@ class App extends Component {
 			this.props.setUser(user);
 
 			if (!skipGameCheck) {
-				const { activeGame } = this.state;
+				const { gameId } = this.props;
 
-				if (activeGame && activeGame.status === 'PENDING') {
-					return <Redirect to={`/game/${activeGame.gameId}`} />;
+				if (gameId) {
+					<Redirect to={`/game/${gameId}`} />;
 				}
-
-				return <Redirect to={`/game/${activeGame.gameId}/details`} />;
 			}
 
 			return <RenderableComponent {...this.props.location} />;
@@ -288,20 +291,26 @@ class App extends Component {
 	}
 
 	render() {
+		const {
+			isPageLoading,
+		} = this.props;
+
 		return (
 			<div className="App">
 				<div className="rugby-main">
 					<div className="rugby-content">
-						{
-							this.state.hasInitialized &&
-							<Switch>
-								<Route path="/" exact render={() => this.isUserSignedIn(Lobby, false)} />
-								<Route path="/create" exact render={() => this.isUserSignedIn(GameCreate, false)} />
-								<Route path="/join" exact component={() => this.isUserAlreadySignedIn()} />
-								<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GamePrepare)} />
-								<Route path="/game/:gameId/details" exact render={() => this.isUserSignedIn(GameDetails)} />
-							</Switch>
-						}
+						<Spinner isLoading={isPageLoading}>
+							{
+								this.state.hasInitialized &&
+								<Switch>
+									<Route path="/" exact render={() => this.isUserSignedIn(Lobby, false)} />
+									<Route path="/create" exact render={() => this.isUserSignedIn(GameCreate, false)} />
+									<Route path="/join" exact component={() => this.isUserAlreadySignedIn()} />
+									<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GamePrepare)} />
+									<Route path="/game/:gameId/details" exact render={() => this.isUserSignedIn(GameDetails)} />
+								</Switch>
+							}
+						</Spinner>
 					</div>
 					<div className="rugby-nav">
 						<Navigator />
@@ -312,5 +321,5 @@ class App extends Component {
 	}
 }
 
-export default withRouter(connect(null, mapDispatchToProps)(App));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));
 export { App as PlainApp };

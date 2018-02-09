@@ -5,31 +5,74 @@ import { Link, withRouter } from 'react-router-dom';
 
 import './Lobby.scss';
 import pageNames from 'lib/pageNames';
-import { setCurrentPage } from 'actions/navigation';
+import gameApi from 'services/GameApi';
+import { setCurrentPage, setGameId, isGameSelectedOnLobby } from 'actions/navigation';
 import LobbyHeader from './LobbyHeader';
-import { GameCard } from 'components';
+import { GameCard, Spinner } from 'components';
 
 const mapDispatchToProps = dispatch => ({
-	setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameLobby)),
+  setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameLobby)),
+  setGameId: (gameId) => dispatch(setGameId(gameId)),
 });
 
 class Lobby extends PureComponent {
-  componentDidMount() {
+  async componentDidMount() {
     const {
-			setCurrentPage,
+      setCurrentPage,
+      setGameId,
 		} = this.props;
 
-		setCurrentPage();
+    setCurrentPage();
+    setGameId(null);
+    await this.getActiveGames();
   }
-  
+
+  state = {
+    isBusy: false,
+    games: [],
+  };
+
+  async getActiveGames() {
+    const { isBusy } = this.state;
+    if (isBusy) {
+      return;
+    }
+
+    this.setState({ isBusy: true });
+
+    try {
+      const games = await gameApi.getGames();
+      this.setState({ games, isBusy: false });
+    } catch (error) {
+      this.setState({ isBusy: false });
+      console.log(error);
+    }
+  }
+
+  onGameSelect = (gameId) => {
+    this.props.setGameId(gameId);
+  }
+
   render() {
+    const { games, isBusy } = this.state;
+
     return (
       <div className="lobby">
         <LobbyHeader />
-        <div className="game-list">
-          <GameCard number={1} home="England" away="Scotland" playerCount={6} />
-          <GameCard number={2} home="England" away="Scotland" playerCount={11} />
-        </div>
+        <Spinner isLoading={isBusy}>
+          <div className="game-list">
+            {
+              games && games.length > 0 && games.map((game, index) =>
+                <GameCard
+                  key={index}
+                  home={game.teams[0].name}
+                  away={games.teams[1].name}
+                  playerCount={games.players.length}
+                />
+              )
+            }
+          </div>
+        </Spinner>
       </div>
     );
   }
