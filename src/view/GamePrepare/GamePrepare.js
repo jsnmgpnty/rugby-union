@@ -2,9 +2,7 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router';
 import { withRouter } from 'react-router-dom';
-import { Row, Col } from 'reactstrap';
 import { remove } from 'lodash';
-import uuid from 'uuid';
 
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
@@ -44,10 +42,11 @@ class GameLobby extends PureComponent {
     currentTeamId: null,
     isGameStarted: false,
     isGameCompleted: false,
+    goToLobby: false,
   };
 
   async componentDidMount() {
-    const { user, setCurrentPage } = this.props;
+    const { setCurrentPage } = this.props;
     const { params } = this.props.match;
 
     setCurrentPage();
@@ -136,6 +135,10 @@ class GameLobby extends PureComponent {
         return player.username === data.username;
       });
     });
+
+    if (data.username === this.props.user.username) {
+      this.setState({ goToLobby: true });
+    }
   };
 
   handleGameStarted = (data) => {
@@ -158,7 +161,7 @@ class GameLobby extends PureComponent {
   };
 
   joinGame = (teamId, avatarId) => {
-    const { game, currentAvatarId, currentTeamId } = this.state;
+    const { game } = this.state;
     const { user } = this.props;
 
     let isAvatarInUse = false;
@@ -204,6 +207,7 @@ class GameLobby extends PureComponent {
       isBusy,
       isGameStarted,
       isGameCompleted,
+      goToLobby,
     } = this.state;
 
     const { countries, user } = this.props;
@@ -240,7 +244,7 @@ class GameLobby extends PureComponent {
             isGameStarted && <Redirect to={`/game/${gameId}/details`} />
           }
           {
-            isGameCompleted && <Redirect to="/" />
+            (isGameCompleted || goToLobby) && <Redirect to="/" />
           }
         </Spinner>
       </div>

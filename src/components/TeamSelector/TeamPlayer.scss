@@ -8,6 +8,10 @@
     background: $blue;
     color: $white;
 
+    &:nth-child(odd) {
+      box-shadow: none;
+    }
+
     .team-player__user {
       .team-player__user-name {
         &.player-taken {
