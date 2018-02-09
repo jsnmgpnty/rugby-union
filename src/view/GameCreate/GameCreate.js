@@ -49,6 +49,29 @@ class GameCreate extends Component {
 		else
 			return '';
 	}
+	
+	displayTeamLabal(countryID){
+		const countriesSelected = this.state.rules;
+		
+		if(countriesSelected[0] === countryID){
+			return (
+				<span>
+				Team 
+				<label> A </label>
+				</span>
+			)
+		}
+		if (countriesSelected[1] === countryID){
+			return (
+				<span>
+				Team 
+				<label> B </label>
+				</span>
+			)
+		}
+		else
+			return ' ';
+	}
 
 	componentDidMount () {
 		const {
@@ -73,6 +96,9 @@ class GameCreate extends Component {
 							<div className={`team-div ${country.name}_off ${this.isCountryActive(country)}`} onClick={() => this.addNewRow(country.countryId)}>
 								<label className="team-name">{country.name}</label>
 								<img src={require('../../assets/teams/'+ country.name +'_icon.png')} />
+								<div className="team-label">
+									{this.displayTeamLabal(country.countryId)}
+								</div>
 							</div>
 							)
 						}
