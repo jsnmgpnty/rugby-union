@@ -1,5 +1,6 @@
 export const SET_COUNTRIES = 'SET_COUNTRIES';
 export const SET_USER = 'SET_USER';
+export const SET_TEAMS = 'SET_TEAMS';
 
 // navigation actions
 export const IS_TEAMS_SELECTED_ON_GAME_CREATE = 'IS_TEAMS_SELECTED_ON_GAME_CREATE';

@@ -6,7 +6,7 @@ import { Badge, Form, Col, Row, Button, UncontrolledButtonDropdown, DropdownTogg
 
 import './GameCreate.scss';
 import pageNames from 'lib/pageNames';
-import { setCurrentPage } from 'actions/navigation';
+import { setCurrentPage, isTeamsSelectedOnGameCreate } from 'actions/navigation';
 
 const mapStateToProps = state => ({
 	countries: state.countries,
@@ -15,6 +15,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
 	setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameCreate)),
+	isTeamsSelectedOnGameCreate: (isSelected) => dispatch(isTeamsSelectedOnGameCreate(isSelected)),
 });
 
 class GameCreate extends Component {
@@ -32,13 +33,18 @@ class GameCreate extends Component {
     }
 	
 	addNewRow(e){
-		if(this.state.rules.length > 1){
-			this.state.rules.shift();
+		const rules = this.state.rules;
+		
+		if(rules.length > 1){
+			rules.shift();
 		}
 		
-		const updated = this.state.rules.slice(0,2);
+		const updated = rules.slice(0,2);
 		updated.push(e);
-		this.setState({rules:updated});
+		if(updated.length === 2)
+			this.props.isTeamsSelectedOnGameCreate(true);
+		
+		this.setState({ rules: updated });
 	}
 	
 	isCountryActive(country){
@@ -48,6 +54,29 @@ class GameCreate extends Component {
 		}
 		else
 			return '';
+	}
+	
+	displayTeamLabal(countryID){
+		const countriesSelected = this.state.rules;
+		
+		if(countriesSelected[0] === countryID){
+			return (
+				<span>
+				Team 
+				<label> A </label>
+				</span>
+			)
+		}
+		if (countriesSelected[1] === countryID){
+			return (
+				<span>
+				Team 
+				<label> B </label>
+				</span>
+			)
+		}
+		else
+			return ' ';
 	}
 
 	componentDidMount () {
@@ -73,6 +102,9 @@ class GameCreate extends Component {
 							<div className={`team-div ${country.name}_off ${this.isCountryActive(country)}`} onClick={() => this.addNewRow(country.countryId)}>
 								<label className="team-name">{country.name}</label>
 								<img src={require('../../assets/teams/'+ country.name +'_icon.png')} />
+								<div className="team-label">
+									{this.displayTeamLabal(country.countryId)}
+								</div>
 							</div>
 							)
 						}
