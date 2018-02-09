@@ -1,15 +1,15 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import './BoundedCountry.scss';
+import './Country.scss';
 
-export default class Country extends PureComponent {
-  static propTypes = {
+const propTypes = {
+  country: PropTypes.object,
+};
 
-  };
-
-  render() {
-    return (
-      <div className="country"></div>
-    );
-  }
+function Country(props) {
+  return <div className={`country ${props.country.name.toLowerCase()}`}></div>;
 }
+
+Country.propTypes = propTypes;
+
+export default Country;

@@ -7,10 +7,15 @@ export default class GameCard extends PureComponent {
   static propTypes = {
     gameId: PropTypes.string.isRequired,
     number: PropTypes.number.isRequired,
-    home: PropTypes.string.isRequired,
-    away: PropTypes.string.isRequired,
+    home: PropTypes.object.isRequired,
+    away: PropTypes.object.isRequired,
     playerCount: PropTypes.number.isRequired,
     onSelect: PropTypes.func.isRequired,
+    isSelected: PropTypes.bool,
+  };
+
+  static defaultProps ={
+    isSelected: false,
   };
 
   render() {
@@ -18,15 +23,15 @@ export default class GameCard extends PureComponent {
       <div className="game-card">
         <a onClick={() => this.props.onSelect(this.props.gameId)}>
           <div className="game-bg"></div>
-          <div className="game-details">
+          <div className={`game-details ${this.props.isSelected ? 'is-selected' : ''}`}>
             <span className="game-number">Game {this.props.number}</span>
-            <span className="game-matchup caps">{this.props.home} vs {this.props.away}</span>
-            <span className="player-requirements">{this.props.playerCount} Players Inside (Minimum 12 players)</span>
+            <span className="game-matchup caps">{this.props.home.name} vs {this.props.away.name}</span>
+            <span className="player-requirements">{this.props.playerCount} Players Inside</span>
           </div>
           <div className="game-countries">
-            <Country />
+            <Country country={this.props.home} />
             <span className="game-vs">vs</span>
-            <Country />
+            <Country country={this.props.away} />
           </div>
         </a>
       </div>

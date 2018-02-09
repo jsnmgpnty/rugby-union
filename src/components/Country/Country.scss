@@ -1,0 +1,32 @@
+@import '../../variables';
+
+.country {
+  background-size: cover;
+  height: 60px;
+  background-position: center;
+  width: 60px;
+
+  &.england {
+    background-image: url('../../assets/england_icon.png');
+  }
+  
+  &.france {
+    background-image: url('../../assets/france_icon.png');
+  }
+  
+  &.italy {
+    background-image: url('../../assets/italy_icon.png');
+  }
+  
+  &.wales {
+    background-image: url('../../assets/wales_icon.png');
+  }
+  
+  &.scotland {
+    background-image: url('../../assets/scotland_icon.png');
+  }
+  
+  &.ireland {
+    background-image: url('../../assets/ireland_icon.png');
+  }
+}

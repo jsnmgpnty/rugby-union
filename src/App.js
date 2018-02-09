@@ -56,10 +56,7 @@ class App extends Component {
 
 		const user = reactLocalStorage.getObject('user');
 		if (user && user.userId && user.username) {
-			const game = await gameApi.getLatestGameByUser(user.username);
-			if (game && game.gameId) {
-				this.props.setGameId(game.gameId);
-			}
+			this.props.setUser(user);
 		}
 
 		this.setState({ hasInitialized: true });
@@ -261,19 +258,10 @@ class App extends Component {
 		}
 	}
 
-	isUserSignedIn(RenderableComponent, skipGameCheck = true) {
+	isUserSignedIn(RenderableComponent) {
 		const user = reactLocalStorage.getObject('user');
 		if (user && user.userId && user.username) {
 			this.props.setUser(user);
-
-			if (!skipGameCheck) {
-				const { gameId } = this.props;
-
-				if (gameId) {
-					<Redirect to={`/game/${gameId}`} />;
-				}
-			}
-
 			return <RenderableComponent {...this.props.location} />;
 		} else {
 			return <Redirect to="/join" />;
@@ -303,8 +291,8 @@ class App extends Component {
 							{
 								this.state.hasInitialized &&
 								<Switch>
-									<Route path="/" exact render={() => this.isUserSignedIn(Lobby, false)} />
-									<Route path="/create" exact render={() => this.isUserSignedIn(GameCreate, false)} />
+									<Route path="/" exact render={() => this.isUserSignedIn(Lobby)} />
+									<Route path="/create" exact render={() => this.isUserSignedIn(GameCreate)} />
 									<Route path="/join" exact component={() => this.isUserAlreadySignedIn()} />
 									<Route path="/game/:gameId" exact render={() => this.isUserSignedIn(GamePrepare)} />
 									<Route path="/game/:gameId/details" exact render={() => this.isUserSignedIn(GameDetails)} />

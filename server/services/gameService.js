@@ -464,7 +464,7 @@ class GameService extends BaseService {
     try {
       await gameRepository.save(game);
       const savedGame = await gameRepository.getItem({ gameId: data.gameId });
-      return { gameId: savedGame.gameId, teamId: team.teamId, username: data.username };
+      return { gameId: savedGame.gameId, teamId: data.teamId, username: data.username };
     } catch (error) {
       return this.handleError(error);
     }

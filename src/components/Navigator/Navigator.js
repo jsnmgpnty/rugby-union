@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
 import { reactLocalStorage } from 'reactjs-localstorage';
 
-import { isPageLoading } from 'actions/navigation';
+import { isPageLoading, setGameId } from 'actions/navigation';
 import pageNames from 'lib/pageNames';
 import { onGameLeave, onGameStart } from 'services/SocketClient';
 import './Navigator.scss';
@@ -25,11 +25,13 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = dispatch => ({
   isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
+  setGameId: (gameId) => dispatch(setGameId(gameId)),
 });
 
 class Navigator extends Component {
   state = {
-    goToGameStart: false,
+    goToGamePrepare: false,
+    goToLobby: false,
   };
 
   getBackButtonStyle = () => {
@@ -38,7 +40,7 @@ class Navigator extends Component {
   };
 
   getBackButtonLink = () => {
-    const { currentPage } = this.props;
+    const { currentPage, setGameId } = this.props;
     return currentPage === pageNames.gameLobby ? '/join' : '/';
   };
 
@@ -69,6 +71,10 @@ class Navigator extends Component {
     onGameStart(requestPayload);
   };
 
+  onGameJoin = () => {
+    this.setState({ goToGamePrepare: true, goToLobby: false });
+  }
+
   render() {
     const {
       isCreatingGame,
@@ -82,7 +88,8 @@ class Navigator extends Component {
     } = this.props;
 
     const {
-      goToGameStart,
+      goToGamePrepare,
+      goToLobby,
     } = this.state;
 
     return (
@@ -90,12 +97,10 @@ class Navigator extends Component {
         <div className='rugby-navigator__top'>
           {
             currentPage !== pageNames.join &&
-            <Link to={this.getBackButtonLink()} className={this.getBackButtonStyle()}>
-              <Button color="info" onClick={this.onBackButtonClick}>
-                <span className="back" />
-                <span className="btn-text-content">Back</span>
-              </Button>
-            </Link>
+            <Button color="info" onClick={this.onBackButtonClick} className={this.getBackButtonStyle()}>
+              <span className="back" />
+              <span className="btn-text-content">Back</span>
+            </Button>
           }
         </div>
         <div className='rugby-navigator__bottom'>
@@ -106,8 +111,8 @@ class Navigator extends Component {
               <span className="btn-text-content">Create</span>
             </Button>
           }
-          {
-            currentPage === pageNames.gameLobby &&
+          { // disable view for now
+            currentPage === pageNames.gameLobby && false &&
             <Button className="btn-view" color="success" disabled={!isGameSelectedOnLobby}>
               <span className="view" />
               <span className="btn-text-content">View</span>
@@ -115,7 +120,7 @@ class Navigator extends Component {
           }
           {
             currentPage === pageNames.gameLobby &&
-            <Button className="btn-join" color="primary" disabled={!isGameSelectedOnLobby}>
+            <Button className="btn-join" onClick={this.onGameJoin} color="primary" disabled={!isGameSelectedOnLobby}>
               <span className="join" />
               <span className="btn-text-content">Join</span>
             </Button>
@@ -129,7 +134,10 @@ class Navigator extends Component {
           }
         </div>
         {
-          goToGameStart && <Redirect to={`/game/${gameId}/details`} />
+          goToGamePrepare && gameId && <Redirect to={`/game/${gameId}`} />
+        }
+        {
+          goToLobby && <Redirect to="/" />
         }
       </div>
     )

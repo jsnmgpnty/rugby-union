@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Link, withRouter } from 'react-router-dom';
+import { Redirect } from 'react-router';
+import { withRouter } from 'react-router-dom';
 
 import './Lobby.scss';
 import pageNames from 'lib/pageNames';
@@ -13,24 +13,44 @@ import { GameCard, Spinner } from 'components';
 const mapDispatchToProps = dispatch => ({
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameLobby)),
   setGameId: (gameId) => dispatch(setGameId(gameId)),
+  isGameSelectedOnLobby: (isSelected) => dispatch(isGameSelectedOnLobby(isSelected)),
+});
+
+const mapStateToProps = state => ({
+  countries: state.countries,
+  gameId: state.navigation.gameId,
+  user: state.user,
 });
 
 class Lobby extends PureComponent {
   async componentDidMount() {
-    const {
-      setCurrentPage,
-      setGameId,
-		} = this.props;
-
-    setCurrentPage();
-    setGameId(null);
-    await this.getActiveGames();
+    this.props.setCurrentPage(pageNames.gamePrepare);
+    await this.getCurrentGameByUser();
   }
 
   state = {
     isBusy: false,
     games: [],
+    selectedGameId: null,
+    activeGameId: null,
   };
+
+  async getCurrentGameByUser() {
+    const { user } = this.props;
+
+    try {
+      const game = await gameApi.getLatestGameByUser(user.username);
+      if (game && game.gameId) {
+        this.props.setGameId(game.gameId);
+        this.setState({ activeGameId: game.gameId });
+      } else {
+        setCurrentPage();
+        await this.getActiveGames();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async getActiveGames() {
     const { isBusy } = this.state;
@@ -50,11 +70,18 @@ class Lobby extends PureComponent {
   }
 
   onGameSelect = (gameId) => {
+    this.setState({ selectedGameId: gameId });
     this.props.setGameId(gameId);
+    this.props.isGameSelectedOnLobby(true);
+  }
+
+  getCountryByTeam = (team) => {
+    const country = this.props.countries.find(a => a.countryId === team.countryId);
+    return country ? country : { name: 'N/A' };
   }
 
   render() {
-    const { games, isBusy } = this.state;
+    const { games, isBusy, selectedGameId, activeGameId } = this.state;
 
     return (
       <div className="lobby">
@@ -65,17 +92,24 @@ class Lobby extends PureComponent {
               games && games.length > 0 && games.map((game, index) =>
                 <GameCard
                   key={index}
-                  home={game.teams[0].name}
-                  away={game.teams[1].name}
+                  number={index + 1}
+                  gameId={game.gameId}
+                  home={this.getCountryByTeam(game.teams[0])}
+                  away={this.getCountryByTeam(game.teams[1])}
                   playerCount={game.players.length}
+                  onSelect={this.onGameSelect}
+                  isSelected={selectedGameId === game.gameId}
                 />
               )
             }
           </div>
         </Spinner>
+        {
+          activeGameId && <Redirect to={`/game/${activeGameId}`} />
+        }
       </div>
     );
   }
 }
 
-export default withRouter(connect(null, mapDispatchToProps)(Lobby));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Lobby));

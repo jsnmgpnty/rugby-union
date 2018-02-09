@@ -118,8 +118,6 @@ io.on('connection', (socket) => {
       const gameLeaveResult = await gameService.leaveGame(request);
 
       if (!gameLeaveResult.error) {
-        socket.leave(gameLeaveResult.gameId);
-        socket.leave(gameLeaveResult.teamId);
         socket.currentGameId = null;
         socket.currentTeamId = null;
 
@@ -128,6 +126,8 @@ io.on('connection', (socket) => {
           teamId: gameLeaveResult.teamId,
           username: gameLeaveResult.username,
         });
+        socket.leave(gameLeaveResult.gameId);
+        socket.leave(gameLeaveResult.teamId);
       }
     } catch (error) {
       console.log(error);

@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'reactstrap';
 import uuid from 'uuid';
 
 import TeamPlayer from './TeamPlayer';
@@ -66,7 +65,7 @@ function TeamSelector(props) {
   return (
     <div id={'team-selector_' + props.teamId} className="team-selector">
       <div className="team-selector__logo">
-        <a onClick={() => props.onJoin(props.teamId)} className={`team-selector__logo-country ${getCountryLogo(props.country)}`} />
+        <div className={`team-selector__logo-country ${getCountryLogo(props.country)}`} />
       </div>
       <div className="team-selector__players">
         {
