@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
 import { reactLocalStorage } from 'reactjs-localstorage';
 
-import { isPageLoading, setGameId } from 'actions/navigation';
+import { isPageLoading, setGame } from 'actions/navigation';
 import pageNames from 'lib/pageNames';
 import { onGameLeave, onGameStart } from 'services/SocketClient';
 import './Navigator.scss';
@@ -19,19 +19,20 @@ const mapStateToProps = (state) => ({
   isGameWaitingForPlayers: state.navigation.isGameWaitingForPlayers,
   isGameReadyToStart: state.navigation.isGameReadyToStart,
   currentPage: state.navigation.currentPage,
-  gameId: state.navigation.gameId,
+  game: state.navigation.game,
   user: state.user,
 });
 
 const mapDispatchToProps = dispatch => ({
   isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
-  setGameId: (gameId) => dispatch(setGameId(gameId)),
+  setGame: (game) => dispatch(setGame(game)),
 });
 
 class Navigator extends Component {
   state = {
     goToGamePrepare: false,
     goToLobby: false,
+    goToJoin: false,
   };
 
   getBackButtonStyle = () => {
@@ -40,39 +41,40 @@ class Navigator extends Component {
   };
 
   getBackButtonLink = () => {
-    const { currentPage, setGameId } = this.props;
+    const { currentPage } = this.props;
     return currentPage === pageNames.gameLobby ? '/join' : '/';
   };
 
   onBackButtonClick = () => {
-    const { currentPage, gameId, user } = this.props;
+    const { currentPage, game, user } = this.props;
 
     if (currentPage === pageNames.gameLobby) {
       reactLocalStorage.setObject('user', null);
+      this.setState({ goToJoin: true, goToGamePrepare: false, goToLobby: false });
     }
 
     if (currentPage === pageNames.gamePrepare) {
       onGameLeave({
         username: user.username,
-        gameId: gameId,
+        gameId: game.gameId,
       });
     }
   };
 
   onGameStart = () => {
     const {
-      gameId,
+      game,
       isPageLoading,
     } = this.props;
 
     isPageLoading(true);
 
-    const requestPayload = { gameId };
+    const requestPayload = { gameId: game.gameId };
     onGameStart(requestPayload);
   };
 
   onGameJoin = () => {
-    this.setState({ goToGamePrepare: true, goToLobby: false });
+    this.setState({ goToGamePrepare: true, goToLobby: false, goToJoin: false });
   }
 
   render() {
@@ -84,12 +86,14 @@ class Navigator extends Component {
       isGameWaitingForPlayers,
       isGameReadyToStart,
       currentPage,
-      gameId,
+      game,
+      user,
     } = this.props;
 
     const {
       goToGamePrepare,
       goToLobby,
+      goToJoin,
     } = this.state;
 
     return (
@@ -127,17 +131,20 @@ class Navigator extends Component {
           }
           {
             currentPage === pageNames.gamePrepare &&
-            <Button className="btn-join" onClick={this.onGameStart} color="primary" disabled={!isGameReadyToStart}>
+            <Button className="btn-join" onClick={this.onGameStart} color="primary" disabled={!isGameReadyToStart || user.username !== game.createdBy}>
               <span className="start" />
               <span className="btn-text-content">Start</span>
             </Button>
           }
         </div>
         {
-          goToGamePrepare && gameId && <Redirect to={`/game/${gameId}`} />
+          goToGamePrepare && (game && game.gameId) && <Redirect to={`/game/${game.gameId}`} />
         }
         {
           goToLobby && <Redirect to="/" />
+        }
+        {
+          goToJoin && <Redirect to="/join" />
         }
       </div>
     )

@@ -6,25 +6,26 @@ import { withRouter } from 'react-router-dom';
 import './Lobby.scss';
 import pageNames from 'lib/pageNames';
 import gameApi from 'services/GameApi';
-import { setCurrentPage, setGameId, isGameSelectedOnLobby } from 'actions/navigation';
+import { setCurrentPage, setGame, isGameSelectedOnLobby } from 'actions/navigation';
 import LobbyHeader from './LobbyHeader';
 import { GameCard, Spinner } from 'components';
 
 const mapDispatchToProps = dispatch => ({
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameLobby)),
-  setGameId: (gameId) => dispatch(setGameId(gameId)),
+  setGame: (game) => dispatch(setGame(game)),
   isGameSelectedOnLobby: (isSelected) => dispatch(isGameSelectedOnLobby(isSelected)),
 });
 
 const mapStateToProps = state => ({
   countries: state.countries,
-  gameId: state.navigation.gameId,
+  game: state.navigation.game,
   user: state.user,
 });
 
 class Lobby extends PureComponent {
   async componentDidMount() {
     this.props.setCurrentPage(pageNames.gamePrepare);
+    this.props.setGame(null);
     await this.getCurrentGameByUser();
   }
 
@@ -41,7 +42,7 @@ class Lobby extends PureComponent {
     try {
       const game = await gameApi.getLatestGameByUser(user.username);
       if (game && game.gameId) {
-        this.props.setGameId(game.gameId);
+        this.props.setGame(game);
         this.setState({ activeGameId: game.gameId });
       } else {
         setCurrentPage();
@@ -69,9 +70,9 @@ class Lobby extends PureComponent {
     }
   }
 
-  onGameSelect = (gameId) => {
-    this.setState({ selectedGameId: gameId });
-    this.props.setGameId(gameId);
+  onGameSelect = (game) => {
+    this.setState({ selectedGameId: game.gameId });
+    this.props.setGame(game);
     this.props.isGameSelectedOnLobby(true);
   }
 
@@ -93,7 +94,7 @@ class Lobby extends PureComponent {
                 <GameCard
                   key={index}
                   number={index + 1}
-                  gameId={game.gameId}
+                  game={game}
                   home={this.getCountryByTeam(game.teams[0])}
                   away={this.getCountryByTeam(game.teams[1])}
                   playerCount={game.players.length}

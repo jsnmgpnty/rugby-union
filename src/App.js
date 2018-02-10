@@ -7,8 +7,7 @@ import { reactLocalStorage } from 'reactjs-localstorage';
 import AppRoutes from './routes';
 import { setCountries } from 'actions/countries';
 import { setUser } from 'actions/user';
-import { setGameId } from 'actions/navigation';
-import { onUserCreated } from 'services/SocketClient';
+import { onUserCreate, onUserCreated } from 'services/SocketClient';
 import gameApi from 'services/GameApi';
 import { Navigator, Spinner } from 'components';
 
@@ -17,12 +16,10 @@ import './App.scss';
 const mapDispatchToProps = dispatch => ({
 	setCountries: countries => dispatch(setCountries(countries)),
 	setUser: user => dispatch(setUser(user)),
-	setGameId: gameId => dispatch(setGameId(gameId)),
 });
 
 const mapStateToProps = state => ({
 	isPageLoading: state.navigation.isPageLoading,
-	gameId: state.navigation.gameId,
 });
 
 class App extends Component {

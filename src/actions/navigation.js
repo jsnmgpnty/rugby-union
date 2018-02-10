@@ -6,7 +6,7 @@ import {
   IS_GAME_READY_TO_START,
   IS_PAGE_LOADING,
   SET_CURRENT_PAGE,
-  SET_GAME_ID,
+  SET_GAME,
   SET_PLAYER_AVATAR,
 } from 'lib/actionNames';
 
@@ -24,7 +24,7 @@ const isPageLoading = (payload) => ({ type: IS_PAGE_LOADING, payload });
 
 const setCurrentPage = (payload) => ({ type: SET_CURRENT_PAGE, payload });
 
-const setGameId = (payload) => ({ type: SET_GAME_ID, payload });
+const setGame = (payload) => ({ type: SET_GAME, payload });
 
 const setPlayerAvatar = (payload) => ({ type: SET_PLAYER_AVATAR, payload });
 
@@ -36,6 +36,6 @@ export {
   isGameReadyToStart,
   isPageLoading,
   setCurrentPage,
-  setGameId,
+  setGame,
   setPlayerAvatar,
 };
