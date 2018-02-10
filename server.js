@@ -128,6 +128,8 @@ io.on('connection', (socket) => {
         });
         socket.leave(gameLeaveResult.gameId);
         socket.leave(gameLeaveResult.teamId);
+      } else {
+        io.to(request.gameId).emit('game:leave', request);
       }
     } catch (error) {
       console.log(error);

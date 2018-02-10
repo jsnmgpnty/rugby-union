@@ -25,6 +25,7 @@ const mapStateToProps = state => ({
 class Lobby extends PureComponent {
   async componentDidMount() {
     this.props.setCurrentPage(pageNames.gamePrepare);
+    this.props.setGame(null);
     await this.getCurrentGameByUser();
   }
 
