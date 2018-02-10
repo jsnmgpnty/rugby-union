@@ -1,15 +1,19 @@
 const MongoClient = require('mongodb').MongoClient;
 const _ = require('lodash');
+const connString = require('./dbEnv');
 
 const mongoDbPort = 27017;
 const databaseName = 'rugby-union';
-const mongoDbHost = process.env.REACT_RUNTIME_DB_HOST || 'mongodb';
+const mongoDbHost = process.env.DB_HOST || 'mongodb';
+const mongoDbConnectionString = process.env.NODE_ENV.trim() === 'prod' ? connString.db.uri : 'mongodb://' + mongoDbHost.trim() + ':' + mongoDbPort;
 
 const getDatabase = () => {
 	return new Promise((resolve, reject) => {
-		MongoClient.connect('mongodb://' + mongoDbHost.trim() + ':' + mongoDbPort, function (err, client) {
+		MongoClient.connect(mongoDbConnectionString, { uri_decode_auth: true }, function (err, client) {
 			if (err) {
+				console.log(err);
 				reject(err);
+				return;
 			}
 
 			var db = client.db(databaseName);
