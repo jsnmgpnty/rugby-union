@@ -6,7 +6,7 @@ import { remove } from 'lodash';
 
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
-import { onGameJoin, onGameJoined, onGameLeft, onGameStarted } from 'services/SocketClient';
+import { onGameJoined, onGameLeft, onGameStarted } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
 import { setCurrentPage, setGame, isGameReadyToStart, isPageLoading } from 'actions/navigation';
 import './GamePrepare.scss';
@@ -21,8 +21,8 @@ const mapDispatchToProps = dispatch => ({
 });
 
 const mapStateToProps = state => ({
-  countries: state.countries,
-  user: state.user,
+  countries: state.countries.countries,
+  user: state.user.user,
 });
 
 class GameLobby extends PureComponent {
@@ -161,7 +161,7 @@ class GameLobby extends PureComponent {
     }
   };
 
-  joinGame = (teamId, avatarId) => {
+  async joinGame(teamId, avatarId) {
     const { game } = this.state;
     const { user } = this.props;
 
@@ -177,7 +177,10 @@ class GameLobby extends PureComponent {
     });
 
     if (!isAvatarInUse) {
-      onGameJoin({ teamId, gameId: game.gameId, username: user.username, avatarId });
+      const result = await gameApi.joinGame(game.gameId, teamId, user.userId, avatarId);
+      if (result.isSuccess) {
+        console.log(result);
+      }
     }
   };
 
@@ -230,7 +233,7 @@ class GameLobby extends PureComponent {
                         <TeamSelector
                           currentUser={user.username}
                           teamId={team.teamId}
-                          players={team.players}
+                          players={team.users}
                           country={this.getCountry(team.countryId)}
                           onJoin={this.joinGame}
                         />

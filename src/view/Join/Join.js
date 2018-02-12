@@ -10,7 +10,7 @@ import './Join.scss';
 import { setUser } from 'actions/user';
 import { setCurrentPage } from 'actions/navigation';
 import pageNames from 'lib/pageNames';
-import { onUserCreate, onUserCreated } from 'services/SocketClient.js'
+import gameApi from 'services/GameApi';
 import { Spinner } from 'components';
 
 const mapDispatchToProps = dispatch => ({
@@ -39,26 +39,7 @@ class Join extends Component {
 
 	componentDidMount() {
 		this.props.setCurrentPage(pageNames.join);
-		onUserCreated(this.handleUserCreated);
 	}
-
-	handleUserCreated = (data) => {
-		if (data.error) {
-			this.setState({
-				errorMessage: data.error,
-				isLoading: false,
-				isSuccessSignIn: false,
-			});
-		} else {
-			this.props.setUser(data);
-			reactLocalStorage.setObject('user', data);
-			this.setState({
-				errorMessage: null,
-				isLoading: false,
-				isSuccessSignIn: true,
-			});
-		}
-	};
 
 	handleNameChange = (event) => {
 		if (!this.state.isUsernamePristine) {
@@ -81,9 +62,39 @@ class Join extends Component {
 		}
 	}
 
-	signInUser = (isCreatingGame) => {
+	async signInUser(isCreatingGame) {
 		const { username } = this.state;
-		this.setState({ isLoading: true, username, isCreatingGame }, onUserCreate(username, false));
+		this.setState({ isLoading: true, username, isCreatingGame });
+
+		try {
+			const result = await gameApi.login(username);
+			if (result) {
+				if (!result.isSuccess) {
+					this.setState({
+						errorMessage: result.message,
+						isSuccessSignIn: false,
+					});
+					return;
+				}
+				
+				if (result.data) {
+					this.props.setUser(result.data);
+					reactLocalStorage.setObject('user', result.data);
+					this.setState({
+						errorMessage: null,
+						isSuccessSignIn: true,
+					});
+				}
+			}
+
+			this.setState({ isLoading: false });
+		} catch (error) {
+			this.setState({
+				errorMessage: error,
+				isSuccessSignIn: false,
+				isLoading: false,
+			});
+		}
 	}
 
 	render() {

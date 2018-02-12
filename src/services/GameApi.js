@@ -1,6 +1,7 @@
 import ApiClient from './ApiClient';
+import { prod, local } from './ApiEnv';
 
-const gameApiBaseUrl = 'http://localhost:8080/api';
+const gameApiBaseUrl = window.appConfig.env === 'prod' ? prod.apiUrl : local.apiUrl;
 
 class GameApi extends ApiClient {
   constructor() {
@@ -8,7 +9,7 @@ class GameApi extends ApiClient {
   }
 
   async getGames() {
-    return this.get('/game/active');
+    return this.get('/game?skip=0&take=9999');
   }
 
   async getGame(gameId) {
@@ -21,6 +22,38 @@ class GameApi extends ApiClient {
 
   async getLatestGameByUser(username) {
     return this.get(`/user/${username}/game/latest`);
+  }
+  
+  async getDepartments() {
+    return this.get('/department');
+  }
+
+  async createGame(name, userId, firstTeamCountry, secondTeamCountry) {
+    return this.post('/game', { name, userId, firstTeamCountry, secondTeamCountry });
+  }
+
+  async startGame(gameId) {
+    return this.get(`/game/${gameId}/start`);
+  }
+  
+  async joinGame(gameId, teamId, userId, playerId) {
+    return this.get(`/game/${gameId}/join?teamId=${teamId}&userId=${userId}&playerId=${playerId}`);
+  }
+
+  async leaveGame(gameId, teamId, userId, playerId) {
+    return this.get(`/game/${gameId}/leave?teamId=${teamId}&userId=${userId}&playerId=${playerId}`);
+  }
+
+  async passBall(gameId, sender, passTo) {
+    return this.post(`/game/${gameId}/pass`, { gameId, sender, passTo });
+  }
+
+  async tacklePlayer(gameId, sender, toTackle) {
+    return this.post(`/game/${gameId}/tackle`, { gameId, sender, toTackle });
+  }
+
+  async login(username) {
+    return this.post('/user/login', { username });
   }
 }
 
