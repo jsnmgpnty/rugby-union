@@ -29,4 +29,10 @@
   &.ireland {
     background-image: url('../../assets/ireland_icon.png');
   }
+
+  &.bordered{
+    border-style: solid;
+    border-color: $green;
+    border-width: thin;
+  }
 }
