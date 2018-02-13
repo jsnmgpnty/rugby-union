@@ -31,7 +31,7 @@ const getAvatar = (avatar) => {
 
 const getProfilePic = (avatar) => {
   const style = {
-    backgroundImage: 'url(' + avatar.profilePicture + ')',
+    background: 'url(' + avatar.profilePicture + ')',
     backgroundPositionX: 'center',
     backgroundPositionY: 'center',
     backgroundRepeat: 'no-repeat',

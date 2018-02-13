@@ -1,0 +1,37 @@
+.gamedetails-view__header{
+    padding: 1rem 1rem 0 1rem;
+    text-align: center;
+    h2{
+		color: #FFF200;
+		font-weight: 700;
+		margin-bottom: 0;
+    }
+    
+    p{
+        text-transform: uppercase;
+		font-size: 1.125rem;
+		color: #FFF;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.2;
+	}
+}
+
+.teamBallPosession{
+    padding-left: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #00974C;
+    text-align: left;
+    margin-bottom: 0;
+}
+
+.teamMissionDescription{
+    padding-left: 0.5rem;
+    padding-right: 1rem;
+    font-size: 00.85rem;
+    font-weight: 700;
+    color: #FFF;
+    text-align: justify;
+    line-height: 1.2;
+}

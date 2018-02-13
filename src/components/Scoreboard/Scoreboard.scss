@@ -1,0 +1,23 @@
+.score-view__header{
+    margin: 1rem;
+    display: flex;
+    flex-direction: row; 
+    justify-content: center;
+    > * {
+        margin: 0 .5rem;
+    }
+    .scoreTally {
+        align-self: center;
+        font-size: 1.34rem;
+        color: #FFF;
+        font-weight: 700;
+    }
+}
+
+.score-view__field{
+    background: url(../../assets/default_field.png) no-repeat center top;
+    background-size: contain;
+    
+    height: 200px;
+    width: 100%;
+}

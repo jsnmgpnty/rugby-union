@@ -8,6 +8,10 @@ import pageNames from 'lib/pageNames';
 import { onGameLeft } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
+import './GameDetails.scss';
+import { Scoreboard } from 'components';
+import TeamPlayer from '../../components/TeamSelector/TeamPlayer';
+import uuid from 'uuid';
 
 const mapDispatchToProps = dispatch => ({
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameDetails)),
@@ -71,11 +75,29 @@ class GameDetails extends PureComponent {
     }
   };
 
+  getMockedAvatarData(){
+    return {
+        username: "johnny_bravo",
+        avatarId: 1,
+        playerId: 1,
+        profilePicture: "../../assets/mark_bennett.png",
+        name: "Mark Bennett",
+    }
+  }
 
   render() {
     return (
-      <div>
-        <h2>Game</h2>
+      <div className="gamedetails-view">
+        <div className="gamedetails-view__header">
+          <h2>Game 2</h2>
+          <p>england vs scotland</p>
+          <p>Round 1 of 5</p>
+        </div>
+        <Scoreboard/>
+        <p className="teamBallPosession">Defense Team (Scotland)</p>
+        <p className="teamMissionDescription">Guess 1 player you think is the ball bearer
+           if majority of the team guesses the right person your team wins the round.</p>
+        <TeamPlayer key={uuid()} currentUser="Kim" username="johnny_bravo" avatar={this.getMockedAvatarData()} teamId={1}/>
       </div>
     )
   }
