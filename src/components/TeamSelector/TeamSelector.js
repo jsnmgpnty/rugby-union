@@ -14,7 +14,7 @@ const propTypes = {
   }).isRequired,
   players: PropTypes.arrayOf(PropTypes.shape({
     user: PropTypes.object.isRequired,
-    avatar: PropTypes.object.isRequired,
+    player: PropTypes.object.isRequired,
   })),
   onJoin: PropTypes.func,
 };
@@ -49,9 +49,9 @@ const getCountryLogo = (country) => {
 
 const mapPlayersToAvatar = (players, avatars) => {
   const mappedPlayers = avatars.map((avatar) => {
-    const player = players.find((p) => p.avatarId === avatar.playerId);
+    const player = players.find((p) => p.player.playerId === avatar.playerId);
     return {
-      username: player ? player.username : null,
+      user: player ? player.user : null,
       avatar: avatar,
     };
   });
@@ -70,7 +70,14 @@ function TeamSelector(props) {
       <div className="team-selector__players">
         {
           players && players.length > 0 ?
-            players.map((player) => <TeamPlayer key={uuid()} currentUser={props.currentUser} username={player.username} avatar={player.avatar} teamId={props.teamId} onJoin={props.onJoin} />)
+            players.map((player) =>
+              <TeamPlayer
+                key={uuid()}
+                currentUser={props.currentUser}
+                user={player.user}
+                avatar={player.avatar}
+                teamId={props.teamId} onJoin={props.onJoin}
+              />)
             : <p>No players yet</p>
         }
       </div>

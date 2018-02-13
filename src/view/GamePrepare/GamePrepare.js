@@ -6,7 +6,7 @@ import { remove } from 'lodash';
 
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
-import { onGameJoined, onGameLeft, onGameStarted } from 'services/SocketClient';
+import { onGameJoin, onGameJoined, onGameLeft, onGameStarted } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
 import { setCurrentTeam } from 'actions/user';
 import { setCurrentPage, setGame, isGameReadyToStart, isPageLoading } from 'actions/navigation';
@@ -50,10 +50,11 @@ class GameLobby extends PureComponent {
   };
 
   async componentDidMount() {
-    const { setCurrentPage } = this.props;
+    const { setCurrentPage, user } = this.props;
     const { params } = this.props.match;
 
     setCurrentPage();
+    onGameJoin({ gameId: params.gameId, userId: user.userId });
     isGameReadyToStart(false);
     this.setState({ gameId: params.gameId });
     await this.getGame(params.gameId);
@@ -102,25 +103,25 @@ class GameLobby extends PureComponent {
             team.users = [];
           }
 
-          const existingPlayer = team.users.find((t) => { return t.userId === data.userAvatar.user.userId });
+          const existingPlayer = team.users.find((t) => { return t.user.userId === data.userAvatar.user.userId });
           if (!existingPlayer) {
-            team.players.push({ username: data.username, avatarId: data.userAvatar.player.playerId });
+            team.users.push(data.userAvatar);
           } else {
-            if (existingPlayer.avatarId !== data.avatarId) {
-              existingPlayer.avatarId = data.userAvatar.player.playerId;
+            if (existingPlayer.player.playerId !== data.userAvatar.player.playerId) {
+              existingPlayer.player = data.userAvatar.player;
             }
           }
         } else {
-          remove(team.players, (player) => {
-            return player.userId === data.userAvatar.user.userId;
+          remove(team.users, (user) => {
+            return user.user.userId === data.userAvatar.user.userId;
           });
         }
       });
 
       const player = game.players.find(a => a.user.userId === data.userAvatar.user.userId);
       if (player) {
-        if (player.avatarId !== data.userAvatar.player.playerId) {
-          player.avatarId = data.userAvatar.player.playerId;
+        if (player.player.playerId !== data.userAvatar.player.playerId) {
+          player.player = data.userAvatar.player;
         }
       }
 
@@ -157,8 +158,8 @@ class GameLobby extends PureComponent {
     const { game } = this.state;
     const { isGameReadyToStart } = this.props;
 
-    const firstTeamPlayers = game.teams[0].players ? game.teams[0].players.length : 0;
-    const secondTeamPlayers = game.teams[1].players ? game.teams[1].players.length : 0;
+    const firstTeamPlayers = game.teams[0].users ? game.teams[0].users.length : 0;
+    const secondTeamPlayers = game.teams[1].users ? game.teams[1].users.length : 0;
 
     if (firstTeamPlayers === defaultNumberOfPlayersPerTeam && secondTeamPlayers === defaultNumberOfPlayersPerTeam) {
       isGameReadyToStart(true);

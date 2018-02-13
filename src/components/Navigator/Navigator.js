@@ -61,7 +61,7 @@ class Navigator extends Component {
 
     if (currentPage === pageNames.gameLobby) {
       reactLocalStorage.setObject('user', null);
-      this.setState({ goToJoin: true, goToGamePrepare: false, goToLobby: false });
+      this.setState({ goToJoin: true, goToGamePrepare: false, goToLobby: false, goToGameDetails: false });
     }
 
     if (currentPage === pageNames.gamePrepare) {
@@ -69,9 +69,7 @@ class Navigator extends Component {
 
       try {
         const result = await gameApi.leaveGame(game.gameId, currentTeam, user.userId);
-        if (result && result.isSuccess) {
-          this.setState({ goToGameDetails: false, goToGamePrepare: false, goToJoin: false, goToLobby: true });
-        }
+        this.setState({ goToGameDetails: false, goToGamePrepare: false, goToJoin: false, goToLobby: true });
         isPageLoading(false);
       } catch (error) {
         isPageLoading(false);
@@ -83,15 +81,14 @@ class Navigator extends Component {
     const {
       game,
       isPageLoading,
-      teams,
     } = this.props;
 
     isPageLoading(true);
 
     try {
-      const result = await gameApi.startGame(game.gameId, teams[0], teams[1]);
-      if (result && result.isSuccess) {
-        setGame(result.data);
+      const result = await gameApi.startGame(game.gameId, game.teams[0].teamId, game.teams[1].teamId);
+      if (result && result.game) {
+        setGame(result.game);
         this.setState({ goToGameDetails: true, goToGamePrepare: false, goToJoin: false, goToLobby: false });
       }
       isPageLoading(false);
@@ -124,7 +121,7 @@ class Navigator extends Component {
   };
 
   onGameJoin = () => {
-    this.setState({ goToGamePrepare: true, goToLobby: false, goToJoin: false });
+    this.setState({ goToGamePrepare: true, goToLobby: false, goToJoin: false, goToGameDetails: false });
   };
 
   render() {
@@ -144,6 +141,7 @@ class Navigator extends Component {
       goToGamePrepare,
       goToLobby,
       goToJoin,
+      goToGameDetails,
     } = this.state;
 
     return (
@@ -181,7 +179,7 @@ class Navigator extends Component {
           }
           {
             currentPage === pageNames.gamePrepare &&
-            <Button className="btn-join" onClick={this.onGameStart} color="primary" disabled={!isGameReadyToStart || user.username !== game.createdBy}>
+            <Button className="btn-join" onClick={this.onGameStart} color="primary" disabled={!isGameReadyToStart || user.userId !== game.createdBy}>
               <span className="start" />
               <span className="btn-text-content">Start</span>
             </Button>
@@ -195,6 +193,9 @@ class Navigator extends Component {
         }
         {
           goToJoin && <Redirect to="/join" />
+        }
+        {
+          goToGameDetails && <Redirect to={`/game/${game.gameId}/details`} />
         }
       </div>
     )

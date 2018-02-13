@@ -8,6 +8,10 @@ class GameApi extends ApiClient {
     super(gameApiBaseUrl);
   }
 
+  async getGameState(gameId, userId) {
+    return this.get(`/game/${gameId}/state?userId=${userId}`);
+  }
+
   async getGames() {
     return this.get('/game?skip=0&take=9999');
   }

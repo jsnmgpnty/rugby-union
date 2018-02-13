@@ -1,20 +1,27 @@
-const express = require('express');
-const bodyParser = require('body-parser')
-const uuid = require('uuid');
-const _ = require('lodash');
-const redisConf = require('./server/redisEnv');
-const redis = require('redis');
+var express = require('express');
+var bodyParser = require('body-parser')
+var uuid = require('uuid');
+var _ = require('lodash');
+var redisConf = require('./server/redisEnv');
+var redis = require('redis');
 
-const port = process.env.PORT || 8080;
-const connString = process.env.NODE_ENV === 'prod' ? redisConf.prod.uri : redisConf.local.uri;
-const redisSubscriber = redis.createClient(connString);
+var port = process.env.PORT || 8080;
+var connString = process.env.NODE_ENV === 'prod' ? redisConf.prod.uri : redisConf.local.uri;
+var redisSubscriber = process.env.NODE_ENV === 'prod' ?
+  redis.createClient(6380, 'whg-engagement-app.redis.cache.windows.net', {
+    auth_pass: 'sjwiA428Y90Mp9nCf7XXYmYCc5QperJJoqR5dR+rpFY=',
+    tls: {
+      servername: 'whg-engagement-app.redis.cache.windows.net'
+    }
+  }) :
+  redis.createClient(connString);
 
 // express server setup
-const app = express();
-const router = express.Router();
+var app = express();
+var router = express.Router();
 
 // server variables
-const path = __dirname + '/build/';
+var path = __dirname + '/build/';
 
 // apply request parsers
 app.use(bodyParser.json());
@@ -24,7 +31,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // socket io setup
 // ======================================
 
-const io = require('socket.io').listen(app.listen(port, function () {
+var io = require('socket.io').listen(app.listen(port, function () {
   console.log('Server now running at port ' + port);
 }));
 io.set('transports', [
@@ -36,14 +43,22 @@ io.set('transports', [
   , 'jsonp-polling'
 ]);
 
-const connectedClients = [];
+var connectedClients = [];
 
-const getSocketBySession = (userId) => {
-  const connectedClient = connectedClients.find(a => a.userId === userId);
+function removeDisconnectedClients() {
+  _.remove(connectedClients, function (client) {
+    return client.socket.disconnected;
+  });
+}
+
+function getSocketBySession(userId) {
+  removeDisconnectedClients();
+  var connectedClient = _.find(connectedClients, function (a) { return a.userId === userId; });
   return connectedClient ? connectedClient.socket : null;
 }
 
-const removeSocketBySocketId = (socketIdInternal) => {
+function removeSocketBySocketId(socketIdInternal) {
+  removeDisconnectedClients();
   let index = null;
 
   for (let i = 0; i < connectedClients.length; i++) {
@@ -58,27 +73,27 @@ const removeSocketBySocketId = (socketIdInternal) => {
   }
 }
 
-const onUserLoggedIn = (data) => {
+function onUserLoggedIn(data) {
   io.sockets.emit('user:loggedin', data);
-  const socket = getSocketBySession(data.userId);
+  var socket = getSocketBySession(data.userId);
   if (socket)
     socket.join(data.userId);
 }
 
-const onGameCreated = (data) => {
+function onGameCreated(data) {
   console.log('game:created ' + JSON.stringify(data));
-  io.sockets.emit('game:created', data);
+  io.sockets.emit('game:created', data.game);
 }
 
-const onGameJoined = (data) => {
+function onGameJoined(data) {
   if (!data || !data.game || !data.userAvatar) {
     return;
   }
-  
-  const socket = getSocketBySession(data.userId);
+
+  var socket = getSocketBySession(data.userAvatar.user.userId);
 
   if (socket) {
-    socket.join(data.gameId);
+    socket.join(data.game.gameId);
     socket.join(data.teamId);
     socket.currentGameId = data.game.gameId;
     socket.currentTeamId = data.teamId;
@@ -90,12 +105,12 @@ const onGameJoined = (data) => {
   }
 }
 
-const onGameLeft = (data) => {
+function onGameLeft(data) {
   if (!data || !data.game) {
     return;
   }
 
-  const socket = getSocketBySession(data.userId);
+  var socket = getSocketBySession(data.userId);
 
   if (socket) {
     socket.leave(data.game.gameId);
@@ -108,26 +123,26 @@ const onGameLeft = (data) => {
   }
 }
 
-const onGameStarted = (data) => {
+function onGameStarted(data) {
   if (!data || !data.game) {
     return;
   }
-  
+
   io.to(data.game.gameId).emit('game:started', data);
 }
 
-const onGameScoreboardResult = (data) => {
+function onGameScoreboardResult(data) {
   io.to(date.gameId).emit('game:result:scoreboard:turn', data);
 }
 
-const onGameTeamResult = (data) => {
+function onGameTeamResult(data) {
   io.to(date.teamId).emit('game:result:team:turn', data);
 }
 
-const onGameScoreboardFinalResult = (data) => {
+function onGameScoreboardFinalResult(data) {
   io.to(date.gameId).emit('game:result:scoreboard:finished', data);
 
-  const socket = getSocketBySession(data.userId);
+  var socket = getSocketBySession(data.userId);
 
   if (socket) {
     socket.leave(data.gameId);
@@ -135,10 +150,10 @@ const onGameScoreboardFinalResult = (data) => {
   }
 }
 
-const onGameTeamFinalResult = (data) => {
+function onGameTeamFinalResult(data) {
   io.to(date.gameId).emit('game:result:team:finished', data);
 
-  const socket = getSocketBySession(data.userId);
+  var socket = getSocketBySession(data.userId);
 
   if (socket) {
     socket.leave(data.gameId);
@@ -147,26 +162,28 @@ const onGameTeamFinalResult = (data) => {
 }
 
 // on socket connection
-io.on('connection', (socket) => {
+io.on('connection', function (socket) {
   // once connected, we emit to client that they are connected (server only communication)
   socket.emit('connected', { message: 'You are connected to Rugby Union! Whooooo!' });
   socket.socketIdInternal = uuid();
 
-  socket.on('user:session', (data) => {
-    const connectedClient = getSocketBySession(data.userId);
+  socket.on('user:session', function (data) {
+    var connectedClient = getSocketBySession(data.userId);
     if (!connectedClient) {
       connectedClients.push({ userId: data.userId, socket: socket });
     }
   });
 
-  socket.on('game:view', (data) => {
-    const connectedClient = getSocketBySession(data.userId);
+  socket.on('game:join', function (data) {
+    var connectedClient = getSocketBySession(data.userId);
     if (!connectedClient) {
       connectedClients.push({ userId: data.userId, socket: socket });
     }
+
+    socket.join(data.gameId);
   });
 
-  socket.on('disconnection', async () => {
+  socket.on('disconnection', function () {
     removeSocketBySocketId(socket.socketIdInternal);
   })
 });

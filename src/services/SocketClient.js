@@ -10,6 +10,10 @@ import openSocket from 'socket.io-client';
    socket.emit('user:session', data);
  }
 
+ function onGameJoin(message) {
+   socket.emit('game:join', message);
+ }
+
 function onGameCreated(callback) {
   socket.on('game:created', (message) => {
     console.log(`game:created ${JSON.stringify(message)}`);
@@ -19,7 +23,7 @@ function onGameCreated(callback) {
 
 function onGameJoined(callback) {
   socket.on('game:joined', (message) => {
-    console.log(`game:join ${JSON.stringify(message)}`);
+    console.log(`game:joined ${JSON.stringify(message)}`);
     callback(message);
   });
 }
@@ -68,6 +72,7 @@ function onGameResult(callback) {
 
 export {
   initializeSession,
+  onGameJoin,
   onGameJoined,
   onGameCreated,
   onGameStarted,

@@ -20,8 +20,8 @@ const mapDispatchToProps = dispatch => ({
 });
 
 const mapStateToProps = state => ({
-  countries: state.countries,
-  user: state.user,
+  countries: state.countries.countries,
+  user: state.user.user,
 });
 
 class GameDetails extends PureComponent {
@@ -31,6 +31,11 @@ class GameDetails extends PureComponent {
     isGameStarted: false,
     isGameCompleted: false,
     game: null,
+    currentTeam: null,
+    currentTurnNumber: 0,
+    winningTeam: null,
+    isTackled: false,
+    isTouchdown: false,
   };
   
   async componentDidMount() {
@@ -67,7 +72,30 @@ class GameDetails extends PureComponent {
         }
         
         this.props.setGame(game);
-        this.setState({ game, isBusy: false }, this.isGameReady);
+        this.setState({ game, isBusy: false });
+      }
+    } catch (error) {
+      this.setState({ isBusy: false });
+      console.log(error);
+    }
+  };
+
+  getGameState = async (gameId) => {
+    const { user } = this.props;
+    const { game } = this.state;
+
+    try {
+      const gameState = await gameApi.getGameState(gameId. user.userId);
+
+      if (game && gameState) {
+        if (gameState.teamId) {
+          const currentTeam = game.teams.find(a => a.teamId === gameState.teamId);
+          this.setState({ currentTeam });
+        }
+
+        if (gameState.winningTeam) {
+          this.setState({ winningTeam: gameState.winningTeam, isTackled: gameState.isTackled, isTouchdown: gameState.isTouchdown });
+        } 
       }
     } catch (error) {
       this.setState({ isBusy: false });

@@ -6,8 +6,11 @@ import './TeamPlayer.scss';
 
 const propTypes = {
   currentUser: PropTypes.string.isRequired,
-  username: PropTypes.string,
   teamId: PropTypes.string.isRequired,
+  user: PropTypes.shape({
+    userId: PropTypes.string.isRequired,
+    username: PropTypes.string.isRequired,
+  }),
   avatar: PropTypes.shape({
     playerId: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
@@ -49,17 +52,19 @@ const isCurrentUser = (username, currentUser) => {
 };
 
 function TeamPlayer(props) {
+  const username = props.user ? props.user.username : null;
+
   return (
-    <div id={`team-player_${getTeamPlayerId(props.avatar)}`} className={`team-player ${isCurrentUser(props.username, props.currentUser) ? 'is-active' : null}`}>
+    <div id={`team-player_${getTeamPlayerId(props.avatar)}`} className={`team-player ${isCurrentUser(username, props.currentUser) ? 'is-active' : null}`}>
       <a onClick={() => props.onJoin(props.teamId, props.avatar.playerId)}>
         <div className="team-player__avatar">
           <span className="team-player__avatar-pic" style={getProfilePic(props.avatar)} />
         </div>
         <div className="team-player__user">
           <p className="team-player__user-avatar">{getAvatar(props.avatar).name}</p>
-          <p className={`team-player__user-name ${props.username ? 'player-taken' : ''}`}>
+          <p className={`team-player__user-name ${username ? 'player-taken' : ''}`}>
             {
-              props.username ? <span>{props.username}</span> : <span>Available</span>
+              username ? <span>{username}</span> : <span>Available</span>
             }
           </p>
         </div>
