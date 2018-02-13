@@ -49,7 +49,7 @@ class Lobby extends PureComponent {
     const { user } = this.props;
 
     try {
-      const game = await gameApi.getLatestGameByUser(user.username);
+      const game = await gameApi.getLatestGameByUser(user.userId);
       if (game && game.gameId) {
         this.props.setGame(game);
         this.setState({ activeGameId: game.gameId });

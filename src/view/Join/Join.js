@@ -11,6 +11,7 @@ import { setUser } from 'actions/user';
 import { setCurrentPage } from 'actions/navigation';
 import pageNames from 'lib/pageNames';
 import gameApi from 'services/GameApi';
+import { initializeSession } from 'services/SocketClient';
 import { Spinner } from 'components';
 
 const mapDispatchToProps = dispatch => ({
@@ -78,6 +79,7 @@ class Join extends Component {
 				}
 				
 				if (result.data) {
+					initializeSession(result.data);
 					this.props.setUser(result.data);
 					reactLocalStorage.setObject('user', result.data);
 					this.setState({

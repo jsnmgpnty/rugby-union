@@ -8,6 +8,7 @@ import AppRoutes from './routes';
 import { setCountries } from 'actions/countries';
 import { setUser } from 'actions/user';
 import gameApi from 'services/GameApi';
+import { initializeSession } from 'services/SocketClient';
 import { Navigator, Spinner } from 'components';
 
 import './App.scss';
@@ -38,6 +39,7 @@ class App extends Component {
 
 		const user = reactLocalStorage.getObject('user');
 		if (user && user.userId && user.username) {
+			initializeSession(user);
 			this.props.setUser(user);
 		}
 

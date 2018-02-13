@@ -3,7 +3,7 @@ const prod = {
 };
 
 const local = {
-  url: 'ws://localhost:58747/ws/game',
+  url: 'http://localhost:8080',
 };
 
 export { local, prod };
