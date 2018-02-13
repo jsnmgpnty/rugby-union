@@ -1,5 +1,5 @@
 const prod = {
-  url: 'ws://whg-engagement-app-api.azurewebsites.net/ws/game',
+  url: 'http//whg-engagement-app-node.azurewebsites.net',
 };
 
 const local = {

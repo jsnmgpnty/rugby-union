@@ -66,10 +66,15 @@ const onUserLoggedIn = (data) => {
 }
 
 const onGameCreated = (data) => {
+  console.log('game:created ' + JSON.stringify(data));
   io.sockets.emit('game:created', data);
 }
 
 const onGameJoined = (data) => {
+  if (!data) {
+    return;
+  }
+  
   const socket = getSocketBySession(data.userId);
 
   if (socket) {
@@ -78,17 +83,23 @@ const onGameJoined = (data) => {
     socket.currentGameId = data.gameId;
     socket.currentTeamId = data.teamId;
 
+    console.log('game:joined ' + JSON.stringify(data));
     io.to(data.gameId).emit('game:joined', data);
+    console.log('game:joined ' + JSON.stringify(data));
     io.to(data.teamId).emit('game:joined', data);
   }
 }
 
 const onGameLeft = (data) => {
+  if (!data || !data.game) {
+    return;
+  }
+
   const socket = getSocketBySession(data.userId);
 
   if (socket) {
-    socket.leave(data.gameId);
-    socket.leave(data.teamId);
+    socket.leave(data.game.gameId);
+    socket.leave(data.game.teamId);
     socket.currentGameId = null;
     socket.currentTeamId = null;
 
@@ -98,7 +109,11 @@ const onGameLeft = (data) => {
 }
 
 const onGameStarted = (data) => {
-  io.to(data.gameId).emit('game:started', data);
+  if (!data || !data.game) {
+    return;
+  }
+  
+  io.to(data.game.gameId).emit('game:started', data);
 }
 
 const onGameScoreboardResult = (data) => {

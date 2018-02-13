@@ -9,7 +9,7 @@ const propTypes = {
   username: PropTypes.string,
   teamId: PropTypes.string.isRequired,
   avatar: PropTypes.shape({
-    playerId: PropTypes.number.isRequired,
+    playerId: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     profilePicture: PropTypes.string.isRequired,
   }),

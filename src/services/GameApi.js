@@ -55,6 +55,10 @@ class GameApi extends ApiClient {
   async login(username) {
     return this.post('/user/login', { username });
   }
+  
+  async getCountries() {
+    return this.get('/country');
+  }
 }
 
 export default new GameApi();

@@ -79,14 +79,13 @@
     "sass-loader": "^6.0.6"
   },
   "scripts": {
-    "start": "set REACT_APP_RUNTIME_PORT=8080 && node scripts/start.js",
+    "start": "set REACT_APP_RUNTIME_PORT=8080 && set REACT_APP_RUNTIME_ENV=local && node scripts/start.js",
+    "start:prod": "set REACT_APP_RUNTIME_PORT=8080 && set REACT_APP_RUNTIME_ENV=local && node scripts/start.js",
     "startunix": "REACT_APP_RUNTIME_PORT=8080 node scripts/start.js",
-    "build": "node scripts/build.js",
+    "build": "set REACT_APP_RUNTIME_PORT=8080 && set REACT_APP_RUNTIME_ENV=local && node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
     "server": "nodemon server.js",
-    "server:prod": "set NODE_ENV=prod && nodemon server.js",
-    "stack": "set DB_HOST=localhost && node scripts/build.js && nodemon server.js",
-    "stack:fixedport": "set DB_HOST=localhost && set REACT_APP_RUNTIME_PORT=8080 && node scripts/build.js && nodemon server.js"
+    "server:prod": "set NODE_ENV=prod && nodemon server.js"
   },
   "jest": {
     "collectCoverageFrom": [

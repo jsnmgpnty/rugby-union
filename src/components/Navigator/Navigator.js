@@ -22,6 +22,7 @@ const mapStateToProps = (state) => ({
   game: state.navigation.game,
   user: state.user.user,
   teams: state.createGame.teams,
+  currentTeam: state.user.currentTeam,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -56,7 +57,7 @@ class Navigator extends Component {
   };
 
   async onBackButtonClick() {
-    const { currentPage, game, user } = this.props;
+    const { currentPage, game, user, currentTeam } = this.props;
 
     if (currentPage === pageNames.gameLobby) {
       reactLocalStorage.setObject('user', null);
@@ -67,7 +68,7 @@ class Navigator extends Component {
       isPageLoading(true);
 
       try {
-        const result = await gameApi.leaveGame(game.gameId);
+        const result = await gameApi.leaveGame(game.gameId, currentTeam, user.userId);
         if (result && result.isSuccess) {
           this.setState({ goToGameDetails: false, goToGamePrepare: false, goToJoin: false, goToLobby: true });
         }

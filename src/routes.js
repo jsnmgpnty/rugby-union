@@ -34,17 +34,14 @@ function AppRoutes(props) {
   };
 
   return (
-    // <Switch>
-    //   <Route path="/" exact render={() => isUserSignedIn(Lobby)} />
-    //   <Route path="/create" exact render={() => isUserSignedIn(GameCreate)} />
-    //   <Route path="/join" exact component={() => isUserAlreadySignedIn()} />
-    //   <Route path="/game/:gameId" exact render={() => isUserSignedIn(GamePrepare)} />
-    //   <Route path="/game/:gameId/details" exact render={() => isUserSignedIn(GameDetails)} />
-    // </Switch>
-    <div>
-      <GameDetails />
-    </div>
-  )
+    <Switch>
+      <Route path="/" exact render={() => isUserSignedIn(Lobby)} />
+      <Route path="/create" exact render={() => isUserSignedIn(GameCreate)} />
+      <Route path="/join" exact component={() => isUserAlreadySignedIn()} />
+      <Route path="/game/:gameId" exact render={() => isUserSignedIn(GamePrepare)} />
+      <Route path="/game/:gameId/details" exact render={() => isUserSignedIn(GameDetails)} />
+    </Switch>
+  );
 }
 
 AppRoutes.propTypes = propTypes;

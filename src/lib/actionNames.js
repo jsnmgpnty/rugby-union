@@ -1,5 +1,6 @@
 export const SET_COUNTRIES = 'SET_COUNTRIES';
 export const SET_USER = 'SET_USER';
+export const SET_CURRENT_TEAM = 'SET_TEAMS';
 export const SET_TEAMS = 'SET_TEAMS';
 
 // navigation actions

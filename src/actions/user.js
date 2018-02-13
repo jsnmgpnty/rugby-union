@@ -1,5 +1,7 @@
-import { SET_USER } from 'lib/actionNames';
+import { SET_USER, SET_CURRENT_TEAM } from 'lib/actionNames';
 
 const setUser = user => ({ type: SET_USER, payload: user });
 
-export { setUser };
+const setCurrentTeam = payload => ({ type: SET_CURRENT_TEAM, payload });
+
+export { setUser, setCurrentTeam };

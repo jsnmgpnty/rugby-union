@@ -24,25 +24,7 @@
     var appConfig = {
       socketServerUrl: 'http://localhost:%REACT_APP_RUNTIME_PORT%'.trim(),
       env: '%REACT_APP_RUNTIME_ENV'.trim(),
-    };
-
-    var uri = "ws://localhost:58747/ws/game";
-    function connect() {
-      socket = new WebSocket(uri);
-      socket.onopen = function (event) {
-        console.log("opened connection to " + uri);
-      };
-      socket.onclose = function (event) {
-        console.log("closed connection from " + uri);
-      };
-      socket.onmessage = function (event) {
-        console.log(event.data);
-      };
-      socket.onerror = function (event) {
-        console.log("error: " + event.data);
-      };
-    }
-    connect();  
+    }; 
   </script>
   <title>Rugby Union</title>
 </head>

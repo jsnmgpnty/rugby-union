@@ -9,7 +9,7 @@ const propTypes = {
   currentUser: PropTypes.string.isRequired,
   teamId: PropTypes.string.isRequired,
   country: PropTypes.shape({
-    countryId: PropTypes.number.isRequired,
+    countryId: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
   }).isRequired,
   players: PropTypes.arrayOf(PropTypes.shape({

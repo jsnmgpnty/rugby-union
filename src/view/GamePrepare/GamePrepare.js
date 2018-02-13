@@ -8,6 +8,7 @@ import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
 import { onGameJoined, onGameLeft, onGameStarted } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
+import { setCurrentTeam } from 'actions/user';
 import { setCurrentPage, setGame, isGameReadyToStart, isPageLoading } from 'actions/navigation';
 import './GamePrepare.scss';
 
@@ -18,6 +19,7 @@ const mapDispatchToProps = dispatch => ({
   isGameReadyToStart: (ready) => dispatch(isGameReadyToStart(ready)),
   isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
   setGame: (game) => dispatch(setGame(game)),
+  setCurrentTeam: (team) => dispatch(setCurrentTeam(team)),
 });
 
 const mapStateToProps = state => ({
@@ -32,6 +34,8 @@ class GameLobby extends PureComponent {
     onGameJoined(this.handleGameJoin);
     onGameLeft(this.handleGameLeft);
     onGameStarted(this.handleGameStarted);
+
+    this.joinGame = this.joinGame.bind(this);
   }
 
   state = {
@@ -78,7 +82,7 @@ class GameLobby extends PureComponent {
           default:
             break;
         }
-        
+
         this.props.setGame(game);
         this.setState({ game, isBusy: false }, this.isGameReady);
       }
@@ -167,7 +171,7 @@ class GameLobby extends PureComponent {
 
     let isAvatarInUse = false;
     game.teams.every((team) => {
-      const avatar = team.players.find(a => a.avatarId === avatarId);
+      const avatar = team.users.find(a => a.player && a.player.playerId === avatarId);
       if (avatar) {
         isAvatarInUse = true;
         return false;
@@ -178,9 +182,7 @@ class GameLobby extends PureComponent {
 
     if (!isAvatarInUse) {
       const result = await gameApi.joinGame(game.gameId, teamId, user.userId, avatarId);
-      if (result.isSuccess) {
-        console.log(result);
-      }
+      setCurrentTeam(result.teamId);
     }
   };
 
