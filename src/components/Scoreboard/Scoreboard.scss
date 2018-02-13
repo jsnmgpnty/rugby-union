@@ -15,8 +15,9 @@
 }
 
 .score-view__field{
-    background: url(../../assets/default_field.png) no-repeat;
+    background: url(../../assets/default_field.png) no-repeat center top;
     background-size: contain;
+    
     height: 200px;
     width: 100%;
 }
