@@ -1,92 +1,100 @@
 import uuid from 'uuid';
-import openSocket from 'socket.io-client';
+import { local, prod } from './SocketEnv';
+import EventPubSub from './EventPubSub';
+const eventPubSub = new EventPubSub();
 
 // initialize connection to socket server
-const socket = openSocket(window.appConfig.socketServerUrl);
+const socketUrl = window.appConfig.env === 'prod' ? prod.url : local.url;
+let webSocket = new WebSocket(socketUrl);
 
-socket.on('connected', (data) => {
-  console.log(data);
-});
+webSocket.onopen = function (event) {
+  console.log("opened connection to " + socketUrl);
+};
 
-function ping(callback) {
-  socket.on('myEvent', (message) => {
-    callback(message);
-  });
+webSocket.onclose = function (event) {
+  console.log("closed connection from " + socketUrl);
+  setTimeout(function () {
+    console.log("websocket client is reconnecting...");
+    webSocket = new WebSocket(socketUrl);
+  }, 500);
+};
 
-  // emit an event to server
-  setTimeout(() => socket.emit('myEvent', {}), 1000);
-}
+webSocket.onmessage = function (event) {
+  try {
+    var data = JSON.parse(event.data);
+    eventPubSub.emit(data.topic, data.payload, false);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-function onGameCreate(message) {
-  socket.emit('game:create', message);
-}
+webSocket.onerror = function (event) {
+  console.log("error: " + event.data);
+};
 
 function onGameCreated(callback) {
-  socket.on('game:created', (message) => {
+  eventPubSub.on('game:created', (message) => {
     console.log(`game:created ${JSON.stringify(message)}`);
     callback(message);
   });
 }
 
-function onGameJoin(message) {
-  socket.emit('game:join', message);
-}
-
 function onGameJoined(callback) {
-  socket.on('game:joined', (message) => {
+  eventPubSub.on('game:joined', (message) => {
     console.log(`game:join ${JSON.stringify(message)}`);
     callback(message);
   });
 }
 
-function onGameLeave(message) {
-  socket.emit('game:leave', message);
-}
-
 function onGameLeft(callback) {
-  socket.on('game:leave', (message) => {
+  eventPubSub.on('game:leave', (message) => {
     console.log(`game:leave ${JSON.stringify(message)}`);
     callback(message);
   });
 }
 
-function onGameStart(message) {
-  socket.emit('game:start', message);
-}
-
 function onGameStarted(callback) {
-  socket.on('game:started', (message) => {
+  eventPubSub.on('game:started', (message) => {
     console.log(`game:started ${JSON.stringify(message)}`);
     callback(message);
   });
 }
 
-function onUserCreate(username, isReturningUser = true) {
-  const user = {
-    username,
-    userId : uuid(),
-    isReturningUser,
-  };
-  socket.emit('user:create', user);
+function onGameFinalScoreboard(callback) {
+  eventPubSub.on('game:result:scoreboard:finished', (message) => {
+    console.log(`game:result:scoreboard:finished ${JSON.stringify(message)}`);
+    callback(message);
+  });
 }
 
-function onUserCreated(callback) {
-  socket.on('user:created', (message) => {
-    console.log(`user:created ${JSON.stringify(message)}`);
+function onGameFinalResult(callback) {
+  eventPubSub.on('game:result:team:finished', (message) => {
+    console.log(`game:result:team:finished ${JSON.stringify(message)}`);
+    callback(message);
+  });
+}
+
+function onGameScoreboard(callback) {
+  eventPubSub.on('game:result:scoreboard:turn', (message) => {
+    console.log(`game:result:scoreboard:turn ${JSON.stringify(message)}`);
+    callback(message);
+  });
+}
+
+function onGameResult(callback) {
+  eventPubSub.on('game:result:team:turn', (message) => {
+    console.log(`game:result:team:turn ${JSON.stringify(message)}`);
     callback(message);
   });
 }
 
 export {
-  ping,
-  onGameJoin,
   onGameJoined,
-  onGameCreate,
   onGameCreated,
-  onGameStart,
   onGameStarted,
-  onGameLeave,
   onGameLeft,
-  onUserCreate,
-  onUserCreated,
+  onGameFinalScoreboard,
+  onGameFinalResult,
+  onGameScoreboard,
+  onGameResult,
 };

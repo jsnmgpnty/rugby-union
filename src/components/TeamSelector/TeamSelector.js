@@ -13,8 +13,8 @@ const propTypes = {
     name: PropTypes.string.isRequired,
   }).isRequired,
   players: PropTypes.arrayOf(PropTypes.shape({
-    username: PropTypes.string.isRequired,
-    avatarId: PropTypes.number.isRequired,
+    user: PropTypes.object.isRequired,
+    avatar: PropTypes.object.isRequired,
   })),
   onJoin: PropTypes.func,
 };
@@ -70,7 +70,7 @@ function TeamSelector(props) {
       <div className="team-selector__players">
         {
           players && players.length > 0 ?
-            players.map((player) => <TeamPlayer key={uuid()} currentUser={props.currentUser} username={player.username} avatar={player.avatar} teamId={props.teamId} onJoin={props.onJoin} />)
+            players.map((player) => <TeamPlayer key={uuid()} currentUser={props.currentUser} username={player.user.username} avatar={player.avatar} teamId={props.teamId} onJoin={props.onJoin} />)
             : <p>No players yet</p>
         }
       </div>

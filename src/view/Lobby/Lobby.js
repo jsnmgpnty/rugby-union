@@ -6,6 +6,7 @@ import { withRouter } from 'react-router-dom';
 import './Lobby.scss';
 import pageNames from 'lib/pageNames';
 import gameApi from 'services/GameApi';
+import { onGameCreated } from 'services/SocketClient';
 import { setCurrentPage, setGame, isGameSelectedOnLobby } from 'actions/navigation';
 import LobbyHeader from './LobbyHeader';
 import { GameCard, Spinner } from 'components';
@@ -17,7 +18,7 @@ const mapDispatchToProps = dispatch => ({
 });
 
 const mapStateToProps = state => ({
-  countries: state.countries,
+  countries: state.countries.countries,
   game: state.navigation.game,
   user: state.user,
 });
@@ -27,6 +28,8 @@ class Lobby extends PureComponent {
     this.props.setCurrentPage(pageNames.gamePrepare);
     this.props.setGame(null);
     await this.getCurrentGameByUser();
+
+    onGameCreated(this.handleGameCreated);
   }
 
   state = {
@@ -35,6 +38,12 @@ class Lobby extends PureComponent {
     selectedGameId: null,
     activeGameId: null,
   };
+
+  handleGameCreated = (data) => {
+    this.setState({
+      games: [...this.state.games, data],
+    });
+  }
 
   async getCurrentGameByUser() {
     const { user } = this.props;
@@ -97,7 +106,7 @@ class Lobby extends PureComponent {
                   game={game}
                   home={this.getCountryByTeam(game.teams[0])}
                   away={this.getCountryByTeam(game.teams[1])}
-                  playerCount={game.players.length}
+                  playerCount={game.players ? game.players.length : 0}
                   onSelect={this.onGameSelect}
                   isSelected={selectedGameId === game.gameId}
                 />

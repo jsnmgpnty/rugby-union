@@ -8,7 +8,7 @@ import { reactLocalStorage } from 'reactjs-localstorage';
 
 import { isPageLoading, setGame } from 'actions/navigation';
 import pageNames from 'lib/pageNames';
-import { onGameLeave, onGameStart } from 'services/SocketClient';
+import gameApi from 'services/GameApi';
 import './Navigator.scss';
 
 const mapStateToProps = (state) => ({
@@ -20,7 +20,8 @@ const mapStateToProps = (state) => ({
   isGameReadyToStart: state.navigation.isGameReadyToStart,
   currentPage: state.navigation.currentPage,
   game: state.navigation.game,
-  user: state.user,
+  user: state.user.user,
+  teams: state.createGame.teams,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -33,7 +34,16 @@ class Navigator extends Component {
     goToGamePrepare: false,
     goToLobby: false,
     goToJoin: false,
+    goToGameDetails: false,
   };
+
+  constructor(props) {
+    super(props);
+
+    this.onBackButtonClick = this.onBackButtonClick.bind(this);
+    this.onGameStart = this.onGameStart.bind(this);
+    this.onGameCreate = this.onGameCreate.bind(this);
+  }
 
   getBackButtonStyle = () => {
     const { currentPage } = this.props;
@@ -45,7 +55,7 @@ class Navigator extends Component {
     return currentPage === pageNames.gameLobby ? '/join' : '/';
   };
 
-  onBackButtonClick = () => {
+  async onBackButtonClick() {
     const { currentPage, game, user } = this.props;
 
     if (currentPage === pageNames.gameLobby) {
@@ -54,28 +64,67 @@ class Navigator extends Component {
     }
 
     if (currentPage === pageNames.gamePrepare) {
-      onGameLeave({
-        username: user.username,
-        gameId: game.gameId,
-      });
+      isPageLoading(true);
+
+      try {
+        const result = await gameApi.leaveGame(game.gameId);
+        if (result && result.isSuccess) {
+          this.setState({ goToGameDetails: false, goToGamePrepare: false, goToJoin: false, goToLobby: true });
+        }
+        isPageLoading(false);
+      } catch (error) {
+        isPageLoading(false);
+      }
     }
   };
 
-  onGameStart = () => {
+  async onGameStart() {
     const {
       game,
       isPageLoading,
+      teams,
     } = this.props;
 
     isPageLoading(true);
 
-    const requestPayload = { gameId: game.gameId };
-    onGameStart(requestPayload);
+    try {
+      const result = await gameApi.startGame(game.gameId, teams[0], teams[1]);
+      if (result && result.isSuccess) {
+        setGame(result.data);
+        this.setState({ goToGameDetails: true, goToGamePrepare: false, goToJoin: false, goToLobby: false });
+      }
+      isPageLoading(false);
+    } catch (error) {
+      isPageLoading(false);
+    }
+  };
+
+  async onGameCreate() {
+    const {
+      game,
+      user,
+      teams,
+      isPageLoading,
+      setGame,
+    } = this.props;
+
+    isPageLoading(true);
+
+    try {
+      const result = await gameApi.createGame(null, user.userId, teams[0], teams[1]);
+      if (result && result.isSuccess) {
+        setGame(result.data);
+        this.setState({ goToGameDetails: false, goToGamePrepare: true, goToJoin: false, goToLobby: false });
+      }
+      isPageLoading(false);
+    } catch (error) {
+      isPageLoading(false);
+    }
   };
 
   onGameJoin = () => {
     this.setState({ goToGamePrepare: true, goToLobby: false, goToJoin: false });
-  }
+  };
 
   render() {
     const {
@@ -110,7 +159,7 @@ class Navigator extends Component {
         <div className='rugby-navigator__bottom'>
           {
             currentPage === pageNames.gameCreate &&
-            <Button color="success" disabled={!isTeamsSelectedOnGameCreate}>
+            <Button color="success" disabled={!isTeamsSelectedOnGameCreate} onClick={this.onGameCreate}>
               <span className="create" />
               <span className="btn-text-content">Create</span>
             </Button>

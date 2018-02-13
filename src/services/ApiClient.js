@@ -2,7 +2,7 @@ import axios from 'axios';
 import queryString from 'query-string';
 
 // timeout in milliseconds
-const requestTimeout = 3000;
+const requestTimeout = 300000;
 
 export default class ApiClient {
   constructor(baseUrl) {
