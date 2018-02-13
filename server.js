@@ -71,7 +71,7 @@ const onGameCreated = (data) => {
 }
 
 const onGameJoined = (data) => {
-  if (!data) {
+  if (!data || !data.game || !data.userAvatar) {
     return;
   }
   
@@ -80,7 +80,7 @@ const onGameJoined = (data) => {
   if (socket) {
     socket.join(data.gameId);
     socket.join(data.teamId);
-    socket.currentGameId = data.gameId;
+    socket.currentGameId = data.game.gameId;
     socket.currentTeamId = data.teamId;
 
     console.log('game:joined ' + JSON.stringify(data));
@@ -175,33 +175,33 @@ redisSubscriber.subscribe("whg:app");
 redisSubscriber.on("message", function (channel, message) {
   try {
     var messageJson = JSON.parse(message);
-    switch (messageJson.Topic) {
+    switch (messageJson.topic) {
       case 'user:loggedin':
-        onUserLoggedIn(messageJson.Payload);
+        onUserLoggedIn(messageJson.payload);
         break;
       case 'game:joined':
-        onGameJoined(messageJson.Payload);
+        onGameJoined(messageJson.payload);
         break;
       case 'game:left':
-        onGameLeft(messageJson.Payload);
+        onGameLeft(messageJson.payload);
         break;
       case 'game:started':
-        onGameStarted(messageJson.Payload);
+        onGameStarted(messageJson.payload);
         break;
       case 'game:created':
-        onGameCreated(messageJson.Payload);
+        onGameCreated(messageJson.payload);
         break;
       case 'game:result:team:turn':
-        onGameTeamResult(messageJson.Payload);
+        onGameTeamResult(messageJson.payload);
         break;
       case 'game:result:scoreboard:turn':
-        onGameScoreboardResult(messageJson.Payload);
+        onGameScoreboardResult(messageJson.payload);
         break;
       case 'game:result:team:finished':
-        onGameFinalResult(messageJson.Payload);
+        onGameFinalResult(messageJson.payload);
         break;
       case 'game:result:scoreboard:finished':
-        onGameScoreboardFinalResult(messageJson.Payload);
+        onGameScoreboardFinalResult(messageJson.payload);
         break;
       default:
         break;

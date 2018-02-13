@@ -98,29 +98,29 @@ class GameLobby extends PureComponent {
     if (data.teamId) {
       game.teams.forEach(team => {
         if (team.teamId === data.teamId) {
-          if (!team.players) {
-            team.players = [];
+          if (!team.users) {
+            team.users = [];
           }
 
-          const existingPlayer = team.players.find((t) => { return t.username === data.username });
+          const existingPlayer = team.users.find((t) => { return t.userId === data.userAvatar.user.userId });
           if (!existingPlayer) {
-            team.players.push({ username: data.username, avatarId: data.avatarId });
+            team.players.push({ username: data.username, avatarId: data.userAvatar.player.playerId });
           } else {
             if (existingPlayer.avatarId !== data.avatarId) {
-              existingPlayer.avatarId = data.avatarId;
+              existingPlayer.avatarId = data.userAvatar.player.playerId;
             }
           }
         } else {
           remove(team.players, (player) => {
-            return player.username === data.username;
+            return player.userId === data.userAvatar.user.userId;
           });
         }
       });
 
-      const player = game.players.find(a => a.username === data.username);
+      const player = game.players.find(a => a.user.userId === data.userAvatar.user.userId);
       if (player) {
-        if (player.avatarId !== data.avatarId) {
-          player.avatarId = data.avatarId;
+        if (player.avatarId !== data.userAvatar.player.playerId) {
+          player.avatarId = data.userAvatar.player.playerId;
         }
       }
 
