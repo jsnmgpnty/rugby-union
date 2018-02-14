@@ -105,11 +105,29 @@ class GameDetails extends PureComponent {
 
   getMockedAvatarData(){
     return {
-        username: "johnny_bravo",
-        avatarId: 1,
-        playerId: 1,
-        profilePicture: "../../assets/mark_bennett.png",
-        name: "Mark Bennett",
+      "players" : [
+        {
+          username: "king_json",
+          avatarId: "1",
+          playerId: "1",
+          profilePicture: "mark_bennett.png",
+          name: "Mark Bennett",
+        },
+        {
+          username: "kim_strong",
+          avatarId: "2",
+          playerId: "2",
+          profilePicture: "solen_brandy.png",
+          name: "Solen Brandy",
+        },
+        {
+          username: "luibogs",
+          avatarId: "3",
+          playerId: "3",
+          profilePicture: "liza_malupet.png",
+          name: "Liza Malupet",
+        }
+      ]
     }
   }
 

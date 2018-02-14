@@ -3,6 +3,7 @@
 .team-player {
   color: $white;
   transition: 0.5s;
+  padding: 0.2rem 0 0.2rem 0;
 
   &.is-active {
     background: $blue;
@@ -40,14 +41,14 @@
 
   .team-player__avatar {
     float: left;
-    padding: 0.475rem 0;
+	padding: 0 1rem;
 
     .team-player__avatar-pic {
       background-size: cover;
       display: block;
       float: left;
-      width: 2rem;
-      height: 2rem;
+	  width: 3rem;
+	  height: 3rem;
       border-radius: 100%;
       border: 1.5px solid $white;
     }
@@ -55,6 +56,7 @@
 
   .team-player__user {
     padding-left: 2.5rem;
+	padding-top: .49rem;
 
     p {
       margin: 0;
@@ -62,10 +64,13 @@
 
     .team-player__user-avatar {
       @include ellipsis-text;
+	  line-height: 1;
+	  text-align: left;
     }
 
     .team-player__user-name {
       color: $gray-500;
+	  text-align: left;
 
       &.player-taken {
         color: $blue;

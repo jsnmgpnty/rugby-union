@@ -7,7 +7,7 @@ const propTypes = {
 };
 
 function Country(props) {
-  return <div className={`country ${props.country.name.toLowerCase()}`}></div>;
+  return <div className={`country team-attack ${props.country.name.toLowerCase()}`}></div>;
 }
 
 Country.propTypes = propTypes;
