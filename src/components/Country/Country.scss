@@ -2,9 +2,18 @@
 
 .country {
   background-size: cover;
-  height: 60px;
+  height: 80px;
   background-position: center;
-  width: 60px;
+  width: 80px;
+  border-radius: 50%;
+  
+  &.team-attack{
+    border: 5px solid red;
+  }
+  
+  &.team-defend{
+    border: 5px solid red;
+  }
 
   &.england {
     background-image: url('../../assets/england_icon.png');
