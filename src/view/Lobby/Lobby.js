@@ -40,10 +40,7 @@ class Lobby extends PureComponent {
   };
 
   handleGameCreated = (data) => {
-    const games = this.state.games;
-    games.push(data);
-
-    this.setState({ games });
+    this.setState({ games: this.state.games.concat(data) });
   }
 
   async getCurrentGameByUser() {

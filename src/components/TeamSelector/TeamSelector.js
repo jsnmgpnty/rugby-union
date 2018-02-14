@@ -13,8 +13,9 @@ const propTypes = {
     name: PropTypes.string.isRequired,
   }).isRequired,
   players: PropTypes.arrayOf(PropTypes.shape({
-    user: PropTypes.object.isRequired,
-    player: PropTypes.object.isRequired,
+    userId: PropTypes.string.isRequired,
+    username: PropTypes.string.isRequired,
+    playerId: PropTypes.string.isRequired,
   })),
   onJoin: PropTypes.func,
 };
@@ -28,30 +29,14 @@ const getCountryLogo = (country) => {
   if (!country) {
     return null;
   }
-
-  switch (country.countryId) {
-    case 1:
-      return 'england';
-    case 2:
-      return 'france';
-    case 3:
-      return 'ireland';
-    case 4:
-      return 'italy';
-    case 5:
-      return 'scotland';
-    case 6:
-      return 'wales';
-    default:
-      return null;
-  }
+  return country.name.toLowerCase();
 };
 
 const mapPlayersToAvatar = (players, avatars) => {
   const mappedPlayers = avatars.map((avatar) => {
-    const player = players.find((p) => p.player.playerId === avatar.playerId);
+    const player = players.find((p) => p.playerId === avatar.playerId);
     return {
-      user: player ? player.user : null,
+      user: player ? { userId: player.userId, username: player.username } : null,
       avatar: avatar,
     };
   });

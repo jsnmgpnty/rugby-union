@@ -82,7 +82,7 @@ function onUserLoggedIn(data) {
 
 function onGameCreated(data) {
   console.log('game:created ' + JSON.stringify(data));
-  io.sockets.emit('game:created', data.game);
+  io.sockets.emit('game:created', data);
 }
 
 function onGameJoined(data) {
@@ -90,18 +90,15 @@ function onGameJoined(data) {
     return;
   }
 
-  var socket = getSocketBySession(data.userAvatar.user.userId);
+  var socket = getSocketBySession(data.userAvatar.userId);
 
   if (socket) {
     socket.join(data.game.gameId);
-    socket.join(data.teamId);
     socket.currentGameId = data.game.gameId;
     socket.currentTeamId = data.teamId;
 
     console.log('game:joined ' + JSON.stringify(data));
-    io.to(data.gameId).emit('game:joined', data);
-    console.log('game:joined ' + JSON.stringify(data));
-    io.to(data.teamId).emit('game:joined', data);
+    io.to(data.game.gameId).emit('game:joined', data);
   }
 }
 
@@ -180,6 +177,7 @@ io.on('connection', function (socket) {
       connectedClients.push({ userId: data.userId, socket: socket });
     }
 
+    connectedClient.join(data.gameId);
     socket.join(data.gameId);
   });
 
