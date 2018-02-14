@@ -24,6 +24,9 @@ class Scoreboard extends PureComponent {
     }
 
     getResultField(game) {
+        if(game.currentTurnNumber === 1){
+            return "default_field";
+        }
         var scoreFieldClassName = game.isSaved ? "safe" : "tackled";
         console.log(game.isSaved);
         scoreFieldClassName += game.currentTurnNumber;
