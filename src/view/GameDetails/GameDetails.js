@@ -74,7 +74,7 @@ class GameDetails extends PureComponent {
         }
 
         this.props.setGame(game);
-        this.setState({ game, isBusy: false });
+        this.setState({ game, isBusy: false }, () => this.getGameState(gameId));
       }
     } catch (error) {
       this.setState({ isBusy: false });
@@ -87,12 +87,14 @@ class GameDetails extends PureComponent {
     const { game } = this.state;
 
     try {
-      const gameState = await gameApi.getGameState(gameId.user.userId);
+      const gameStateResult = await gameApi.getGameState(gameId, user.userId);
 
-      if (game && gameState) {
+      if (game && gameStateResult.isSuccess) {
+        const gameState = gameStateResult.data;
+
         if (gameState.teamId) {
           const currentTeam = game.teams.find(a => a.teamId === gameState.teamId);
-          this.setState({ currentTeam });
+          this.setState({ currentTeam, currentTurnNumber: gameState.turnNumber });
           onGameStart({ userId: user.userId, teamId: currentTeam.teamId });
         }
 
@@ -106,38 +108,40 @@ class GameDetails extends PureComponent {
     }
   };
 
-  getMockedAvatarData() {
-    return {
-      username: "johnny_bravo",
-      avatarId: 1,
-      playerId: 1,
-      profilePicture: "../../assets/mark_bennett.png",
-      name: "Mark Bennett",
-    }
+  getGameDetails = () => {
+    const { isTackled, isTouchdown, currentTurnNumber } = this.state;
+    return { isTackled, currentTurnNumber, isSaved: isTouchdown };
   }
 
-  getGameDetails() {
-    var game = {
-      isSaved: false,
-      isTackled: true,
-      currentTurnNumber: 3,
-    }
-    return game;
+  getCountryByTeam = (team) => {
+    const { countries } = this.props;
+    const country = countries.find(a => a.countryId === team.countryId);
+    return country ? country : { name: 'N/A ' };
   }
 
   render() {
+    const { isBusy, game } = this.state;
+
     return (
       <div className="gamedetails-view">
-        <div className="gamedetails-view__header">
-          <h2>Game 2</h2>
-          <p>england vs scotland</p>
-          <p>Round 1 of 5</p>
-        </div>
-        <Scoreboard game={this.getGameDetails()} />
-        <p className="teamBallPosession">Defense Team (Scotland)</p>
-        <p className="teamMissionDescription">Guess 1 player you think is the ball bearer
-           if majority of the team guesses the right person your team wins the round.</p>
-        <TeamPlayer key={uuid()} currentUser="Kim" username="johnny_bravo" avatar={this.getMockedAvatarData()} teamId={1} />
+        <Spinner isLoading={isBusy}>
+          {
+            game && (
+              <div>
+                <div className="gamedetails-view__header">
+                  <h2>{game.name}</h2>
+                  <p>{`${this.getCountryByTeam(game.teams[0]).name} vs ${this.getCountryByTeam(game.teams[1]).name}`}</p>
+                  <p>Round 1 of 5</p>
+                </div>
+                <Scoreboard game={this.getGameDetails()} />
+                <p className="teamBallPosession">Defense Team (Scotland)</p>
+                <p className="teamMissionDescription">Guess 1 player you think is the ball bearer if majority of the team guesses the right person your team wins the round.</p>
+                <TeamPlayer key={uuid()} currentUser="Kim" username="johnny_bravo" avatar={this.getMockedAvatarData()} teamId={1} />
+              </div>
+            )
+          }
+
+        </Spinner>
       </div>
     )
   }
