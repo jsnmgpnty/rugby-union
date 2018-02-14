@@ -119,14 +119,54 @@ class GameDetails extends PureComponent {
     return country ? country : { name: 'N/A ' };
   }
 
+  getMappedPlayers = (team) => {
+    if (!team) {
+      return [];
+    }
+
+    const { countries, user } = this.props;
+    const country = countries.find(a => a.countryId === team.countryId);
+
+    const mappedPlayers = [];
+
+    team.users.map((user) => {
+      let player = country.players.find(p => p.playerId === user.playerId);
+      if (!player) {
+        player = {
+          playerId: null,
+          name: 'N/A',
+          profilePicture: null
+        };
+      }
+
+      const mappedPlayer = {
+        user: {
+          username: user.username,
+          userId: user.userId,
+        },
+        player: {
+          playerId: player.playerId,
+          profilePicture: player.profilePicture,
+          name: player.name,
+        }
+      };
+
+      mappedPlayers.push(mappedPlayer);
+    });
+
+    return mappedPlayers;
+  }
+
   render() {
-    const { isBusy, game } = this.state;
+    const { isBusy, game, currentTeam } = this.state;
+    const { user } = this.props;
+    const mappedPlayers = this.getMappedPlayers(currentTeam);
 
     return (
       <div className="gamedetails-view">
         <Spinner isLoading={isBusy}>
           {
-            game && (
+            game && currentTeam && (
               <div>
                 <div className="gamedetails-view__header">
                   <h2>{game.name}</h2>
@@ -136,7 +176,15 @@ class GameDetails extends PureComponent {
                 <Scoreboard game={this.getGameDetails()} />
                 <p className="teamBallPosession">Defense Team (Scotland)</p>
                 <p className="teamMissionDescription">Guess 1 player you think is the ball bearer if majority of the team guesses the right person your team wins the round.</p>
-                <TeamPlayer key={uuid()} currentUser="Kim" username="johnny_bravo" avatar={this.getMockedAvatarData()} teamId={1} />
+                {
+                  mappedPlayers.map(a => {
+                    return (
+                      <TeamPlayer key={uuid()} currentUser={user.username} user={a.user} avatar={a.player}>
+                        <label>ball</label>
+                      </TeamPlayer>
+                    )
+                  })
+                }
               </div>
             )
           }
