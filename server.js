@@ -181,6 +181,16 @@ io.on('connection', function (socket) {
     socket.join(data.gameId);
   });
 
+  socket.on('game:create', function (data) {
+    var connectedClient = getSocketBySession(data.userId);
+    if (!connectedClient) {
+      connectedClients.push({ userId: data.userId, socket: socket });
+    }
+
+    connectedClient.join(data.teamId);
+    socket.join(data.teamId);
+  });
+
   socket.on('disconnection', function () {
     removeSocketBySocketId(socket.socketIdInternal);
   })

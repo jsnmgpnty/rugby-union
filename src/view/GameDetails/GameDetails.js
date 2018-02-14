@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
-import { onGameLeft } from 'services/SocketClient';
+import { onGameLeft, onGameStart } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
 import './GameDetails.scss';
@@ -91,11 +91,12 @@ class GameDetails extends PureComponent {
         if (gameState.teamId) {
           const currentTeam = game.teams.find(a => a.teamId === gameState.teamId);
           this.setState({ currentTeam });
+          onGameStart({ userId: user.userId, teamId: currentTeam.teamId });
         }
 
         if (gameState.winningTeam) {
           this.setState({ winningTeam: gameState.winningTeam, isTackled: gameState.isTackled, isTouchdown: gameState.isTouchdown });
-        } 
+        }
       }
     } catch (error) {
       this.setState({ isBusy: false });
