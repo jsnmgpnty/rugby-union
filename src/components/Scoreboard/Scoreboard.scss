@@ -15,9 +15,57 @@
 }
 
 .score-view__field{
-    background: url(../../assets/default_field.png) no-repeat center top;
     background-size: contain;
-    
+    background-repeat: no-repeat;
+    background-position: center top;
     height: 200px;
     width: 100%;
+
+    &.default{
+        background-image: url(../../assets/default_field.png);
+    }
+    
+    &.safe2{
+        background-image: url(../../assets/safe2.png);
+    }
+
+    &.safe3{
+        background-image: url(../../assets/safe3.png);
+    }
+
+    &.safe4{
+        background-image: url(../../assets/safe4.png);
+    }
+
+    &.safe5{
+        background-image: url(../../assets/safe5.png);
+    }
+
+    &.safe6{
+        background-image: url(../../assets/safe6.png);
+    }
+
+    &.tackled1{
+        background-image: url(../../assets/tackled1.png);
+    }
+    
+    &.tackled2{
+        background-image: url(../../assets/tackled2.png);
+    }
+
+    &.tackled3{
+        background-image: url(../../assets/tackled3.png);
+    }
+
+    &.tackled4{
+        background-image: url(../../assets/tackled4.png);
+    }
+
+    &.tackled5{
+        background-image: url(../../assets/tackled5.png);
+    }
+
+    &.tackled6{
+        background-image: url(../../assets/tackled6.png);
+    }
 }

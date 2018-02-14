@@ -87,7 +87,9 @@
     "server": "nodemon server.js",
     "server:prod": "set NODE_ENV=prod && nodemon server.js"
   },
-  "engines":{"node": "0.12.x"}, 
+  "engines": {
+    "node": "0.12.x"
+  },
   "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx,mjs}"

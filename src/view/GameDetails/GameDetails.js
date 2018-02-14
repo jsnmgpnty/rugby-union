@@ -26,10 +26,12 @@ const mapStateToProps = state => ({
 
 class GameDetails extends PureComponent {
   state = {
+    //Game State
     gameId: null,
     isBusy: false,
     isGameStarted: false,
     isGameCompleted: false,
+    //Game Details
     game: null,
     currentTeam: null,
     currentTurnNumber: 0,
@@ -37,7 +39,7 @@ class GameDetails extends PureComponent {
     isTackled: false,
     isTouchdown: false,
   };
-  
+
   async componentDidMount() {
     const { setCurrentPage } = this.props;
     const { params } = this.props.match;
@@ -70,7 +72,7 @@ class GameDetails extends PureComponent {
           default:
             break;
         }
-        
+
         this.props.setGame(game);
         this.setState({ game, isBusy: false });
       }
@@ -85,7 +87,7 @@ class GameDetails extends PureComponent {
     const { game } = this.state;
 
     try {
-      const gameState = await gameApi.getGameState(gameId. user.userId);
+      const gameState = await gameApi.getGameState(gameId.user.userId);
 
       if (game && gameState) {
         if (gameState.teamId) {
@@ -104,14 +106,23 @@ class GameDetails extends PureComponent {
     }
   };
 
-  getMockedAvatarData(){
+  getMockedAvatarData() {
     return {
-        username: "johnny_bravo",
-        avatarId: 1,
-        playerId: 1,
-        profilePicture: "../../assets/mark_bennett.png",
-        name: "Mark Bennett",
+      username: "johnny_bravo",
+      avatarId: 1,
+      playerId: 1,
+      profilePicture: "../../assets/mark_bennett.png",
+      name: "Mark Bennett",
     }
+  }
+
+  getGameDetails() {
+    var game = {
+      isSaved: false,
+      isTackled: true,
+      currentTurnNumber: 3,
+    }
+    return game;
   }
 
   render() {
@@ -122,11 +133,11 @@ class GameDetails extends PureComponent {
           <p>england vs scotland</p>
           <p>Round 1 of 5</p>
         </div>
-        <Scoreboard/>
+        <Scoreboard game={this.getGameDetails()} />
         <p className="teamBallPosession">Defense Team (Scotland)</p>
         <p className="teamMissionDescription">Guess 1 player you think is the ball bearer
            if majority of the team guesses the right person your team wins the round.</p>
-        <TeamPlayer key={uuid()} currentUser="Kim" username="johnny_bravo" avatar={this.getMockedAvatarData()} teamId={1}/>
+        <TeamPlayer key={uuid()} currentUser="Kim" username="johnny_bravo" avatar={this.getMockedAvatarData()} teamId={1} />
       </div>
     )
   }
