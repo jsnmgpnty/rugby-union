@@ -43,12 +43,12 @@ const getProfilePic = (avatar) => {
   return style;
 };
 
-const isCurrentUser = (username, currentUser) => {
-  if (!currentUser || !username) {
+const isCurrentUser = (user, currentUser) => {
+  if (!currentUser || !user) {
     return false;
   }
 
-  return username === currentUser;
+  return user.userId === currentUser;
 };
 
 function TeamPlayer(props) {

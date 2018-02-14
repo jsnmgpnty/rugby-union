@@ -96,36 +96,38 @@ class GameLobby extends PureComponent {
   handleGameJoin = (data) => {
     const { game } = this.state;
 
-    if (data.teamId) {
+    if (data.teamId && data.game) {
+      game.players = data.game.players;
+
       game.teams.forEach(team => {
         if (team.teamId === data.teamId) {
           if (!team.users) {
             team.users = [];
           }
 
-          const existingPlayer = team.users.find((t) => { return t.user.userId === data.userAvatar.user.userId });
+          const existingPlayer = team.users.find((t) => { return t.userId === data.userAvatar.userId });
           if (!existingPlayer) {
             team.users.push(data.userAvatar);
           } else {
-            if (existingPlayer.player.playerId !== data.userAvatar.player.playerId) {
-              existingPlayer.player = data.userAvatar.player;
+            if (existingPlayer.playerId !== data.userAvatar.playerId) {
+              existingPlayer.playerId = data.userAvatar.playerId;
             }
           }
         } else {
           remove(team.users, (user) => {
-            return user.user.userId === data.userAvatar.user.userId;
+            return user.userId === data.userAvatar.userId;
           });
         }
       });
 
-      const player = game.players.find(a => a.user.userId === data.userAvatar.user.userId);
+      const player = game.players.find(a => a.userId === data.userAvatar.userId);
       if (player) {
-        if (player.player.playerId !== data.userAvatar.player.playerId) {
-          player.player = data.userAvatar.player;
+        if (player.playerId !== data.userAvatar.playerId) {
+          player.playerId = data.userAvatar.playerId;
         }
       }
 
-      this.setState({ game: { ...game } });
+      this.setState({ game: {...game} });
     }
   };
 
@@ -234,7 +236,7 @@ class GameLobby extends PureComponent {
                     game.teams.map((team) => (
                       <div className="game-prepare__teams-item" key={team.teamId}>
                         <TeamSelector
-                          currentUser={user.username}
+                          currentUser={user.userId}
                           teamId={team.teamId}
                           players={team.users}
                           country={this.getCountry(team.countryId)}
