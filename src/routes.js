@@ -14,13 +14,14 @@ const propTypes = {
 
 function AppRoutes(props) {
   return (
-    <Switch>
-      <Route path="/" exact component={Lobby} />
-      <Route path="/create" exact component={GameCreate} />
-      <Route path="/join" exact component={Join} />
-      <Route path="/game/:gameId" exact component={GamePrepare} />
-      <Route path="/game/:gameId/details" exact component={GameDetails} />
-    </Switch>
+    // <Switch>
+    //   <Route path="/" exact component={Lobby} />
+    //   <Route path="/create" exact component={GameCreate} />
+    //   <Route path="/join" exact component={Join} />
+    //   <Route path="/game/:gameId" exact component={GamePrepare} />
+    //   <Route path="/game/:gameId/details" exact component={GameDetails} />
+    // </Switch>
+    <GameDetails />
   );
 }
 
