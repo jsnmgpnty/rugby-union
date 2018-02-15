@@ -102,12 +102,12 @@ class GameDetails extends PureComponent {
       const game = await gameApi.getGame(gameId);
 
       if (game) {
-        switch (game.status) {
-          case 'INPROGRESS':
-          case 'PAUSED':
+        switch (game.gameStatus) {
+          case 0:
+          case 1:
             this.setState({ isGameStarted: true });
             break;
-          case 'COMPLETED':
+          case 2:
             this.setState({ isGameCompleted: true });
             break;
           default:
