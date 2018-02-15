@@ -13,3 +13,6 @@ export const IS_PAGE_LOADING = 'IS_PAGE_LOADING';
 export const SET_CURRENT_PAGE = 'SET_CURRENT_PAGE';
 export const SET_GAME = 'SET_GAME';
 export const SET_PLAYER_AVATAR = 'SET_PLAYER_AVATAR';
+
+// game proper
+export const SET_PLAYER_TO_TACKLE = 'SET_PLAYER_TO_TACKLE';

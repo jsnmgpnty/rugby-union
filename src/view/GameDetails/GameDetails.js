@@ -8,6 +8,7 @@ import pageNames from 'lib/pageNames';
 import { onGameLeft, onGameStart } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
+import { setPlayerToTackle } from 'actions/game';
 import './GameDetails.scss';
 import { Scoreboard } from 'components';
 import TeamPlayer from '../../components/TeamSelector/TeamPlayer';
@@ -17,6 +18,7 @@ const mapDispatchToProps = dispatch => ({
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameDetails)),
   isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
   setGame: (game) => dispatch(setGame(game)),
+  setPlayerToTackle: (playerId) => dispatch(setPlayerToTackle(playerId)),
 });
 
 const mapStateToProps = state => ({
@@ -194,10 +196,14 @@ class GameDetails extends PureComponent {
   passBall = () => {
   }
 
+  onPlayerSelected = (teamId, playerId) => {
+    this.props.setPlayerToTackle(playerId);
+  }
+
   render() {
-    const { isBusy, game, currentTeam, isPlayerHoldingBall, isPlayerOnAttack, ballHolder } = this.state;
+    const { isBusy, game, currentTeam, isPlayerHoldingBall, isPlayerOnAttack, ballHolder, ballHandlerTeam } = this.state;
     const { user } = this.props;
-    const mappedPlayers = this.getMappedPlayers(currentTeam);
+    const mappedPlayers = this.getMappedPlayers(ballHandlerTeam);
 
     return (
       <div className="gamedetails-view">
@@ -216,7 +222,7 @@ class GameDetails extends PureComponent {
                 {
                   mappedPlayers.map(a => {
                     return (
-                      <TeamPlayer key={uuid()} currentUser={user.username} user={a.user} avatar={a.player}>
+                      <TeamPlayer key={uuid()} currentUser={user.username} user={a.user} avatar={a.player} onSelect={this.onPlayerSelected}>
                         {
                           isPlayerOnAttack && ballHolder === a.user.userId && <div className="player-badge ball"></div>
                         }

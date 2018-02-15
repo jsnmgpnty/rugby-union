@@ -23,6 +23,7 @@ const mapStateToProps = (state) => ({
   user: state.user.user,
   teams: state.createGame.teams,
   currentTeam: state.user.currentTeam,
+  playerToTackle: state.game.playerToTackle,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -44,6 +45,7 @@ class Navigator extends Component {
     this.onBackButtonClick = this.onBackButtonClick.bind(this);
     this.onGameStart = this.onGameStart.bind(this);
     this.onGameCreate = this.onGameCreate.bind(this);
+    this.onTackle = this.onTackle.bind(this);
   }
 
   getBackButtonStyle = () => {
@@ -124,6 +126,11 @@ class Navigator extends Component {
     this.setState({ goToGamePrepare: true, goToLobby: false, goToJoin: false, goToGameDetails: false });
   };
 
+  async onTackle() {
+    const { game, user, playerToTackle } = this.props;
+    await gameApi.tacklePlayer(game.gameId, user.userId, playerToTackle);
+  }
+
   render() {
     const {
       isCreatingGame,
@@ -135,6 +142,7 @@ class Navigator extends Component {
       currentPage,
       game,
       user,
+      playerToTackle,
     } = this.props;
 
     const {
@@ -182,6 +190,13 @@ class Navigator extends Component {
             <Button className="btn-join" onClick={this.onGameStart} color="primary" disabled={!isGameReadyToStart || user.userId !== game.createdBy}>
               <span className="start" />
               <span className="btn-text-content">Start</span>
+            </Button>
+          }
+          {
+            currentPage === pageNames.gameDetails &&
+            <Button className="btn-tackle" onClick={this.onTackle} color="success" disabled={!playerToTackle}>
+              <span className="tackle" />
+              <span className="btn-text-content">Tackle</span>
             </Button>
           }
         </div>

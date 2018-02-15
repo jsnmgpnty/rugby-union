@@ -15,12 +15,12 @@ const propTypes = {
     name: PropTypes.string.isRequired,
     profilePicture: PropTypes.string.isRequired,
   }),
-  onJoin: PropTypes.func,
+  onSelect: PropTypes.func,
 };
 
 const defaultProps = {
   avatar: null,
-  onJoin: () => { },
+  onSelect: () => { },
 };
 
 const getTeamPlayerId = (avatar) => {
@@ -56,7 +56,7 @@ function TeamPlayer(props) {
 
   return (
     <div id={`team-player_${getTeamPlayerId(props.avatar)}`} className={`team-player ${isCurrentUser(userId, props.currentUser) ? 'is-active' : null}`}>
-      <a onClick={() => props.onJoin(props.teamId, props.avatar.playerId)}>
+      <a onClick={() => props.onSelect(props.teamId, props.avatar.playerId)}>
         <div className="team-player__avatar">
           <span className="team-player__avatar-pic" style={getProfilePic(props.avatar)} />
         </div>
