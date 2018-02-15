@@ -5,3 +5,4 @@ export { default as Navigator } from './Navigator/Navigator';
 export { default as GameCard } from './GameCard/GameCard';
 export { default as Country } from './Country/Country';
 export { default as Scoreboard } from './Scoreboard/Scoreboard';
+export { default as SplashScreen } from './SplashScreen/SplashScreen';

@@ -6,7 +6,7 @@ import { withRouter } from 'react-router-dom';
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
 import { onGameLeft, onGameStart } from 'services/SocketClient';
-import { TeamSelector, Spinner } from 'components';
+import { TeamSelector, Spinner, SplashScreen } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
 import './GameDetails.scss';
 import { Scoreboard } from 'components';
@@ -164,12 +164,13 @@ class GameDetails extends PureComponent {
   }
 
   render() {
-    const { isBusy, game, currentTeam } = this.state;
+    const { isBusy, game, currentTeam, winningTeam } = this.state;
     const { user } = this.props;
     const mappedPlayers = this.getMappedPlayers(currentTeam);
 
     return (
       <div className="gamedetails-view">
+		<SplashScreen/>
         <Spinner isLoading={isBusy}>
           {
             game && currentTeam && (
