@@ -34,10 +34,15 @@ class GameDetails extends PureComponent {
     //Game Details
     game: null,
     currentTeam: null,
+    ballHandlerTeam: null,
     currentTurnNumber: 0,
     winningTeam: null,
     isTackled: false,
     isTouchdown: false,
+    isPlayerOnAttack: false,
+    isPlayerHoldingBall: false,
+    ballHolder: null,
+    votes: [],
   };
 
   async componentDidMount() {
@@ -89,12 +94,26 @@ class GameDetails extends PureComponent {
     try {
       const gameStateResult = await gameApi.getGameState(gameId, user.userId);
 
-      if (game && gameStateResult.isSuccess) {
+      if (game && gameStateResult) {
         const gameState = gameStateResult.data;
 
         if (gameState.teamId) {
           const currentTeam = game.teams.find(a => a.teamId === gameState.teamId);
-          this.setState({ currentTeam, currentTurnNumber: gameState.turnNumber });
+          const ballHandlerTeam = game.teams.find(a => a.isBallHandler);
+          const isPlayerOnAttack = currentTeam.isBallHandler;
+          this.setState({ isPlayerOnAttack });
+
+          if (gameState.latestTurn && gameState.latestTurn.length > 0) {
+            if (isPlayerOnAttack) {
+              const ballHolder = gameState.latestTurn[0].sender;
+              const isPlayerHoldingBall = ballHolder === user.userId;
+              this.setState({ isPlayerHoldingBall, ballHolder });
+            } else {
+              this.setState({ votes: gameState.latestTurn });
+            }
+          }
+
+          this.setState({ currentTeam, ballHandlerTeam, currentTurnNumber: gameState.turnNumber });
           onGameStart({ userId: user.userId, teamId: currentTeam.teamId });
         }
 
@@ -111,6 +130,21 @@ class GameDetails extends PureComponent {
   getGameDetails = () => {
     const { isTackled, isTouchdown, currentTurnNumber } = this.state;
     return { isTackled, currentTurnNumber, isSaved: isTouchdown };
+  }
+
+  getVotePerPlayerBadge = (userId) => {
+    if (!userId) {
+      return null;
+    }
+
+    const { votes } = this.state;
+    const voters = votes.filter(a => a.toTackle === userId).length;
+
+    if (voters === 0) {
+      return null;
+    }
+
+    return <div className="player-badge vote"><span>{voters}</span></div>;
   }
 
   getCountryByTeam = (team) => {
@@ -157,8 +191,11 @@ class GameDetails extends PureComponent {
     return mappedPlayers;
   }
 
+  passBall = () => {
+  }
+
   render() {
-    const { isBusy, game, currentTeam } = this.state;
+    const { isBusy, game, currentTeam, isPlayerHoldingBall, isPlayerOnAttack, ballHolder } = this.state;
     const { user } = this.props;
     const mappedPlayers = this.getMappedPlayers(currentTeam);
 
@@ -173,14 +210,19 @@ class GameDetails extends PureComponent {
                   <p>{`${this.getCountryByTeam(game.teams[0]).name} vs ${this.getCountryByTeam(game.teams[1]).name}`}</p>
                   <p>Round 1 of 5</p>
                 </div>
-                <Scoreboard game={this.getGameDetails()} />
+                <Scoreboard game={this.getGameDetails()} teams={game.teams} />
                 <p className="teamBallPosession">Defense Team (Scotland)</p>
                 <p className="teamMissionDescription">Guess 1 player you think is the ball bearer if majority of the team guesses the right person your team wins the round.</p>
                 {
                   mappedPlayers.map(a => {
                     return (
                       <TeamPlayer key={uuid()} currentUser={user.username} user={a.user} avatar={a.player}>
-                        <label>ball</label>
+                        {
+                          isPlayerOnAttack && ballHolder === a.user.userId && <div className="player-badge ball"></div>
+                        }
+                        {
+                          !isPlayerOnAttack && this.getVotePerPlayerBadge(a.user.userId)
+                        }
                       </TeamPlayer>
                     )
                   })

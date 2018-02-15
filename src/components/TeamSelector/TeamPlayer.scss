@@ -4,6 +4,7 @@
   color: $white;
   transition: 0.5s;
   padding: 0.2rem 0 0.2rem 0;
+  position: relative;
 
   &.is-active {
     background: $blue;

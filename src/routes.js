@@ -13,13 +13,23 @@ const propTypes = {
 };
 
 function AppRoutes(props) {
+  const isUserSignedIn = (RenderableComponent) => {
+    const user = reactLocalStorage.getObject('user');
+    if (user && user.userId && user.username) {
+      props.setUser(user);
+      return <RenderableComponent {...props.location} />;
+    } else {
+      return <Redirect to="/join" />;
+    }
+  };
+
   return (
     <Switch>
-      <Route path="/" exact component={Lobby} />
-      <Route path="/create" exact component={GameCreate} />
+      <Route path="/" exact render={() => isUserSignedIn(Lobby)} />
+      <Route path="/create" exact render={() => isUserSignedIn(GameCreate)} />
       <Route path="/join" exact component={Join} />
-      <Route path="/game/:gameId" exact component={GamePrepare} />
-      <Route path="/game/:gameId/details" exact component={GameDetails} />
+      <Route path="/game/:gameId" exact render={() => isUserSignedIn(GamePrepare)} />
+      <Route path="/game/:gameId/details" exact render={() => isUserSignedIn(GameDetails)} />
     </Switch>
   );
 }

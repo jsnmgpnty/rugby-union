@@ -38,3 +38,22 @@
     text-align: justify;
     line-height: 1.2;
 }
+
+.player-badge {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    bottom: .25rem;
+    right: 0;
+
+    &.vote {
+
+    }
+    
+    &.ball {
+        background-image: url(../../assets/ball.png);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+}

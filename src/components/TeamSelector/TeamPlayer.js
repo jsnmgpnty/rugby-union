@@ -47,14 +47,15 @@ const isCurrentUser = (user, currentUser) => {
     return false;
   }
 
-  return user.userId === currentUser;
+  return user === currentUser;
 };
 
 function TeamPlayer(props) {
   const username = props.user ? props.user.username : null;
+  const userId = props.user ? props.user.userId : null;
 
   return (
-    <div id={`team-player_${getTeamPlayerId(props.avatar)}`} className={`team-player ${isCurrentUser(username, props.currentUser) ? 'is-active' : null}`}>
+    <div id={`team-player_${getTeamPlayerId(props.avatar)}`} className={`team-player ${isCurrentUser(userId, props.currentUser) ? 'is-active' : null}`}>
       <a onClick={() => props.onJoin(props.teamId, props.avatar.playerId)}>
         <div className="team-player__avatar">
           <span className="team-player__avatar-pic" style={getProfilePic(props.avatar)} />
