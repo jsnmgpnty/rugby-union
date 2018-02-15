@@ -9,7 +9,7 @@ class GameApi extends ApiClient {
   }
 
   async getGameState(gameId, userId) {
-    return this.get(`/game/${gameId}/state?userId=${userId}`);
+    return this.get(`/game/${gameId}/state?userId=${userId}`);	
   }
 
   async getGames() {
@@ -27,7 +27,7 @@ class GameApi extends ApiClient {
   async getLatestGameByUser(username) {
     return this.get(`/user/${username}/game/latest`);
   }
-  
+
   async getDepartments() {
     return this.get('/department');
   }
@@ -39,7 +39,7 @@ class GameApi extends ApiClient {
   async startGame(gameId) {
     return this.get(`/game/${gameId}/start`);
   }
-  
+
   async joinGame(gameId, teamId, userId, playerId) {
     return this.get(`/game/${gameId}/join?teamId=${teamId}&userId=${userId}&playerId=${playerId}`);
   }
@@ -59,7 +59,7 @@ class GameApi extends ApiClient {
   async login(username) {
     return this.post('/user/login', { username });
   }
-  
+
   async getCountries() {
     return this.get('/country');
   }

@@ -144,10 +144,10 @@ class GameDetails extends PureComponent {
 
     try {
       const gameStateResult = await gameApi.getGameState(gameId, user.userId);
+      const isGood = game && gameStateResult;
 
       if (game && gameStateResult) {
         const gameState = gameStateResult.data;
-
         if (gameState.teamId) {
           const currentTeam = game.teams.find(a => a.teamId === gameState.teamId);
           const ballHandlerTeam = game.teams.find(a => a.isBallHandler);
@@ -255,11 +255,33 @@ class GameDetails extends PureComponent {
       this.props.setPlayerToTackle(userId);
     }
   }
+  
+  getGameResultDisplay(){
+    const { isTackled, isTouchdown, isSaved, currentTurnNumber } = this.state;
+    if(isTackled){
+      return "tackled";
+    } else if(isTouchdown){
+      return "try";
+    } else if(isSaved){
+      return "missed";
+    }
+    return "default";
+  }
+
+  onGameResult(game){
+    const turnNumber = game.turnNumber;
+    if(game.winningTeam){
+      this.setState({ isTackled: true, isSaved: false, currentTurnNumber: turnNumber });
+    }else{
+      this.setState({ isSaved: true, isTackled: true, currentTurnNumber: turnNumber })
+    }
+  }
 
   render() {
     const { isBusy, game, currentTeam, isPlayerHoldingBall, isPlayerOnAttack, ballHolder, ballReceiver, ballHandlerTeam } = this.state;
     const { user } = this.props;
     const mappedPlayers = this.getMappedPlayers(ballHandlerTeam);
+    const resultDisplay = this.getGameResultDisplay();
 
     return (
       <div className="gamedetails-view">
@@ -275,6 +297,7 @@ class GameDetails extends PureComponent {
                 <Scoreboard game={this.getGameDetails()} teams={game.teams} />
                 <p className="teamBallPosession">Defense Team (Scotland)</p>
                 <p className="teamMissionDescription">Guess 1 player you think is the ball bearer if majority of the team guesses the right person your team wins the round.</p>
+                <div className={`turnResultDisplay ${this.getGameResultDisplay()}`}></div>
                 {
                   mappedPlayers.map(a => {
                     return (
