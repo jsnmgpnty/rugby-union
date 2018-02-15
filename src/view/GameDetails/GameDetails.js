@@ -8,6 +8,7 @@ import pageNames from 'lib/pageNames';
 import { onGameLeft, onGameStart, onGameResult } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
+import { setPlayerToTackle } from 'actions/game';
 import './GameDetails.scss';
 import { Scoreboard } from 'components';
 import TeamPlayer from '../../components/TeamSelector/TeamPlayer';
@@ -17,6 +18,7 @@ const mapDispatchToProps = dispatch => ({
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameDetails)),
   isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
   setGame: (game) => dispatch(setGame(game)),
+  setPlayerToTackle: (playerId) => dispatch(setPlayerToTackle(playerId)),
 });
 
 const mapStateToProps = state => ({
@@ -207,7 +209,7 @@ class GameDetails extends PureComponent {
     return mappedPlayers;
   }
 
-  onTeamPlayerClick = (userAvatar) => {
+  onTeamPlayerClick = (teamId, playerId) => {
     const { isPlayerOnAttack } = this.state;
 
     if (isPlayerOnAttack) {
@@ -219,10 +221,20 @@ class GameDetails extends PureComponent {
     this.setState({ ballReceiver: userAvatar.user.userId });
   }
 
+  onPlayerSelected = (teamId, playerId) => {
+    const { isPlayerOnAttack } = this.state;
+
+    if (isPlayerOnAttack) {
+      this.passBall(userAvatar);
+    } else {
+      this.props.setPlayerToTackle(playerId);
+    }
+  }
+
   render() {
-    const { isBusy, game, currentTeam, isPlayerHoldingBall, isPlayerOnAttack, ballHolder, ballReceiver } = this.state;
+    const { isBusy, game, currentTeam, isPlayerHoldingBall, isPlayerOnAttack, ballHolder, ballReceiver, ballHandlerTeam } = this.state;
     const { user } = this.props;
-    const mappedPlayers = this.getMappedPlayers(currentTeam);
+    const mappedPlayers = this.getMappedPlayers(ballHandlerTeam);
 
     return (
       <div className="gamedetails-view">
@@ -241,7 +253,7 @@ class GameDetails extends PureComponent {
                 {
                   mappedPlayers.map(a => {
                     return (
-                      <TeamPlayer key={uuid()} currentUser={user.username} user={a.user} avatar={a.player} onClick={() => this.onTeamPlayerClick(a)}>
+                      <TeamPlayer key={uuid()} currentUser={user.username} user={a.user} avatar={a.player} onClick={this.onTeamPlayerClick}>
                         {
                           isPlayerOnAttack && ballHolder === a.user.userId && <div className="player-badge ball"></div>
                         }
