@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
-import { onGameLeft, onGameStart, onGameJoin, onGameResult } from 'services/SocketClient';
+import { onGameLeft, onGameStart, onGameJoin, onGameResult, onGameScoreboard, onGameFinalResult, onGameFinalScoreboard  } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
 import { setPlayerToTackle, setPlayerToReceiveBall, isBallHandler } from 'actions/game';
@@ -56,6 +56,9 @@ class GameDetails extends PureComponent {
 
     // socket io callbacks
     onGameResult(this.handleGameResult);
+    onGameScoreboard(this.handleGameScoreboardUpdate)
+    onGameFinalResult(this.handleGameFinalResult);
+    onGameFinalScoreboard(this.handleGameFinalScoreboardUpdate)
 
     setCurrentPage();
     onGameJoin({ gameId: params.gameId, userId: user.userId });
@@ -88,7 +91,19 @@ class GameDetails extends PureComponent {
         this.setState({ votes: [] });
       }
     }
-  }
+  };
+
+  handleGameScoreboardUpdate = (data) => {
+    this.setState({ isTackled: false, isTouchdown: false, currentTurnNumber: data.currentTurnNumber });
+  };
+
+  handleGameFinalResult = (data) => {
+    // this.setState({ winningTeam: data.winningTeam });
+  };
+
+  handleGameFinalScoreboardUpdate = (data) => {
+    this.setState({ isTackled: false, isTouchdown: false, currentTurnNumber: data.currentTurnNumber, winningTeam: data.winningTeam });
+  };
 
   getGame = async (gameId) => {
     const { isBusy } = this.state;
