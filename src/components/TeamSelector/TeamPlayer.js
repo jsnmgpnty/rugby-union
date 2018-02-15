@@ -56,7 +56,7 @@ function TeamPlayer(props) {
 
   return (
     <div id={`team-player_${getTeamPlayerId(props.avatar)}`} className={`team-player ${isCurrentUser(userId, props.currentUser) ? 'is-active' : null}`}>
-      <a onClick={() => props.onClick(props.teamId, props.avatar.playerId)}>
+      <a onClick={() => props.onClick(props.teamId, props.avatar.playerId, userId)}>
         <div className="team-player__avatar">
           <span className="team-player__avatar-pic" style={getProfilePic(props.avatar)} />
         </div>

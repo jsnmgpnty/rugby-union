@@ -20,10 +20,15 @@ const mapStateToProps = (state) => ({
   isGameReadyToStart: state.navigation.isGameReadyToStart,
   currentPage: state.navigation.currentPage,
   game: state.navigation.game,
-  user: state.user.user,
+  // create game state
   teams: state.createGame.teams,
+  // user state
+  user: state.user.user,
   currentTeam: state.user.currentTeam,
+  // game state
   playerToTackle: state.game.playerToTackle,
+  playerToReceiveBall: state.game.playerToReceiveBall,
+  isBallHandler: state.game.isBallHandler,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -46,6 +51,7 @@ class Navigator extends Component {
     this.onGameStart = this.onGameStart.bind(this);
     this.onGameCreate = this.onGameCreate.bind(this);
     this.onTackle = this.onTackle.bind(this);
+    this.onPassBall = this.onPassBall.bind(this);
   }
 
   getBackButtonStyle = () => {
@@ -131,6 +137,11 @@ class Navigator extends Component {
     await gameApi.tacklePlayer(game.gameId, user.userId, playerToTackle);
   }
 
+  async onPassBall() {
+    const { game, user, playerToReceiveBall } = this.props;
+    await gameApi.passBall(game.gameId, user.userId, playerToReceiveBall);
+  }
+
   render() {
     const {
       isCreatingGame,
@@ -143,6 +154,8 @@ class Navigator extends Component {
       game,
       user,
       playerToTackle,
+      playerToReceiveBall,
+      isBallHandler
     } = this.props;
 
     const {
@@ -193,10 +206,17 @@ class Navigator extends Component {
             </Button>
           }
           {
-            currentPage === pageNames.gameDetails &&
+            currentPage === pageNames.gameDetails && !isBallHandler &&
             <Button className="btn-tackle" onClick={this.onTackle} color="success" disabled={!playerToTackle}>
               <span className="tackle" />
               <span className="btn-text-content">Tackle</span>
+            </Button>
+          }
+          {
+            currentPage === pageNames.gameDetails && isBallHandler &&
+            <Button className="btn-pass" onClick={this.onPassBall} color="success" disabled={!playerToReceiveBall}>
+              <span className="pass" />
+              <span className="btn-text-content">Pass</span>
             </Button>
           }
         </div>

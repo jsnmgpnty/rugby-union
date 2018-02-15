@@ -5,10 +5,10 @@ import { withRouter } from 'react-router-dom';
 
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
-import { onGameLeft, onGameStart, onGameResult } from 'services/SocketClient';
+import { onGameLeft, onGameStart, onGameJoin, onGameResult } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
-import { setPlayerToTackle } from 'actions/game';
+import { setPlayerToTackle, setPlayerToReceiveBall, isBallHandler } from 'actions/game';
 import './GameDetails.scss';
 import { Scoreboard } from 'components';
 import TeamPlayer from '../../components/TeamSelector/TeamPlayer';
@@ -19,6 +19,8 @@ const mapDispatchToProps = dispatch => ({
   isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
   setGame: (game) => dispatch(setGame(game)),
   setPlayerToTackle: (playerId) => dispatch(setPlayerToTackle(playerId)),
+  setPlayerToReceiveBall: (playerId) => dispatch(setPlayerToReceiveBall(playerId)),
+  isBallHandler: (val) => dispatch(isBallHandler(val)),
 });
 
 const mapStateToProps = state => ({
@@ -49,11 +51,14 @@ class GameDetails extends PureComponent {
   };
 
   async componentDidMount() {
-    const { setCurrentPage } = this.props;
+    const { setCurrentPage, user } = this.props;
     const { params } = this.props.match;
 
+    // socket io callbacks
+    onGameResult(this.handleGameResult);
+
     setCurrentPage();
-    onGameResult(this.handleOnGameTurn)
+    onGameJoin({ gameId: params.gameId, userId: user.userId });
     this.setState({ gameId: params.gameId });
     await this.getGame(params.gameId);
   }
@@ -61,13 +66,26 @@ class GameDetails extends PureComponent {
   handleGameResult = (data) => {
     const { currentTeam, isPlayerOnAttack, currentTurnNumber } = this.state;
 
-    if (data.latestTurn && isPlayerOnAttack) {
-      const turn = data.latestTurn[0];
+    if (!data.latestTurn || data.latestTurn.length === 0) {
+      return;
+    }
 
+    // ball handler result
+    if (isPlayerOnAttack) {
+      const turn = data.latestTurn[0];  
       if (data.turnNumber === currentTurnNumber) {
         this.setState({ ballReceiver: turn.passedTo });
       } else {
         this.setState({ ballHolder: turn.sender, ballReceiver: null });
+        this.props.setPlayerToReceiveBall(null);
+      }
+    // tacklers results
+    } else {
+      const turn = data.latestTurn;
+      if (data.turnNumber === currentTurnNumber) {
+        this.setState({ votes: turn });
+      } else {
+        this.setState({ votes: [] });
       }
     }
   }
@@ -106,7 +124,7 @@ class GameDetails extends PureComponent {
   };
 
   getGameState = async (gameId) => {
-    const { user } = this.props;
+    const { user, isBallHandler } = this.props;
     const { game } = this.state;
 
     try {
@@ -118,7 +136,10 @@ class GameDetails extends PureComponent {
         if (gameState.teamId) {
           const currentTeam = game.teams.find(a => a.teamId === gameState.teamId);
           const ballHandlerTeam = game.teams.find(a => a.isBallHandler);
+
           const isPlayerOnAttack = currentTeam.isBallHandler;
+          isBallHandler(isPlayerOnAttack);
+
           this.setState({ isPlayerOnAttack });
 
           if (gameState.latestTurn && gameState.latestTurn.length > 0) {
@@ -209,25 +230,14 @@ class GameDetails extends PureComponent {
     return mappedPlayers;
   }
 
-  onTeamPlayerClick = (teamId, playerId) => {
+  onPlayerSelected = (teamId, playerId, userId) => {
     const { isPlayerOnAttack } = this.state;
 
     if (isPlayerOnAttack) {
-      this.passBall(userAvatar);
-    }
-  }
-
-  passBall = (userAvatar) => {
-    this.setState({ ballReceiver: userAvatar.user.userId });
-  }
-
-  onPlayerSelected = (teamId, playerId) => {
-    const { isPlayerOnAttack } = this.state;
-
-    if (isPlayerOnAttack) {
-      this.passBall(userAvatar);
+      this.setState({ ballReceiver: userId });
+      this.props.setPlayerToReceiveBall(userId);
     } else {
-      this.props.setPlayerToTackle(playerId);
+      this.props.setPlayerToTackle(userId);
     }
   }
 
@@ -253,7 +263,7 @@ class GameDetails extends PureComponent {
                 {
                   mappedPlayers.map(a => {
                     return (
-                      <TeamPlayer key={uuid()} currentUser={user.username} user={a.user} avatar={a.player} onClick={this.onTeamPlayerClick}>
+                      <TeamPlayer key={uuid()} currentUser={user.username} user={a.user} avatar={a.player} onClick={this.onPlayerSelected}>
                         {
                           isPlayerOnAttack && ballHolder === a.user.userId && <div className="player-badge ball"></div>
                         }

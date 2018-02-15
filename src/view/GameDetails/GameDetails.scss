@@ -47,7 +47,10 @@
     right: 0;
 
     &.vote {
-
+        bottom: .5rem;
+        right: .5rem;
+        border-radius: 100%;
+        background: $danger;
     }
     
     &.ball {

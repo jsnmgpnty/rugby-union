@@ -129,15 +129,15 @@ function onGameStarted(data) {
 }
 
 function onGameScoreboardResult(data) {
-  io.to(date.gameId).emit('game:result:scoreboard:turn', data);
+  io.to(data.gameId).emit('game:result:scoreboard:turn', data);
 }
 
 function onGameTeamResult(data) {
-  io.to(date.teamId).emit('game:result:team:turn', data);
+  io.to(data.teamId).emit('game:result:team:turn', data);
 }
 
 function onGameScoreboardFinalResult(data) {
-  io.to(date.gameId).emit('game:result:scoreboard:finished', data);
+  io.to(data.gameId).emit('game:result:scoreboard:finished', data);
 
   var socket = getSocketBySession(data.userId);
 
@@ -181,7 +181,7 @@ io.on('connection', function (socket) {
     socket.join(data.gameId);
   });
 
-  socket.on('game:create', function (data) {
+  socket.on('game:start', function (data) {
     var connectedClient = getSocketBySession(data.userId);
     if (!connectedClient) {
       connectedClients.push({ userId: data.userId, socket: socket });
