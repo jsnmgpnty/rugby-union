@@ -61,7 +61,7 @@ function TeamSelector(props) {
                 currentUser={props.currentUser}
                 user={player.user}
                 avatar={player.avatar}
-                teamId={props.teamId} onJoin={props.onJoin}
+                teamId={props.teamId} onClick={props.onJoin}
               />)
             : <p>No players yet</p>
         }

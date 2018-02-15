@@ -55,5 +55,9 @@
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
+
+        &.receive {
+            opacity: 0.4;
+        }
     }
 }

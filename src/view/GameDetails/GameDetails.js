@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
-import { onGameLeft, onGameStart } from 'services/SocketClient';
+import { onGameLeft, onGameStart, onGameResult } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
 import './GameDetails.scss';
@@ -42,6 +42,7 @@ class GameDetails extends PureComponent {
     isPlayerOnAttack: false,
     isPlayerHoldingBall: false,
     ballHolder: null,
+    ballReceiver: null,
     votes: [],
   };
 
@@ -50,8 +51,23 @@ class GameDetails extends PureComponent {
     const { params } = this.props.match;
 
     setCurrentPage();
+    onGameResult(this.handleOnGameTurn)
     this.setState({ gameId: params.gameId });
     await this.getGame(params.gameId);
+  }
+
+  handleGameResult = (data) => {
+    const { currentTeam, isPlayerOnAttack, currentTurnNumber } = this.state;
+
+    if (data.latestTurn && isPlayerOnAttack) {
+      const turn = data.latestTurn[0];
+
+      if (data.turnNumber === currentTurnNumber) {
+        this.setState({ ballReceiver: turn.passedTo });
+      } else {
+        this.setState({ ballHolder: turn.sender, ballReceiver: null });
+      }
+    }
   }
 
   getGame = async (gameId) => {
@@ -191,11 +207,20 @@ class GameDetails extends PureComponent {
     return mappedPlayers;
   }
 
-  passBall = () => {
+  onTeamPlayerClick = (userAvatar) => {
+    const { isPlayerOnAttack } = this.state;
+
+    if (isPlayerOnAttack) {
+      this.passBall(userAvatar);
+    }
+  }
+
+  passBall = (userAvatar) => {
+    this.setState({ ballReceiver: userAvatar.user.userId });
   }
 
   render() {
-    const { isBusy, game, currentTeam, isPlayerHoldingBall, isPlayerOnAttack, ballHolder } = this.state;
+    const { isBusy, game, currentTeam, isPlayerHoldingBall, isPlayerOnAttack, ballHolder, ballReceiver } = this.state;
     const { user } = this.props;
     const mappedPlayers = this.getMappedPlayers(currentTeam);
 
@@ -216,9 +241,12 @@ class GameDetails extends PureComponent {
                 {
                   mappedPlayers.map(a => {
                     return (
-                      <TeamPlayer key={uuid()} currentUser={user.username} user={a.user} avatar={a.player}>
+                      <TeamPlayer key={uuid()} currentUser={user.username} user={a.user} avatar={a.player} onClick={() => this.onTeamPlayerClick(a)}>
                         {
                           isPlayerOnAttack && ballHolder === a.user.userId && <div className="player-badge ball"></div>
+                        }
+                        {
+                          isPlayerOnAttack && ballReceiver === a.user.userId && <div className="player-badge ball receive"></div>
                         }
                         {
                           !isPlayerOnAttack && this.getVotePerPlayerBadge(a.user.userId)
