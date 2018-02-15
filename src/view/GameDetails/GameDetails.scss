@@ -38,3 +38,23 @@
     text-align: justify;
     line-height: 1.2;
 }
+
+.turnResultDisplay{
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center top;
+    height: 70px;
+    width: 100%;
+    
+    &.missed{
+        background-image: url('../../assets/missed_tackle.png');
+    }
+
+    &.tackled{
+        background-image: url('../../assets/tackled.png');
+    }
+
+    &.default{
+        height: 0px;
+    }
+}

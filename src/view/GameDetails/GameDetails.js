@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
-import { onGameLeft, onGameStart } from 'services/SocketClient';
+import { onGameLeft, onGameStart, onGameResult } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
 import './GameDetails.scss';
@@ -163,10 +163,32 @@ class GameDetails extends PureComponent {
     return mappedPlayers;
   }
 
+  getGameResultDisplay(){
+    const { isTackled, isTouchdown, isSaved, currentTurnNumber } = this.state;
+    if(isTackled){
+      return "tackled";
+    } else if(isTouchdown){
+      return "try";
+    } else if(isSaved){
+      return "missed";
+    }
+    return "default";
+  }
+
+  onGameResult(game){
+    const turnNumber = game.turnNumber;
+    if(game.winningTeam){
+      this.setState({ isTackled: true, isSaved: false, currentTurnNumber: turnNumber });
+    }else{
+      this.setState({ isSaved: true, isTackled: true, currentTurnNumber: turnNumber })
+    }
+  }
+
   render() {
     const { isBusy, game, currentTeam } = this.state;
     const { user } = this.props;
     const mappedPlayers = this.getMappedPlayers(currentTeam);
+    const resultDisplay = this.getGameResultDisplay();
 
     return (
       <div className="gamedetails-view">
@@ -182,6 +204,7 @@ class GameDetails extends PureComponent {
                 <Scoreboard game={this.getGameDetails()} />
                 <p className="teamBallPosession">Defense Team (Scotland)</p>
                 <p className="teamMissionDescription">Guess 1 player you think is the ball bearer if majority of the team guesses the right person your team wins the round.</p>
+                <div className={`turnResultDisplay ${this.getGameResultDisplay()}`}></div>
                 {
                   mappedPlayers.map(a => {
                     return (
