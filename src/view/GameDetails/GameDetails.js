@@ -21,9 +21,7 @@ const mapDispatchToProps = dispatch => ({
 
 const mapStateToProps = state => ({
   countries: state.countries.countries,
-  user: {
-    userId: "8ed88a5f-170d-4b47-aa5d-8a909a56ba4f",
-  },
+  user: state.user.user,
 });
 
 class GameDetails extends PureComponent {
@@ -89,15 +87,11 @@ class GameDetails extends PureComponent {
     const { game } = this.state;
 
     try {
-      // const user = {
-      //   userId: "8ed88a5f-170d-4b47-aa5d-8a909a56ba4f",
-      // }
       const gameStateResult = await gameApi.getGameState(gameId, user.userId);
       const isGood = game && gameStateResult;
 
       if (game && gameStateResult) {
         const gameState = gameStateResult.data;
-        console.log(gameStateResult);
         if (gameState.teamId) {
           const currentTeam = game.teams.find(a => a.teamId === gameState.teamId);
           this.setState({ currentTeam, currentTurnNumber: gameState.turnNumber });
