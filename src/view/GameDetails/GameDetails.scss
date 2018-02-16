@@ -72,15 +72,19 @@
     height: 70px;
     width: 100%;
     
-    &.missed{
+    &.missed {
         background-image: url('../../assets/missed_tackle.png');
     }
 
-    &.tackled{
+    &.tackled { 
         background-image: url('../../assets/tackled.png');
     }
 
-    &.default{
+    &.try {
+        background-image: url('../../assets/tackled.png');
+    }
+
+    &.default {
         height: 0px;
     }
 }
