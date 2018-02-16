@@ -6,7 +6,7 @@ import { withRouter } from 'react-router-dom';
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
 import { onGameLeft, onGameStart, onGameJoin, onGameTurn, onGameScoreboard, onGameFinalResult } from 'services/SocketClient';
-import { TeamSelector, Spinner } from 'components';
+import { TeamSelector, Spinner, SplashScreen } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
 import { setPlayerToTackle, setPlayerToReceiveBall, isBallHandler } from 'actions/game';
 import './GameDetails.scss';
@@ -71,7 +71,7 @@ class GameDetails extends PureComponent {
     if (!data.latestTurn) {
       return;
     }
-    
+
     const turn = data.latestTurn;
 
     // ball handler result
@@ -289,6 +289,7 @@ class GameDetails extends PureComponent {
       ballReceiver,
       ballHandlerTeam,
       currentTurnNumber,
+      winningTeam,
     } = this.state;
     const { user } = this.props;
     const mappedPlayers = this.getMappedPlayers(ballHandlerTeam);
@@ -296,6 +297,7 @@ class GameDetails extends PureComponent {
 
     return (
       <div className="gamedetails-view">
+        <SplashScreen />
         <Spinner isLoading={isBusy}>
           {
             game && currentTeam && (
