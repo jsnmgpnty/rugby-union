@@ -6,6 +6,23 @@
   padding: 0.2rem 0 0.2rem 0;
   position: relative;
 
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+
+    .team-player__avatar {
+      .team-player__avatar-pic {
+        border: $gray-600;
+      }
+    }
+
+    .team-player__user {
+      .team-player__user-name.player-taken {
+        color: $white;
+      }
+    }
+  }
+
   &.is-active {
     background: $blue;
     color: $white;

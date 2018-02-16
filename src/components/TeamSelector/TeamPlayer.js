@@ -16,11 +16,13 @@ const propTypes = {
     profilePicture: PropTypes.string.isRequired,
   }),
   onClick: PropTypes.func,
+  isClickable: PropTypes.bool,
 };
 
 const defaultProps = {
   avatar: null,
   onClick: () => { },
+  isClickable: true,
 };
 
 const getTeamPlayerId = (avatar) => {
@@ -55,7 +57,10 @@ function TeamPlayer(props) {
   const userId = props.user ? props.user.userId : null;
 
   return (
-    <div id={`team-player_${getTeamPlayerId(props.avatar)}`} className={`team-player ${isCurrentUser(userId, props.currentUser) ? 'is-active' : null}`}>
+    <div
+      id={`team-player_${getTeamPlayerId(props.avatar)}`}
+      className={`team-player ${isCurrentUser(userId, props.currentUser) ? 'is-active' : null} ${!props.isClickable ? 'disabled' : null}`}
+    >
       <a onClick={() => props.onClick(props.teamId, props.avatar.playerId, userId)}>
         <div className="team-player__avatar">
           <span className="team-player__avatar-pic" style={getProfilePic(props.avatar)} />

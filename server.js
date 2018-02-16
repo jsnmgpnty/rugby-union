@@ -132,30 +132,40 @@ function onGameScoreboardResult(data) {
   io.to(data.gameId).emit('game:result:scoreboard:turn', data);
 }
 
-function onGameTeamResult(data) {
-  io.to(data.teamId).emit('game:result:team:turn', data);
-}
+function onGameResult(data) {
+  if (data.ballHandlerTeam) {
+    io.to(data.ballHandlerTeam).emit('game:result:team:turn', {
+      gameId: data.gameId,
+      teamId: data.ballHandlerTeam,
+      latestTurn: data.latestTurn.ballHandler,
+      turnNumber: data.turnNumber,
+    });
+  }
 
-function onGameScoreboardFinalResult(data) {
-  io.to(data.gameId).emit('game:result:scoreboard:finished', data);
+  if (data.tacklingTeam) {
+    io.to(data.tacklingTeam).emit('game:result:team:turn', {
+      gameId: data.gameId,
+      teamId: data.tacklingTeam,
+      latestTurn: data.latestTurn.tacklers,
+      turnNumber: data.turnNumber,
+    });
+  }
 
-  var socket = getSocketBySession(data.userId);
-
-  if (socket) {
-    socket.leave(data.gameId);
-    socket.leave(data.teamId);
+  if (data.gameId) {
+    io.to(data.gameId).emit('game:result:scoreboard:turn', {
+      gameId: data.gameId,
+      turnNumber: data.turnNumber,
+    });
   }
 }
 
-function onGameTeamFinalResult(data) {
-  io.to(date.gameId).emit('game:result:team:finished', data);
-
-  var socket = getSocketBySession(data.userId);
-
-  if (socket) {
-    socket.leave(data.gameId);
-    socket.leave(data.teamId);
-  }
+function onGameResultFinished(data) {
+  io.to(data.gameId).emit('game:result:finished', {
+    gameId: data.gameId,
+    winningTeam: data.winningTeam,
+    gameResult: data.gameResult,
+    turnNumber: data.turnNumber,
+  });
 }
 
 // on socket connection
@@ -216,17 +226,11 @@ redisSubscriber.on("message", function (channel, message) {
       case 'game:created':
         onGameCreated(messageJson.payload);
         break;
-      case 'game:result:team:turn':
-        onGameTeamResult(messageJson.payload);
+      case 'game:result':
+        onGameResult(messageJson.payload);
         break;
-      case 'game:result:scoreboard:turn':
-        onGameScoreboardResult(messageJson.payload);
-        break;
-      case 'game:result:team:finished':
-        onGameFinalResult(messageJson.payload);
-        break;
-      case 'game:result:scoreboard:finished':
-        onGameScoreboardFinalResult(messageJson.payload);
+      case 'game:result:finished':
+        onGameResultFinished(messageJson.payload);
         break;
       default:
         break;

@@ -72,6 +72,15 @@ class Navigator extends Component {
       this.setState({ goToJoin: true, goToGamePrepare: false, goToLobby: false, goToGameDetails: false });
     }
 
+    if (currentPage === pageNames.gameCreate) {
+      reactLocalStorage.setObject('user', null);
+      this.setState({ goToJoin: true, goToGamePrepare: false, goToLobby: false, goToGameDetails: false });
+    }
+
+    if (currentPage === pageNames.gameDetails) {
+      this.setState({ goToJoin: false, goToGamePrepare: false, goToLobby: true, goToGameDetails: false });
+    }
+
     if (currentPage === pageNames.gamePrepare) {
       isPageLoading(true);
 

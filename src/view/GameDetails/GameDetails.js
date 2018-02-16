@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
-import { onGameLeft, onGameStart, onGameJoin, onGameResult, onGameScoreboard, onGameFinalResult, onGameFinalScoreboard  } from 'services/SocketClient';
+import { onGameLeft, onGameStart, onGameJoin, onGameTurn, onGameScoreboard, onGameFinalResult } from 'services/SocketClient';
 import { TeamSelector, Spinner } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
 import { setPlayerToTackle, setPlayerToReceiveBall, isBallHandler } from 'actions/game';
@@ -55,34 +55,34 @@ class GameDetails extends PureComponent {
     const { params } = this.props.match;
 
     // socket io callbacks
-    onGameResult(this.handleGameResult);
+    onGameTurn(this.handleGameTurn);
     onGameScoreboard(this.handleGameScoreboardUpdate)
     onGameFinalResult(this.handleGameFinalResult);
-    onGameFinalScoreboard(this.handleGameFinalScoreboardUpdate)
 
     setCurrentPage();
     onGameJoin({ gameId: params.gameId, userId: user.userId });
     this.setState({ gameId: params.gameId });
-    await this.getGame(params.gameId);
+    await this.getGameState(params.gameId);
   }
 
-  handleGameResult = (data) => {
+  handleGameTurn = (data) => {
     const { currentTeam, isPlayerOnAttack, currentTurnNumber } = this.state;
 
-    if (!data.latestTurn || data.latestTurn.length === 0) {
+    if (!data.latestTurn) {
       return;
     }
+    
+    const turn = data.latestTurn;
 
     // ball handler result
     if (isPlayerOnAttack) {
-      const turn = data.latestTurn[0];  
       if (data.turnNumber === currentTurnNumber) {
         this.setState({ ballReceiver: turn.passedTo });
       } else {
         this.setState({ ballHolder: turn.sender, ballReceiver: null });
         this.props.setPlayerToReceiveBall(null);
       }
-    // tacklers results
+      // tacklers results
     } else {
       const turn = data.latestTurn;
       if (data.turnNumber === currentTurnNumber) {
@@ -94,19 +94,27 @@ class GameDetails extends PureComponent {
   };
 
   handleGameScoreboardUpdate = (data) => {
-    this.setState({ isTackled: false, isTouchdown: false, currentTurnNumber: data.currentTurnNumber });
+    const { currentTurnNumber } = this.state;
+
+    if (data.turnNumber > currentTurnNumber) {
+      this.setState({ votes: [] });
+    }
+
+    this.setState({ isTackled: false, isTouchdown: false, currentTurnNumber: data.turnNumber });
   };
 
   handleGameFinalResult = (data) => {
-    // this.setState({ winningTeam: data.winningTeam });
+    this.setState({ isTackled: data.gameResult === 2, isTouchdown: data.gameResult === 1, currentTurnNumber: data.turnNumber });
   };
 
   handleGameFinalScoreboardUpdate = (data) => {
-    this.setState({ isTackled: false, isTouchdown: false, currentTurnNumber: data.currentTurnNumber, winningTeam: data.winningTeam });
+    this.setState({ isTackled: false, isTouchdown: false, currentTurnNumber: data.turnNumber, winningTeam: data.winningTeam });
   };
 
-  getGame = async (gameId) => {
+  getGameState = async (gameId) => {
+    const { user, isBallHandler } = this.props;
     const { isBusy } = this.state;
+
     if (isBusy) {
       return;
     }
@@ -114,66 +122,48 @@ class GameDetails extends PureComponent {
     this.setState({ isBusy: true });
 
     try {
-      const game = await gameApi.getGame(gameId);
+      const gameStateResult = await gameApi.getGameState(gameId, user.userId);
 
-      if (game) {
-        switch (game.gameStatus) {
-          case 0:
-          case 1:
-            this.setState({ isGameStarted: true });
-            break;
-          case 2:
+      if (gameStateResult) {
+        switch (gameStateResult.gameStatus) {
+          case 3:
             this.setState({ isGameCompleted: true });
-            break;
+            return;
           default:
             break;
         }
 
-        this.props.setGame(game);
-        this.setState({ game, isBusy: false }, () => this.getGameState(gameId));
-      }
-    } catch (error) {
-      this.setState({ isBusy: false });
-      console.log(error);
-    }
-  };
+        this.props.setGame(gameStateResult);
+        this.setState({ game: gameStateResult });
 
-  getGameState = async (gameId) => {
-    const { user, isBallHandler } = this.props;
-    const { game } = this.state;
-
-    try {
-      const gameStateResult = await gameApi.getGameState(gameId, user.userId);
-      const isGood = game && gameStateResult;
-
-      if (game && gameStateResult) {
-        const gameState = gameStateResult.data;
-        if (gameState.teamId) {
-          const currentTeam = game.teams.find(a => a.teamId === gameState.teamId);
-          const ballHandlerTeam = game.teams.find(a => a.isBallHandler);
+        if (gameStateResult.teamId) {
+          const currentTeam = gameStateResult.teams.find(a => a.teamId === gameStateResult.teamId);
+          const ballHandlerTeam = gameStateResult.teams.find(a => a.isBallHandler);
 
           const isPlayerOnAttack = currentTeam.isBallHandler;
           isBallHandler(isPlayerOnAttack);
 
           this.setState({ isPlayerOnAttack });
 
-          if (gameState.latestTurn && gameState.latestTurn.length > 0) {
+          if (gameStateResult.latestTurn) {
             if (isPlayerOnAttack) {
-              const ballHolder = gameState.latestTurn[0].sender;
+              const ballHolder = gameStateResult.latestTurn[0].sender;
               const isPlayerHoldingBall = ballHolder === user.userId;
               this.setState({ isPlayerHoldingBall, ballHolder });
             } else {
-              this.setState({ votes: gameState.latestTurn });
+              this.setState({ votes: gameStateResult.latestTurn });
             }
           }
 
-          this.setState({ currentTeam, ballHandlerTeam, currentTurnNumber: gameState.turnNumber });
+          this.setState({ currentTeam, ballHandlerTeam, currentTurnNumber: gameStateResult.turnNumber });
           onGameStart({ userId: user.userId, teamId: currentTeam.teamId });
         }
 
-        if (gameState.winningTeam) {
-          this.setState({ winningTeam: gameState.winningTeam, isTackled: gameState.isTackled, isTouchdown: gameState.isTouchdown });
+        if (gameStateResult.winningTeam) {
+          this.setState({ winningTeam: gameStateResult.winningTeam, isTackled: gameStateResult.gameResult === 2, isTouchdown: gameStateResult.gameResult === 1 });
         }
+
+        this.setState({ isBusy: false });
       }
     } catch (error) {
       this.setState({ isBusy: false });
@@ -255,30 +245,51 @@ class GameDetails extends PureComponent {
       this.props.setPlayerToTackle(userId);
     }
   }
-  
-  getGameResultDisplay(){
+
+  isPlayerClickable = () => {
+    const { ballHolder, isPlayerOnAttack } = this.state;
+    const { user } = this.props;
+
+    if (isPlayerOnAttack) {
+      return ballHolder === user.userId;
+    }
+
+    return true;
+  }
+
+  getGameResultDisplay() {
     const { isTackled, isTouchdown, isSaved, currentTurnNumber } = this.state;
-    if(isTackled){
+    if (isTackled) {
       return "tackled";
-    } else if(isTouchdown){
+    } else if (isTouchdown) {
       return "try";
-    } else if(isSaved){
+    } else if (isSaved) {
       return "missed";
     }
     return "default";
   }
 
-  onGameResult(game){
+  onGameResult(game) {
     const turnNumber = game.turnNumber;
-    if(game.winningTeam){
+    if (game.winningTeam) {
       this.setState({ isTackled: true, isSaved: false, currentTurnNumber: turnNumber });
-    }else{
+    } else {
       this.setState({ isSaved: true, isTackled: true, currentTurnNumber: turnNumber })
     }
   }
 
   render() {
-    const { isBusy, game, currentTeam, isPlayerHoldingBall, isPlayerOnAttack, ballHolder, ballReceiver, ballHandlerTeam } = this.state;
+    const {
+      isBusy,
+      game,
+      currentTeam,
+      isPlayerHoldingBall,
+      isPlayerOnAttack,
+      ballHolder,
+      ballReceiver,
+      ballHandlerTeam,
+      currentTurnNumber,
+    } = this.state;
     const { user } = this.props;
     const mappedPlayers = this.getMappedPlayers(ballHandlerTeam);
     const resultDisplay = this.getGameResultDisplay();
@@ -292,7 +303,7 @@ class GameDetails extends PureComponent {
                 <div className="gamedetails-view__header">
                   <h2>{game.name}</h2>
                   <p>{`${this.getCountryByTeam(game.teams[0]).name} vs ${this.getCountryByTeam(game.teams[1]).name}`}</p>
-                  <p>Round 1 of 5</p>
+                  <p>{`Turn ${currentTurnNumber}`}</p>
                 </div>
                 <Scoreboard game={this.getGameDetails()} teams={game.teams} />
                 <p className="teamBallPosession">Defense Team (Scotland)</p>
@@ -301,7 +312,7 @@ class GameDetails extends PureComponent {
                 {
                   mappedPlayers.map(a => {
                     return (
-                      <TeamPlayer key={uuid()} currentUser={user.username} user={a.user} avatar={a.player} onClick={this.onPlayerSelected}>
+                      <TeamPlayer key={uuid()} isClickable={this.isPlayerClickable()} currentUser={user.username} user={a.user} avatar={a.player} onClick={this.onPlayerSelected}>
                         {
                           isPlayerOnAttack && ballHolder === a.user.userId && <div className="player-badge ball"></div>
                         }

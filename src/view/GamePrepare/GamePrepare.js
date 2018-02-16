@@ -12,7 +12,7 @@ import { setCurrentTeam } from 'actions/user';
 import { setCurrentPage, setGame, isGameReadyToStart, isPageLoading } from 'actions/navigation';
 import './GamePrepare.scss';
 
-const defaultNumberOfPlayersPerTeam = 5;
+const defaultNumberOfPlayersPerTeam = 2;
 
 const mapDispatchToProps = dispatch => ({
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gamePrepare)),
@@ -127,7 +127,7 @@ class GameLobby extends PureComponent {
         }
       }
 
-      this.setState({ game: {...game} });
+      this.setState({ game: {...game} }, this.isGameReady);
     }
   };
 
@@ -163,7 +163,9 @@ class GameLobby extends PureComponent {
     const firstTeamPlayers = game.teams[0].users ? game.teams[0].users.length : 0;
     const secondTeamPlayers = game.teams[1].users ? game.teams[1].users.length : 0;
 
-    if (firstTeamPlayers === defaultNumberOfPlayersPerTeam && secondTeamPlayers === defaultNumberOfPlayersPerTeam) {
+    if (firstTeamPlayers >= defaultNumberOfPlayersPerTeam 
+      && secondTeamPlayers >= defaultNumberOfPlayersPerTeam
+      && firstTeamPlayers === secondTeamPlayers) {
       isGameReadyToStart(true);
     }
   };

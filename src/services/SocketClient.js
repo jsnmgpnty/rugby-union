@@ -46,16 +46,9 @@ function onGameStarted(callback) {
   });
 }
 
-function onGameFinalScoreboard(callback) {
-  socket.on('game:result:scoreboard:finished', (message) => {
-    console.log(`game:result:scoreboard:finished ${JSON.stringify(message)}`);
-    callback(message);
-  });
-}
-
 function onGameFinalResult(callback) {
-  socket.on('game:result:team:finished', (message) => {
-    console.log(`game:result:team:finished ${JSON.stringify(message)}`);
+  socket.on('game:result:finished', (message) => {
+    console.log(`game:result:finished ${JSON.stringify(message)}`);
     callback(message);
   });
 }
@@ -67,7 +60,7 @@ function onGameScoreboard(callback) {
   });
 }
 
-function onGameResult(callback) {
+function onGameTurn(callback) {
   socket.on('game:result:team:turn', (message) => {
     console.log(`game:result:team:turn ${JSON.stringify(message)}`);
     callback(message);
@@ -82,8 +75,7 @@ export {
   onGameStart,
   onGameStarted,
   onGameLeft,
-  onGameFinalScoreboard,
-  onGameFinalResult,
+  onGameTurn,
   onGameScoreboard,
-  onGameResult,
+  onGameFinalResult,
 };

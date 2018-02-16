@@ -56,7 +56,7 @@ class Scoreboard extends PureComponent {
           <span className="scoreTally">00:00</span>
           <Country country={this.getCountry(teams[1])} />
         </div>
-        <img className={`score-view__field ${this.getResultField(this.props.game)}`} />
+        <div className={`score-view__field ${this.getResultField(this.props.game)}`} />
       </div>
     )
   }
