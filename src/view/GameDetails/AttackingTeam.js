@@ -54,7 +54,6 @@ class AttackingTeam extends PureComponent {
   }
 
   render() {
-    console.log(this.props.turnLocked);
     const { country, players, currentUser, onPlayerSelected } = this.props;
     return (
       <Fragment>
