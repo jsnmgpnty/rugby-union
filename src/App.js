@@ -7,7 +7,6 @@ import { reactLocalStorage } from 'reactjs-localstorage';
 import AppRoutes from './routes';
 import { setCountries } from 'actions/countries';
 import { setUser } from 'actions/user';
-import gameApi from 'services/GameApi';
 import { initializeSession } from 'services/SocketClient';
 import { Navigator, Spinner } from 'components';
 

@@ -1,4 +1,3 @@
-import uuid from 'uuid';
 import { local, prod } from './SocketEnv';
 import openSocket from 'socket.io-client';	
   		  

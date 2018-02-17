@@ -2,9 +2,7 @@ import React, { PureComponent } from 'react';
 import { Country } from 'components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import uuid from 'uuid';
 import './Scoreboard.scss';
-import { onGameScoreboard } from '../../services/SocketClient';
 import PropTypes from 'prop-types';
 
 const mapStateToProps = (state) => ({
@@ -13,11 +11,10 @@ const mapStateToProps = (state) => ({
 
 class Scoreboard extends PureComponent {
   static propTypes = {
-    game: PropTypes.shape({
-      isSaved: PropTypes.bool.isRequired,
-      isTackled: PropTypes.bool.isRequired,
-      currentTurnNumber: PropTypes.number.isRequired
-    }),
+    isTackled: PropTypes.bool.isRequired,
+    turnNumber: PropTypes.number.isRequired,
+    roundNumber: PropTypes.number.isRequired,
+    gameScore: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
     teams: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
   };
 
@@ -27,21 +24,14 @@ class Scoreboard extends PureComponent {
     return country || { name: 'N/A' };
   }
 
-  getMockedCountry() {
-    return {
-      countryId: uuid(),
-      name: "England",
-      players: [],
-    };
-  };
-
-  getResultField = (game) => {
-    if (game.currentTurnNumber === 1) {
+  getResultField = () => {
+    const { turnNumber, isTackled } = this.props;
+    if (turnNumber === 1) {
       return "default";
     }
 
-    let scoreFieldClassName = game.isSaved ? "safe" : "tackled";
-    scoreFieldClassName += game.currentTurnNumber;
+    let scoreFieldClassName = isTackled ? "tackled" : "safe";
+    scoreFieldClassName += turnNumber;
 
     return scoreFieldClassName;
   }
@@ -56,7 +46,7 @@ class Scoreboard extends PureComponent {
           <span className="scoreTally">00:00</span>
           <Country country={this.getCountry(teams[1])} />
         </div>
-        <div className={`score-view__field ${this.getResultField(this.props.game)}`} />
+        <div className={`score-view__field ${this.getResultField()}`} />
       </div>
     )
   }

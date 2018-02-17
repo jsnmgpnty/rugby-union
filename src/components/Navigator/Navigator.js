@@ -1,7 +1,6 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 import { Redirect } from 'react-router';
-import { Link, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
 import { reactLocalStorage } from 'reactjs-localstorage';
@@ -36,7 +35,7 @@ const mapDispatchToProps = dispatch => ({
   setGame: (game) => dispatch(setGame(game)),
 });
 
-class Navigator extends Component {
+class Navigator extends PureComponent {
   state = {
     goToGamePrepare: false,
     goToLobby: false,
@@ -86,7 +85,9 @@ class Navigator extends Component {
 
       try {
         const result = await gameApi.leaveGame(game.gameId, currentTeam, user.userId);
-        this.setState({ goToGameDetails: false, goToGamePrepare: false, goToJoin: false, goToLobby: true });
+        if (result && result.isSuccess) {
+          this.setState({ goToGameDetails: false, goToGamePrepare: false, goToJoin: false, goToLobby: true });
+        }
         isPageLoading(false);
       } catch (error) {
         isPageLoading(false);
@@ -116,7 +117,6 @@ class Navigator extends Component {
 
   async onGameCreate() {
     const {
-      game,
       user,
       teams,
       isPageLoading,
@@ -153,11 +153,8 @@ class Navigator extends Component {
 
   render() {
     const {
-      isCreatingGame,
       isTeamsSelectedOnGameCreate,
       isGameSelectedOnLobby,
-      isDeleteEnabledOnLobby,
-      isGameWaitingForPlayers,
       isGameReadyToStart,
       currentPage,
       game,

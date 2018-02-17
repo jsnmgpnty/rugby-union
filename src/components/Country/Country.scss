@@ -7,12 +7,12 @@
   width: 80px;
   border-radius: 50%;
   
-  &.team-attack{
-    border: 5px solid red;
+  &.team-home {
+    border: 5px solid $danger;
   }
   
-  &.team-defend{
-    border: 5px solid red;
+  &.team-away {
+    border: 5px solid $success;
   }
 
   &.england {

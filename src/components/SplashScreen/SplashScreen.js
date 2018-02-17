@@ -1,68 +1,90 @@
 import React from 'react';
-import uuid from 'uuid';
-import { Country } from 'components';
 import PropTypes from 'prop-types';
+import { Redirect } from 'react-router';
 import sizeMe from 'react-sizeme';
 import Confetti from 'react-confetti';
 
+import { Country } from 'components';
 import './SplashScreen.scss';
 
 const propTypes = {
-};
-
-const defaultProps = {
+	teams: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
+	winningTeam: PropTypes.string.isRequired,
+	gameScore: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
 };
 
 const SplashScreen = sizeMe({
-  monitorHeight: true,
-  monitorWidth: true,
+	monitorHeight: true,
+	monitorWidth: true,
 })(class Example extends React.PureComponent {
-	
-	getMockedCountry() {
-        return {
-            countryId: uuid(),
-            name: "England",
-            players: [],
-        };
-    }
-	
 	static propTypes = {
 		size: PropTypes.shape({
-		  width: PropTypes.number,
-		  height: PropTypes.number,
-		  numberOfPieces: PropTypes.number,
+			width: PropTypes.number,
+			height: PropTypes.number,
+			numberOfPieces: PropTypes.number,
 		}),
+	};
+
+	state = {
+		goToLobby: false,
+	};
+
+	getWinningTeamTeamCountry = () => {
+		const { teams, winningTeam } = this.props;
+		const team = teams.find(a => a.teamId === winningTeam);
+
+		if (team) {
+			return team.country ? team.country.name : 'N/A';
+		}
+
+		return 'N/A';
+	};
+
+	getTeamScore = (team) => {
+		const gameScore = this.props.gameScore.find(a => a.teamId === team.teamId);
+		return gameScore ? gameScore.score : 0;
+	};
+
+	onBackButton = () => {
+		this.setState({ goToLobby: true });
 	}
+
 	render() {
+		const { teams } = this.props;
+
 		return (
-		  <div className="splash-screen">
-				<Confetti {...this.props.size} />
-				<h2>Scotland Wins the Game!</h2>
-                <div className="score-view__header">
-					<div className="per-team">
-						<Country country={this.getMockedCountry()} />
-						<div className="team-score">
-							Score 
-							<p>2</p>
-						</div>
+			<div className="splash-screen">
+				<div className="splash-screen__overlay"></div>
+				<div className="splash-screen__contents">
+					<Confetti {...this.props.size} />
+					<h2>
+						<span>{this.getWinningTeamTeamCountry()}</span> Wins the Game!
+					</h2>
+					<div className="score-view__header">
+						{
+							teams.map(team => (
+								<div className="per-team" key={team.teamId}>
+									<Country country={team.country} />
+									<div className="team-score">
+										Score
+									<p>{this.getTeamScore(team)}</p>
+									</div>
+								</div>
+							))
+						}
 					</div>
-					<div className="per-team">
-						<Country country={this.getMockedCountry()} />
-						<div className="team-score">
-							Score 
-							<p>2</p>
-						</div>
-					</div>
-                </div>
-				<div className="footer-block">
-				Back to Game Lobby
+					<a className="footer-block" onClick={this.onBackButton}>
+						Back to Game Lobby
+					</a>
+					{
+						this.state.goToLobby && <Redirect to="/" />
+					}
 				</div>
-		  </div>
+			</div>
 		)
 	}
 })
 
 SplashScreen.propTypes = propTypes;
-SplashScreen.defaultProps = defaultProps;
 
-export default SplashScreen
+export default SplashScreen;

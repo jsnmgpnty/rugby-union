@@ -121,40 +121,37 @@ function onGameLeft(data) {
 }
 
 function onGameStarted(data) {
-  if (!data || !data.game) {
+  if (!data || !data.gameId) {
     return;
   }
 
-  io.to(data.game.gameId).emit('game:started', data);
-}
-
-function onGameScoreboardResult(data) {
-  io.to(data.gameId).emit('game:result:scoreboard:turn', data);
+  io.to(data.gameId).emit('game:started', data);
 }
 
 function onGameResult(data) {
   if (data.ballHandlerTeam) {
     io.to(data.ballHandlerTeam).emit('game:result:team:turn', {
       gameId: data.gameId,
-      teamId: data.ballHandlerTeam,
-      latestTurn: data.latestTurn.ballHandler,
+      latestTurn: [data.latestTurn.ballHandler],
       turnNumber: data.turnNumber,
+      roundNumber: data.roundNumber,
+      ballHandlerTeam: data.ballHandlerTeam,
+      tacklingTeam: data.tacklingTeam,
+      gameStatus: data.gameStatus,
+      scores: data.scores,
     });
   }
 
   if (data.tacklingTeam) {
     io.to(data.tacklingTeam).emit('game:result:team:turn', {
       gameId: data.gameId,
-      teamId: data.tacklingTeam,
       latestTurn: data.latestTurn.tacklers,
       turnNumber: data.turnNumber,
-    });
-  }
-
-  if (data.gameId) {
-    io.to(data.gameId).emit('game:result:scoreboard:turn', {
-      gameId: data.gameId,
-      turnNumber: data.turnNumber,
+      roundNumber: data.roundNumber,
+      ballHandlerTeam: data.ballHandlerTeam,
+      tacklingTeam: data.tacklingTeam,
+      gameStatus: data.gameStatus,
+      scores: data.scores,
     });
   }
 }
@@ -163,8 +160,9 @@ function onGameResultFinished(data) {
   io.to(data.gameId).emit('game:result:finished', {
     gameId: data.gameId,
     winningTeam: data.winningTeam,
-    gameResult: data.gameResult,
     turnNumber: data.turnNumber,
+    roundNumber: data.roundNumber,
+    scores: data.scores,
   });
 }
 

@@ -221,7 +221,7 @@ class GameLobby extends PureComponent {
       goToLobby,
     } = this.state;
 
-    const { countries, user } = this.props;
+    const { user } = this.props;
 
     return (
       <div id={`game-prepare__${gameId}`} className="game-prepare__view">

@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Link, withRouter } from 'react-router-dom';
-import { Badge, Form, Col, Row, Button, UncontrolledButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import { withRouter } from 'react-router-dom';
 
 import './GameCreate.scss';
 import pageNames from 'lib/pageNames';
@@ -53,7 +52,7 @@ class GameCreate extends Component {
 
 	isCountryActive(country) {
 		const countriesSelected = this.state.rules;
-		if (countriesSelected.indexOf(country.countryId) != '-1') {
+		if (countriesSelected.indexOf(country.countryId) !== -1) {
 			return country.name + '_on';
 		}
 		else
@@ -92,7 +91,7 @@ class GameCreate extends Component {
 	}
 
 	render() {
-		const { countries, user } = this.props;
+		const { countries } = this.props;
 
 		return (
 			<div>
@@ -105,7 +104,7 @@ class GameCreate extends Component {
 						countries && countries.length > 0 && countries.map((country) =>
 							<div key={country.countryId} className={`team-div ${country.name}_off ${this.isCountryActive(country)}`} onClick={() => this.addNewRow(country.countryId)}>
 								<label className="team-name">{country.name}</label>
-								<img src={require('../../assets/teams/' + country.name + '_icon.png')} />
+								<img src={require('../../assets/teams/' + country.name + '_icon.png')} alt={country.name} />
 								<div className="team-label">
 									{this.displayTeamLabal(country.countryId)}
 								</div>

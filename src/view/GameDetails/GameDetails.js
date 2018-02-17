@@ -1,17 +1,14 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { Redirect } from 'react-router';
 import { withRouter } from 'react-router-dom';
 
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
-import { onGameLeft, onGameStart, onGameJoin, onGameTurn, onGameScoreboard, onGameFinalResult } from 'services/SocketClient';
-import { TeamSelector, Spinner, SplashScreen } from 'components';
+import { onGameStart, onGameJoin, onGameTurn, onGameScoreboard, onGameFinalResult } from 'services/SocketClient';
+import { Spinner, SplashScreen, TeamPlayer, Scoreboard } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
 import { setPlayerToTackle, setPlayerToReceiveBall, isBallHandler } from 'actions/game';
 import './GameDetails.scss';
-import { Scoreboard } from 'components';
-import TeamPlayer from '../../components/TeamSelector/TeamPlayer';
 import uuid from 'uuid';
 
 const mapDispatchToProps = dispatch => ({
@@ -30,21 +27,20 @@ const mapStateToProps = state => ({
 
 class GameDetails extends PureComponent {
   state = {
-    //Game State
-    gameId: null,
+    // game State
+    game: null,
     isBusy: false,
     isGameStarted: false,
     isGameCompleted: false,
-    //Game Details
-    game: null,
-    currentTeam: null,
-    ballHandlerTeam: null,
+    currentRoundNumber: 0,
     currentTurnNumber: 0,
+    gameScore: [],
+    // round or turn state
+    ballHandlerTeam: null,
     winningTeam: null,
     isTackled: false,
     isTouchdown: false,
     isPlayerOnAttack: false,
-    isPlayerHoldingBall: false,
     ballHolder: null,
     ballReceiver: null,
     votes: [],
@@ -66,45 +62,91 @@ class GameDetails extends PureComponent {
   }
 
   handleGameTurn = (data) => {
-    const { currentTeam, isPlayerOnAttack, currentTurnNumber } = this.state;
+    const { isPlayerOnAttack, currentTurnNumber, currentRoundNumber, game } = this.state;
+    const { user, setPlayerToTackle, setPlayerToReceiveBall, isBallHandler } = this.props;
 
-    if (!data.latestTurn) {
+    // if data, latest turn and game is null or undefined or game then what the fuq are we doing here
+    if (!data || !data.latestTurn || !game) {
       return;
     }
 
-    const turn = data.latestTurn;
+    // if we reached max rounds, then game has ended and skip the shenanigans
+    if (game.maxRoundsPerGame === data.roundNumber && data.gameStatus === 3) {
+      return;
+    }
 
-    // ball handler result
-    if (isPlayerOnAttack) {
-      if (data.turnNumber === currentTurnNumber) {
-        this.setState({ ballReceiver: turn.passedTo });
-      } else {
-        this.setState({ ballHolder: turn.sender, ballReceiver: null });
-        this.props.setPlayerToReceiveBall(null);
+    // check if its a new round
+    if (data.roundNumber > currentRoundNumber) {
+      // if it's a new round, we set the new ballhandler 
+      const newBallHandlerTeam = game.teams.find(a => a.teamId === data.ballHandlerTeam);
+      this.setState({ ballHandlerTeam: newBallHandlerTeam });
+
+      // check if current player is in the new ballhandling team
+      let isPlayerOnAttack = false;
+      for (let i = 0; i < newBallHandlerTeam.users.length; i++) {
+        if (newBallHandlerTeam.users[i].userId === user.userId) {
+          isPlayerOnAttack = true;
+          break;
+        }
       }
-      // tacklers results
-    } else {
-      const turn = data.latestTurn;
-      if (data.turnNumber === currentTurnNumber) {
-        this.setState({ votes: turn });
+
+      // set current state if player is on offense
+      isBallHandler(isPlayerOnAttack);
+      this.setState({ isPlayerOnAttack });
+
+      if (isPlayerOnAttack) {
+        // set the current ball holder
+        const ballHolder = data.latestTurn[0].sender;
+        const ballReceiver = data.latestTurn[0].passedTo;
+        this.setState({ ballHolder, ballReceiver });
       } else {
+        // we reset the votes
         this.setState({ votes: [] });
       }
+
+      // reset selections on players
+      setPlayerToReceiveBall(null);
+      setPlayerToTackle(null);
+
+      // finally we set the current round and turn number (we reset the turn number as its a new round)
+      this.setState({ currentTurnNumber: 1, currentRoundNumber: data.roundNumber });
+    } else {
+      // let's check first if this is a new turn
+      if (data.turnNumber > currentTurnNumber) {
+        // if it's a new turn, we set the new ball holder and reset the votes
+        if (isPlayerOnAttack) {
+          this.setState({ ballHolder: data.latestTurn[0].sender, ballReceiver: null });
+        } else {
+          this.setState({ votes: [] });
+        }
+
+        // reset selection on players
+        setPlayerToReceiveBall(null);
+        setPlayerToTackle(null);
+      } else {
+        // if it's the same turn, then let's just update the current selections
+        if (isPlayerOnAttack) {
+          // set who receives the ball
+          this.setState({ ballReceiver: data.latestTurn[0].passedTo });
+          setPlayerToReceiveBall(null);
+        } else {
+          this.setState({ votes: data.latestTurn });
+        }
+      }
+
+      // set the current turn number
+      this.setState({ currentTurnNumber: data.turnNumber });
     }
-  };
 
-  handleGameScoreboardUpdate = (data) => {
-    const { currentTurnNumber } = this.state;
-
-    if (data.turnNumber > currentTurnNumber) {
-      this.setState({ votes: [] });
-    }
-
-    this.setState({ isTackled: false, isTouchdown: false, currentTurnNumber: data.turnNumber });
+    // let's set the game score
+    this.setState({ gameScore: data.scores })
   };
 
   handleGameFinalResult = (data) => {
-    this.setState({ isTackled: data.gameResult === 2, isTouchdown: data.gameResult === 1, currentTurnNumber: data.turnNumber });
+    const { setPlayerToTackle, setPlayerToReceiveBall } = this.props;
+    setPlayerToReceiveBall(null);
+    setPlayerToTackle(null);
+    this.setState({ currentRoundNumber: data.roundNumber, currentTurnNumber: data.turnNumber, winningTeam: data.winningTeam, gameScore: data.scores });
   };
 
   handleGameFinalScoreboardUpdate = (data) => {
@@ -148,15 +190,19 @@ class GameDetails extends PureComponent {
           if (gameStateResult.latestTurn) {
             if (isPlayerOnAttack) {
               const ballHolder = gameStateResult.latestTurn[0].sender;
-              const isPlayerHoldingBall = ballHolder === user.userId;
-              this.setState({ isPlayerHoldingBall, ballHolder });
+              const ballReceiver = gameStateResult.latestTurn[0].passedTo;
+              this.setState({ ballHolder, ballReceiver });
             } else {
               this.setState({ votes: gameStateResult.latestTurn });
             }
           }
 
-          this.setState({ currentTeam, ballHandlerTeam, currentTurnNumber: gameStateResult.turnNumber });
+          this.setState({ ballHandlerTeam, currentTurnNumber: gameStateResult.turnNumber, currentRoundNumber: gameStateResult.roundNumber });
           onGameStart({ userId: user.userId, teamId: currentTeam.teamId });
+        }
+
+        if (gameStateResult.scores) {
+          this.setState({ gameScore: gameStateResult.scores })
         }
 
         if (gameStateResult.winningTeam) {
@@ -171,11 +217,6 @@ class GameDetails extends PureComponent {
     }
   };
 
-  getGameDetails = () => {
-    const { isTackled, isTouchdown, currentTurnNumber } = this.state;
-    return { isTackled, currentTurnNumber, isSaved: isTouchdown };
-  }
-
   getVotePerPlayerBadge = (userId) => {
     if (!userId) {
       return null;
@@ -189,25 +230,23 @@ class GameDetails extends PureComponent {
     }
 
     return <div className="player-badge vote"><span>{voters}</span></div>;
-  }
+  };
 
   getCountryByTeam = (team) => {
     const { countries } = this.props;
     const country = countries.find(a => a.countryId === team.countryId);
     return country ? country : { name: 'N/A ' };
-  }
+  };
 
   getMappedPlayers = (team) => {
     if (!team) {
       return [];
     }
 
-    const { countries, user } = this.props;
+    const { countries } = this.props;
     const country = countries.find(a => a.countryId === team.countryId);
 
-    const mappedPlayers = [];
-
-    team.users.map((user) => {
+    const mappedPlayers = team.users.map((user) => {
       let player = country.players.find(p => p.playerId === user.playerId);
       if (!player) {
         player = {
@@ -229,11 +268,33 @@ class GameDetails extends PureComponent {
         }
       };
 
-      mappedPlayers.push(mappedPlayer);
+      return mappedPlayer;
     });
 
     return mappedPlayers;
-  }
+  };
+
+  getMappedTeamCountries = () => {
+    const { game } = this.state;
+    const { countries } = this.props;
+
+    const mappedTeams = [];
+
+    if (game.teams) {
+      game.teams.forEach(team => {
+        const mappedTeam = { ...team };
+        const country = countries.find(a => a.countryId === team.countryId);
+
+        if (country) {
+          mappedTeam.country = country;
+        }
+
+        mappedTeams.push(mappedTeam);
+      });
+    }
+
+    return mappedTeams;
+  };
 
   onPlayerSelected = (teamId, playerId, userId) => {
     const { isPlayerOnAttack } = this.state;
@@ -244,7 +305,7 @@ class GameDetails extends PureComponent {
     } else {
       this.props.setPlayerToTackle(userId);
     }
-  }
+  };
 
   isPlayerClickable = () => {
     const { ballHolder, isPlayerOnAttack } = this.state;
@@ -255,10 +316,10 @@ class GameDetails extends PureComponent {
     }
 
     return true;
-  }
+  };
 
   getGameResultDisplay() {
-    const { isTackled, isTouchdown, isSaved, currentTurnNumber } = this.state;
+    const { isTackled, isTouchdown, isSaved } = this.state;
     if (isTackled) {
       return "tackled";
     } else if (isTouchdown) {
@@ -267,7 +328,7 @@ class GameDetails extends PureComponent {
       return "missed";
     }
     return "default";
-  }
+  };
 
   onGameResult(game) {
     const turnNumber = game.turnNumber;
@@ -276,38 +337,46 @@ class GameDetails extends PureComponent {
     } else {
       this.setState({ isSaved: true, isTackled: true, currentTurnNumber: turnNumber })
     }
-  }
+  };
 
   render() {
     const {
       isBusy,
+      isTackled,
       game,
-      currentTeam,
-      isPlayerHoldingBall,
       isPlayerOnAttack,
       ballHolder,
       ballReceiver,
       ballHandlerTeam,
       currentTurnNumber,
+      currentRoundNumber,
+      gameScore,
       winningTeam,
     } = this.state;
     const { user } = this.props;
     const mappedPlayers = this.getMappedPlayers(ballHandlerTeam);
-    const resultDisplay = this.getGameResultDisplay();
 
     return (
       <div className="gamedetails-view">
-        <SplashScreen />
+        {
+          winningTeam && <SplashScreen teams={this.getMappedTeamCountries()} winningTeam={winningTeam} gameScore={gameScore} />
+        }
         <Spinner isLoading={isBusy}>
           {
-            game && currentTeam && (
+            game && (
               <div>
                 <div className="gamedetails-view__header">
                   <h2>{game.name}</h2>
                   <p>{`${this.getCountryByTeam(game.teams[0]).name} vs ${this.getCountryByTeam(game.teams[1]).name}`}</p>
-                  <p>{`Turn ${currentTurnNumber}`}</p>
+                  <p>{`Round ${currentRoundNumber} of ${game.maxRoundsPerGame} - Turn ${currentTurnNumber}`}</p>
                 </div>
-                <Scoreboard game={this.getGameDetails()} teams={game.teams} />
+                <Scoreboard
+                  roundNumber={currentRoundNumber}
+                  turnNumber={currentTurnNumber}
+                  isTackled={isTackled}
+                  teams={game.teams}
+                  gameScore={gameScore}
+                />
                 <p className="teamBallPosession">Defense Team (Scotland)</p>
                 <p className="teamMissionDescription">Guess 1 player you think is the ball bearer if majority of the team guesses the right person your team wins the round.</p>
                 <div className={`turnResultDisplay ${this.getGameResultDisplay()}`}></div>
@@ -331,7 +400,6 @@ class GameDetails extends PureComponent {
               </div>
             )
           }
-
         </Spinner>
       </div>
     )
