@@ -1,5 +1,5 @@
 const prod = {
-  apiUrl: 'http://whg-engagement-app-api.azurewebsites.net/api',
+  apiUrl: 'http://52.187.124.84/api',
 };
 
 const local = {

@@ -1,16 +1,40 @@
-version: "2"
+version: '3'
+
 services:
+  whg.engagementapp.api:
+    image: jsnmgpnty/whg-app
+    ports:
+      - "58747:80"
+    networks:
+      - whg-network
+    depends_on:
+      - mongo
+      - redis
+  mongo: 
+    image: mongo:latest
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - whg-network
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - whg-network
   app:
-    image: 097133312331.dkr.ecr.us-east-1.amazonaws.com/rugbyunion:latest
+    build: .
     ports:
       - "58426:8080"
     environment:
-      - REACT_APP_RUNTIME_PORT=58426
-    links:
-      - mongo
-  mongo:
-    image: mongo
-    volumes:
-      - ./data:/data/db
-    ports:
-      - "30149:27017"
+      - REACT_APP_RUNTIME_ENV=${REACT_APP_RUNTIME_ENV}
+      - NODE_ENV=${NODE_ENV}
+    networks:
+      - whg-network
+networks:
+  whg-network:
+    driver: bridge
+volumes:
+  mongo-data:

@@ -6,15 +6,9 @@ var redisConf = require('./server/redisEnv');
 var redis = require('redis');
 
 var port = process.env.PORT || 8080;
-var connString = process.env.NODE_ENV === 'prod' ? redisConf.prod.uri : redisConf.local.uri;
-var redisSubscriber = process.env.NODE_ENV === 'prod' ?
-  redis.createClient(6380, 'whg-engagement-app.redis.cache.windows.net', {
-    auth_pass: 'sjwiA428Y90Mp9nCf7XXYmYCc5QperJJoqR5dR+rpFY=',
-    tls: {
-      servername: 'whg-engagement-app.redis.cache.windows.net'
-    }
-  }) :
-  redis.createClient(connString);
+var redisHost = process.env.NODE_ENV && process.env.NODE_ENV.trim().toLowerCase() === 'prod' ? redisConf.prod.host : redisConf.local.host;
+console.log('connecting to redis host "' + redisHost + '"');
+var redisSubscriber = redis.createClient('6379', redisHost);
 
 // express server setup
 var app = express();
