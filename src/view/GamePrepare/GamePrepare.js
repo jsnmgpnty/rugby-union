@@ -163,7 +163,7 @@ class GameLobby extends PureComponent {
     const firstTeamPlayers = game.teams[0].users ? game.teams[0].users.length : 0;
     const secondTeamPlayers = game.teams[1].users ? game.teams[1].users.length : 0;
 
-    if (firstTeamPlayers >= defaultNumberOfPlayersPerTeam 
+    if (firstTeamPlayers >= defaultNumberOfPlayersPerTeam
       && secondTeamPlayers >= defaultNumberOfPlayersPerTeam
       && firstTeamPlayers === secondTeamPlayers) {
       isGameReadyToStart(true);
@@ -174,20 +174,17 @@ class GameLobby extends PureComponent {
     const { game } = this.state;
     const { user } = this.props;
 
-    let isAvatarInUse = false;
-    game.teams.every((team) => {
-      const avatar = team.users.find(a => a.player && a.player.playerId === avatarId);
-      if (avatar) {
-        isAvatarInUse = true;
+    const isAvatarInUse = game.teams.some((team) => {
+      if (team.teamId !== teamId) {
         return false;
       }
 
-      return true;
+      return team.users.some(a => a.playerId === avatarId);
     });
 
     if (!isAvatarInUse) {
       const result = await gameApi.joinGame(game.gameId, teamId, user.userId, avatarId);
-      setCurrentTeam(result.teamId);
+      this.props.setCurrentTeam(result.teamId);
     }
   };
 

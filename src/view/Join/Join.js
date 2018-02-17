@@ -48,7 +48,7 @@ class Join extends Component {
 		}
 
 		const username = event.target.value;
-		if (username.length >= 6) {
+		if (username.length >= 2) {
 			this.setState({ username, isUsernameValid: true });
 		} else {
 			this.setState({ username, isUsernameValid: false });
@@ -56,7 +56,7 @@ class Join extends Component {
 	}
 
 	validateUsername = (event) => {
-		if (event.target.value.length < 6) {
+		if (event.target.value.length < 2) {
 			this.setState({ isUsernameValid: false, errorMessage: 'Invalid username length', isUsernamePristine: false });
 		} else {
 			this.setState({ isUsernameValid: true, errorMessage: null, isUsernamePristine: false });
@@ -77,7 +77,7 @@ class Join extends Component {
 					});
 					return;
 				}
-				
+
 				if (result.data) {
 					initializeSession(result.data);
 					this.props.setUser(result.data);

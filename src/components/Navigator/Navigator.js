@@ -6,6 +6,7 @@ import { Button } from 'reactstrap';
 import { reactLocalStorage } from 'reactjs-localstorage';
 
 import { isPageLoading, setGame } from 'actions/navigation';
+import { lockTurn } from 'actions/game';
 import pageNames from 'lib/pageNames';
 import gameApi from 'services/GameApi';
 import './Navigator.scss';
@@ -28,11 +29,13 @@ const mapStateToProps = (state) => ({
   playerToTackle: state.game.playerToTackle,
   playerToReceiveBall: state.game.playerToReceiveBall,
   isBallHandler: state.game.isBallHandler,
+  turnLocked: state.game.turnLocked,
 });
 
 const mapDispatchToProps = dispatch => ({
   isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
   setGame: (game) => dispatch(setGame(game)),
+  lockTurn: () => dispatch(lockTurn()),
 });
 
 class Navigator extends PureComponent {
@@ -51,6 +54,7 @@ class Navigator extends PureComponent {
     this.onGameCreate = this.onGameCreate.bind(this);
     this.onTackle = this.onTackle.bind(this);
     this.onPassBall = this.onPassBall.bind(this);
+    this.onKeepBall = this.onKeepBall.bind(this);
   }
 
   getBackButtonStyle = () => {
@@ -143,12 +147,18 @@ class Navigator extends PureComponent {
 
   async onTackle() {
     const { game, user, playerToTackle } = this.props;
+    this.props.lockTurn();
     await gameApi.tacklePlayer(game.gameId, user.userId, playerToTackle);
   }
 
-  async onPassBall() {
-    const { game, user, playerToReceiveBall } = this.props;
+  async onPassBall(playerToReceiveBall = this.props.playerToReceiveBall) {
+    const { game, user } = this.props;
+    this.props.lockTurn();
     await gameApi.passBall(game.gameId, user.userId, playerToReceiveBall);
+  }
+
+  async onKeepBall() {
+    this.onPassBall(this.props.user.userId);
   }
 
   render() {
@@ -161,7 +171,8 @@ class Navigator extends PureComponent {
       user,
       playerToTackle,
       playerToReceiveBall,
-      isBallHandler
+      isBallHandler,
+      turnLocked,
     } = this.props;
 
     const {
@@ -213,16 +224,23 @@ class Navigator extends PureComponent {
           }
           {
             currentPage === pageNames.gameDetails && !isBallHandler &&
-            <Button className="btn-tackle" onClick={this.onTackle} color="success" disabled={!playerToTackle}>
+            <Button className="btn-tackle" onClick={this.onTackle} color="success" disabled={!playerToTackle || turnLocked}>
               <span className="tackle" />
               <span className="btn-text-content">Tackle</span>
             </Button>
           }
           {
             currentPage === pageNames.gameDetails && isBallHandler &&
-            <Button className="btn-pass" onClick={this.onPassBall} color="success" disabled={!playerToReceiveBall}>
+            <Button className="btn-pass" onClick={this.onPassBall} color="success" disabled={!playerToReceiveBall || turnLocked}>
               <span className="pass" />
               <span className="btn-text-content">Pass</span>
+            </Button>
+          }
+          {
+            currentPage === pageNames.gameDetails && isBallHandler &&
+            <Button className="btn-keep" onClick={this.onKeepBall} color="success" disabled={!playerToReceiveBall || turnLocked}>
+              <span className="keep" />
+              <span className="btn-text-content">Keep</span>
             </Button>
           }
         </div>
