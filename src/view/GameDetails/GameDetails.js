@@ -7,7 +7,7 @@ import pageNames from 'lib/pageNames';
 import { onGameStart, onGameJoin, onGameTurn, onGameScoreboard, onGameFinalResult } from 'services/SocketClient';
 import { Spinner, SplashScreen, TeamPlayer, Scoreboard } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
-import { setPlayerToTackle, setPlayerToReceiveBall, isBallHandler, lockTurn, unlockTurn } from 'actions/game';
+import { setPlayerToTackle, setPlayerToReceiveBall, isBallHandler, lockTurn, unlockTurn, setGameStatus } from 'actions/game';
 import './GameDetails.scss';
 import uuid from 'uuid';
 import DefendingTeam from './DefendingTeam';
@@ -22,12 +22,14 @@ const mapDispatchToProps = dispatch => ({
   isBallHandler: (val) => dispatch(isBallHandler(val)),
   lockTurn: () => dispatch(lockTurn()),
   unlockTurn: () => dispatch(unlockTurn()),
+  setGameStatus: (status) => dispatch(setGameStatus(status)),
 });
 
 const mapStateToProps = state => ({
   countries: state.countries.countries,
   user: state.user.user,
   turnLocked: state.game.turnLocked,
+  isGameTransitioning: state.game.status === 4,
 });
 
 class GameDetails extends PureComponent {
@@ -69,12 +71,14 @@ class GameDetails extends PureComponent {
 
   handleGameTurn = (data) => {
     const { isPlayerOnAttack, currentTurnNumber, currentRoundNumber, game } = this.state;
-    const { user, setPlayerToTackle, setPlayerToReceiveBall, isBallHandler, lockTurn, unlockTurn } = this.props;
+    const { user, setPlayerToTackle, setPlayerToReceiveBall, isBallHandler, lockTurn, unlockTurn, setGameStatus } = this.props;
 
     // if data, latest turn and game is null or undefined or game then what the fuq are we doing here
     if (!data || !data.latestTurn || !game) {
       return;
     }
+
+    setGameStatus(data.gameStatus);
 
     // if we reached max rounds, then game has ended and skip the shenanigans
     if (game.maxRoundsPerGame === data.roundNumber && data.gameStatus === 3) {
@@ -178,7 +182,7 @@ class GameDetails extends PureComponent {
   }
 
   getGameState = async (gameId) => {
-    const { user, isBallHandler, lockTurn, unlockTurn } = this.props;
+    const { user, isBallHandler, lockTurn, unlockTurn, setGameStatus } = this.props;
     const { isBusy } = this.state;
 
     if (isBusy) {
@@ -191,6 +195,7 @@ class GameDetails extends PureComponent {
       const gameStateResult = await gameApi.getGameState(gameId, user.userId);
 
       if (gameStateResult) {
+        setGameStatus(gameStateResult.gameStatus);
         switch (gameStateResult.gameStatus) {
           case 3:
             this.setState({ isGameCompleted: true });
@@ -235,7 +240,17 @@ class GameDetails extends PureComponent {
         }
 
         if (gameStateResult.winningTeam) {
-          this.setState({ winningTeam: gameStateResult.winningTeam, isTackled: gameStateResult.gameResult === 2, isTouchdown: gameStateResult.gameResult === 1 });
+          this.setState({ winningTeam: gameStateResult.winningTeam });
+        }
+
+        if (gameStateResult.gameStatus === 4) {
+          const roundResult = gameStateResult.roundResult;
+          const isTouchdown = roundResult === 1;
+          const isTackled = roundResult === 2;
+          const isSaved = roundResult === 3;
+          this.setState({ isTackled, isTouchdown, isSaved});
+        } else {
+          this.setState({ isTackled: false, isTouchdown: false, isSaved: false });
         }
 
         this.setState({ isBusy: false });
@@ -347,8 +362,13 @@ class GameDetails extends PureComponent {
     return true;
   };
 
-  getGameResultDisplay = () => {
+  getRoundResultDisplay = () => {
+    if (!this.props.isGameTransitioning) {
+      return "default";
+    }
+
     const { isTackled, isTouchdown, isSaved } = this.state;
+
     if (isTackled) {
       return "tackled";
     } else if (isTouchdown) {
@@ -412,7 +432,7 @@ class GameDetails extends PureComponent {
                 {
                   isPlayerOnAttack ?
                     <AttackingTeam
-                      getGameResultDisplay={this.getGameResultDisplay}
+                      getRoundResultDisplay={this.getRoundResultDisplay}
                       country={countryName}
                       players={mappedPlayers}
                       currentUser={user}
@@ -421,7 +441,7 @@ class GameDetails extends PureComponent {
                       ballReceiver={ballReceiver}
                       turnLocked={turnLocked} /> :
                     <DefendingTeam
-                      getGameResultDisplay={this.getGameResultDisplay}
+                      getRoundResultDisplay={this.getRoundResultDisplay}
                       country={countryName}
                       players={mappedPlayers}
                       currentUser={user}

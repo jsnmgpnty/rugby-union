@@ -30,6 +30,7 @@ const mapStateToProps = (state) => ({
   playerToReceiveBall: state.game.playerToReceiveBall,
   isBallHandler: state.game.isBallHandler,
   turnLocked: state.game.turnLocked,
+  isGameTransitioning: state.game.status === 4,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -55,6 +56,7 @@ class Navigator extends PureComponent {
     this.onTackle = this.onTackle.bind(this);
     this.onPassBall = this.onPassBall.bind(this);
     this.onKeepBall = this.onKeepBall.bind(this);
+    this.onGameTransition = this.onGameTransition.bind(this);
   }
 
   getBackButtonStyle = () => {
@@ -161,6 +163,10 @@ class Navigator extends PureComponent {
     this.onPassBall(this.props.user.userId);
   }
 
+  async onGameTransition() {
+    await gameApi.transitionGame(this.props.game.gameId);
+  }
+
   render() {
     const {
       isTeamsSelectedOnGameCreate,
@@ -173,6 +179,7 @@ class Navigator extends PureComponent {
       playerToReceiveBall,
       isBallHandler,
       turnLocked,
+      isGameTransitioning,
     } = this.props;
 
     const {
@@ -223,24 +230,31 @@ class Navigator extends PureComponent {
             </Button>
           }
           {
-            currentPage === pageNames.gameDetails && !isBallHandler &&
+            currentPage === pageNames.gameDetails && !isGameTransitioning && !isBallHandler &&
             <Button className="btn-tackle" onClick={this.onTackle} color="success" disabled={!playerToTackle || turnLocked}>
               <span className="tackle" />
               <span className="btn-text-content">Tackle</span>
             </Button>
           }
           {
-            currentPage === pageNames.gameDetails && isBallHandler &&
+            currentPage === pageNames.gameDetails && !isGameTransitioning && isBallHandler &&
             <Button className="btn-pass" onClick={this.onPassBall} color="success" disabled={!playerToReceiveBall || turnLocked}>
               <span className="pass" />
               <span className="btn-text-content">Pass</span>
             </Button>
           }
           {
-            currentPage === pageNames.gameDetails && isBallHandler &&
+            currentPage === pageNames.gameDetails && !isGameTransitioning && isBallHandler &&
             <Button className="btn-keep" onClick={this.onKeepBall} color="success" disabled={!playerToReceiveBall || turnLocked}>
               <span className="keep" />
               <span className="btn-text-content">Keep</span>
+            </Button>
+          }
+          {
+            currentPage === pageNames.gameDetails && isGameTransitioning && game && user.userId === game.createdBy &&
+            <Button className="btn-next" onClick={this.onGameTransition} color="success">
+              <span className="next" />
+              <span className="btn-text-content">Next</span>
             </Button>
           }
         </div>

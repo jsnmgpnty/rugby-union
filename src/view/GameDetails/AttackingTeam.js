@@ -6,7 +6,7 @@ import { TeamPlayer } from 'components';
 
 class AttackingTeam extends PureComponent {
   static propTypes = {
-    getGameResultDisplay: PropTypes.func, // TODO: Refactor
+    getRoundResultDisplay: PropTypes.func, // TODO: Refactor
     country: PropTypes.string,
     players: PropTypes.array,
     currentUser: PropTypes.object,
@@ -53,13 +53,26 @@ class AttackingTeam extends PureComponent {
     return objective;
   }
 
-  render() {
-    const { country, players, currentUser, onPlayerSelected } = this.props;
+  getDescription = () => {
+    const roundResultClass = this.props.getRoundResultDisplay();
+    if (roundResultClass) {
+      return <div className={`turnResultDisplay ${roundResultClass}`}></div>;
+    }
+
     return (
       <Fragment>
-        <p className="team-description offense">Attacking Team <span className="country-name">{`(${country})`}</span></p>
+        <p className="team-description offense">Attacking Team <span className="country-name">{`(${this.props.country})`}</span></p>
         <p className="teamMissionDescription">{this.getTurnDescription()}</p>
-        <div className={`turnResultDisplay ${this.props.getGameResultDisplay()}`}></div>
+      </Fragment>
+    );
+  }
+
+  render() {
+    const { players, currentUser, onPlayerSelected } = this.props;
+
+    return (
+      <Fragment>
+        {this.getDescription()}
         {
           players.map(a => {
             return (

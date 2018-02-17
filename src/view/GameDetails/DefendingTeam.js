@@ -6,7 +6,7 @@ import { TeamPlayer } from 'components';
 
 class DefendingTeam extends PureComponent {
   static propTypes = {
-    getGameResultDisplay: PropTypes.func, // TODO: Refactor
+    getRoundResultDisplay: PropTypes.func, // TODO: Refactor
     country: PropTypes.string,
     players: PropTypes.array,
     currentUser: PropTypes.object,
@@ -29,13 +29,25 @@ class DefendingTeam extends PureComponent {
     return <div className="player-badge vote"><span>{voters}</span></div>;
   };
 
-  render() {
-    const { country, players, currentUser, onPlayerSelected, turnLocked } = this.props;
+  getDescription = () => {
+    const roundResultClass = this.props.getRoundResultDisplay();
+    if (roundResultClass) {
+      return <div className={`turnResultDisplay ${roundResultClass}`}></div>;
+    }
+
     return (
       <Fragment>
-        <p className="team-description defense">Defending Team <span className="country-name">{`(${country})`}</span></p>
+        <p className="team-description defense">Defending Team <span className="country-name">{`(${this.props.country})`}</span></p>
         <p className="teamMissionDescription">Guess 1 player you think is the ball bearer. If majority of the team guesses the right person your team wins the round.</p>
-        <div className={`turnResultDisplay ${this.props.getGameResultDisplay()}`}></div>
+      </Fragment>
+    );
+  }
+
+  render() {
+    const { players, currentUser, onPlayerSelected, turnLocked } = this.props;
+    return (
+      <Fragment>
+        {this.getDescription()}
         {
           players.map(a => {
             return (

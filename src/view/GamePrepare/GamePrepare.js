@@ -75,6 +75,7 @@ class GameLobby extends PureComponent {
         switch (game.gameStatus) {
           case 1:
           case 2:
+          case 4:
             this.setState({ isGameStarted: true });
             break;
           case 3:
