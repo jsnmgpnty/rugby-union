@@ -15,5 +15,17 @@ router.use(function (req, res, next) {
 router.get('/', function(req, res){
   res.sendFile(path.join(__dirname, '../../build/', 'index.html'));
 });
+router.get('/join', function(req, res){
+  res.sendFile(path.join(__dirname, '../../build/', 'index.html'));
+});
+router.get('/create', function(req, res){
+  res.sendFile(path.join(__dirname, '../../build/', 'index.html'));
+});
+router.get('/game/:gameId', function(req, res){
+  res.sendFile(path.join(__dirname, '../../build/', 'index.html'));
+});
+router.get('/game/:gameId/details', function(req, res){
+  res.sendFile(path.join(__dirname, '../../build/', 'index.html'));
+});
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const prod = {
-  apiUrl: 'http://52.187.124.84/api',
+  apiUrl: 'http://52.187.124.84:58747/api',
 };
 
 const local = {

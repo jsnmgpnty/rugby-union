@@ -9,9 +9,9 @@ WORKDIR /app
 # where available (npm@5+)
 COPY package.json /app
 
-RUN npm install
 # If you are building your code for production
-# RUN npm install --only=production
+RUN npm set progress=false
+RUN npm install
 
 # Bundle app source
 COPY . /app
