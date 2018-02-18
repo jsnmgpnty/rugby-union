@@ -9,7 +9,7 @@ class GameApi extends ApiClient {
   }
 
   async getGameState(gameId, userId) {
-    return this.get(`/game/${gameId}/state?userId=${userId}`);	
+    return this.get(`/game/${gameId}/state?userId=${userId}`);
   }
 
   async getGames() {
@@ -50,6 +50,10 @@ class GameApi extends ApiClient {
 
   async passBall(gameId, sender, passTo) {
     return this.post(`/game/${gameId}/pass`, { gameId, sender, passTo });
+  }
+
+  async transitionGame(gameId) {
+    return this.post(`/game/${gameId}/transition`, { gameId });
   }
 
   async tacklePlayer(gameId, sender, toTackle) {
