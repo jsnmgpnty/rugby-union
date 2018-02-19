@@ -29,6 +29,7 @@ const mapStateToProps = (state) => ({
   playerToTackle: state.game.playerToTackle,
   playerToReceiveBall: state.game.playerToReceiveBall,
   isBallHandler: state.game.isBallHandler,
+  ballHandler: state.game.ballHandler,
   turnLocked: state.game.turnLocked,
   isGameTransitioning: state.game.status === 4,
 });
@@ -180,6 +181,7 @@ class Navigator extends PureComponent {
       playerToTackle,
       playerToReceiveBall,
       isBallHandler,
+      ballHandler,
       turnLocked,
       isGameTransitioning,
     } = this.props;
@@ -247,7 +249,7 @@ class Navigator extends PureComponent {
           }
           {
             currentPage === pageNames.gameDetails && !isGameTransitioning && isBallHandler &&
-            <Button className="btn-keep" onClick={this.onKeepBall} color="primary" disabled={turnLocked}>
+            <Button className="btn-keep" onClick={this.onKeepBall} color="primary" disabled={turnLocked || ballHandler !== user.userId}>
               <span className="keep" />
               <span className="btn-text-content">Keep</span>
             </Button>

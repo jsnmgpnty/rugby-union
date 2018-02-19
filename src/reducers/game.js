@@ -1,7 +1,7 @@
 import {
   SET_PLAYER_TO_TACKLE,
   SET_PLAYER_TO_RECEIVE_BALL,
-  IS_BALL_HANDLER,
+  SET_BALL_HANDLER,
   LOCK_TURN,
   UNLOCK_TURN,
   SET_GAME_STATUS,
@@ -11,6 +11,7 @@ const initialState = {
   playerToTackle: null,
   playerToReceiveBall: null,
   isBallHandler: false,
+  ballHandler: null,
   turnLocked: false,
   status: null,
 };
@@ -27,10 +28,11 @@ export default function game(state = initialState, action) {
         ...state,
         playerToReceiveBall: action.payload,
       };
-    case IS_BALL_HANDLER:
+    case SET_BALL_HANDLER:
       return {
         ...state,
-        isBallHandler: action.payload,
+        isBallHandler: action.isBallHandler,
+        ballHandler: action.ballHandler,
       };
     case LOCK_TURN:
       return {

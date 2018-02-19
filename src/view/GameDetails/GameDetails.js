@@ -7,7 +7,7 @@ import pageNames from 'lib/pageNames';
 import { onGameStart, onGameJoin, onGameTurn, onGameScoreboard, onGameFinalResult } from 'services/SocketClient';
 import { Spinner, SplashScreen, TeamPlayer, Scoreboard } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
-import { setPlayerToTackle, setPlayerToReceiveBall, isBallHandler, lockTurn, unlockTurn, setGameStatus } from 'actions/game';
+import { setPlayerToTackle, setPlayerToReceiveBall, setBallHandler, lockTurn, unlockTurn, setGameStatus } from 'actions/game';
 import './GameDetails.scss';
 import uuid from 'uuid';
 import DefendingTeam from './DefendingTeam';
@@ -19,7 +19,7 @@ const mapDispatchToProps = dispatch => ({
   setGame: (game) => dispatch(setGame(game)),
   setPlayerToTackle: (playerId) => dispatch(setPlayerToTackle(playerId)),
   setPlayerToReceiveBall: (playerId) => dispatch(setPlayerToReceiveBall(playerId)),
-  isBallHandler: (val) => dispatch(isBallHandler(val)),
+  setBallHandler: (isBallHandler, ballHandler) => dispatch(setBallHandler(isBallHandler, ballHandler)),
   lockTurn: () => dispatch(lockTurn()),
   unlockTurn: () => dispatch(unlockTurn()),
   setGameStatus: (status) => dispatch(setGameStatus(status)),
@@ -71,7 +71,7 @@ class GameDetails extends PureComponent {
 
   handleGameTurn = (data) => {
     const { isPlayerOnAttack, currentTurnNumber, currentRoundNumber, game } = this.state;
-    const { user, setPlayerToTackle, setPlayerToReceiveBall, isBallHandler, lockTurn, unlockTurn, setGameStatus } = this.props;
+    const { user, setPlayerToTackle, setPlayerToReceiveBall, setBallHandler, lockTurn, unlockTurn, setGameStatus } = this.props;
 
     // if data, latest turn and game is null or undefined or game then what the fuq are we doing here
     if (!data || !data.latestTurn || !game) {
@@ -101,7 +101,6 @@ class GameDetails extends PureComponent {
       }
 
       // set current state if player is on offense
-      isBallHandler(isPlayerOnAttack);
       this.setState({ isPlayerOnAttack });
 
       if (isPlayerOnAttack) {
@@ -109,9 +108,11 @@ class GameDetails extends PureComponent {
         const ballHolder = data.latestTurn[0].sender;
         const ballReceiver = data.latestTurn[0].passedTo;
         this.setState({ ballHolder, ballReceiver });
+        setBallHandler(false, ballHolder);
       } else {
         // we reset the votes
         this.setState({ votes: [] });
+        setBallHandler(false, null);
       }
 
       // reset selections on players
@@ -192,7 +193,7 @@ class GameDetails extends PureComponent {
   }
 
   getGameState = async (gameId) => {
-    const { user, isBallHandler, lockTurn, unlockTurn, setGameStatus } = this.props;
+    const { user, setBallHandler, lockTurn, unlockTurn, setGameStatus } = this.props;
     const { isBusy } = this.state;
 
     if (isBusy) {
@@ -222,24 +223,25 @@ class GameDetails extends PureComponent {
           const countryName = this.props.countries.find(c => c.countryId === currentTeam.countryId).name;
           const ballHandlerTeam = gameStateResult.teams.find(a => a.isBallHandler);
           const isPlayerOnAttack = currentTeam.isBallHandler;
-          isBallHandler(isPlayerOnAttack);
+          
+          if (isPlayerOnAttack) {
+            const ballHolder = gameStateResult.latestTurn[0].sender;
+            const ballReceiver = gameStateResult.latestTurn[0].passedTo;
+            this.setState({ ballHolder, ballReceiver });
 
-          this.setState({ isPlayerOnAttack });
-          if (gameStateResult.latestTurn) {
-            if (isPlayerOnAttack) {
-              const ballHolder = gameStateResult.latestTurn[0].sender;
-              const ballReceiver = gameStateResult.latestTurn[0].passedTo;
-              this.setState({ ballHolder, ballReceiver });
-
-              if (ballReceiver) {
-                lockTurn();
-              } else {
-                unlockTurn();
-              }
+            if (ballReceiver) {
+              lockTurn();
             } else {
-              this.setVotes(gameStateResult.latestTurn);
+              unlockTurn();
             }
+
+            setBallHandler(true, ballHolder);
+          } else {
+            this.setVotes(gameStateResult.latestTurn);
+            setBallHandler(false, null);
           }
+          
+          this.setState({ isPlayerOnAttack });
 
           this.setState({ ballHandlerTeam, currentTurnNumber: gameStateResult.turnNumber, currentRoundNumber: gameStateResult.roundNumber, countryName });
           onGameStart({ userId: user.userId, teamId: currentTeam.teamId });
