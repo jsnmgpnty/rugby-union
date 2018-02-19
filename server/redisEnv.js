@@ -3,6 +3,6 @@ module.exports = {
     host: 'redis',
   },
   local: {
-    host: 'redis',
+    host: 'localhost',
   },
 };

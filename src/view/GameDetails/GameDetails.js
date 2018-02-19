@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
 import { onGameStart, onGameJoin, onGameTurn, onGameScoreboard, onGameFinalResult } from 'services/SocketClient';
-import { Spinner, SplashScreen, TeamPlayer, Scoreboard } from 'components';
+import { Spinner, SplashScreen, TeamPlayer, Scoreboard, RoundResult } from 'components';
 import { setCurrentPage, setGame, isPageLoading } from 'actions/navigation';
 import { setPlayerToTackle, setPlayerToReceiveBall, setBallHandler, lockTurn, unlockTurn, setGameStatus } from 'actions/game';
 import './GameDetails.scss';
@@ -52,6 +52,7 @@ class GameDetails extends PureComponent {
     ballReceiver: null,
     votes: [],
     countryName: null,
+    isNewTurn: false,
   };
 
   async componentDidMount() {
@@ -89,7 +90,7 @@ class GameDetails extends PureComponent {
     if (data.roundNumber > currentRoundNumber) {
       // if it's a new round, we set the new ballhandler
       const newBallHandlerTeam = game.teams.find(a => a.teamId === data.ballHandlerTeam);
-      this.setState({ ballHandlerTeam: newBallHandlerTeam });
+      this.setState({ ballHandlerTeam: newBallHandlerTeam, isNewTurn: true });
 
       // check if current player is in the new ballhandling team
       let isPlayerOnAttack = false;
@@ -158,7 +159,7 @@ class GameDetails extends PureComponent {
           const isTouchdown = roundResult === 1;
           const isTackled = roundResult === 2;
           const isSaved = roundResult === 3;
-          this.setState({ isTackled, isTouchdown, isSaved});
+          this.setState({ isTackled, isTouchdown, isSaved });
         } else {
           this.setState({ isTackled: false, isTouchdown: false, isSaved: false });
         }
@@ -223,7 +224,7 @@ class GameDetails extends PureComponent {
           const countryName = this.props.countries.find(c => c.countryId === currentTeam.countryId).name;
           const ballHandlerTeam = gameStateResult.teams.find(a => a.isBallHandler);
           const isPlayerOnAttack = currentTeam.isBallHandler;
-          
+
           if (isPlayerOnAttack) {
             const ballHolder = gameStateResult.latestTurn[0].sender;
             const ballReceiver = gameStateResult.latestTurn[0].passedTo;
@@ -240,7 +241,7 @@ class GameDetails extends PureComponent {
             this.setVotes(gameStateResult.latestTurn);
             setBallHandler(false, null);
           }
-          
+
           this.setState({ isPlayerOnAttack });
 
           this.setState({ ballHandlerTeam, currentTurnNumber: gameStateResult.turnNumber, currentRoundNumber: gameStateResult.roundNumber, countryName });
@@ -260,7 +261,7 @@ class GameDetails extends PureComponent {
           const isTouchdown = roundResult === 1;
           const isTackled = roundResult === 2;
           const isSaved = roundResult === 3;
-          this.setState({ isTackled, isTouchdown, isSaved});
+          this.setState({ isTackled, isTouchdown, isSaved });
         } else {
           this.setState({ isTackled: false, isTouchdown: false, isSaved: false });
         }
@@ -400,6 +401,10 @@ class GameDetails extends PureComponent {
     }
   };
 
+  checkShouldDisplayRoundResult() {
+    return this.state.isNewTurn && !this.state.isGameCompleted;
+  }
+
   render() {
     const {
       isBusy,
@@ -424,6 +429,10 @@ class GameDetails extends PureComponent {
       <div className="gamedetails-view">
         {
           winningTeam && <SplashScreen teams={this.getMappedTeamCountries()} winningTeam={winningTeam} gameScore={gameScore} />
+        }
+
+        { 
+          this.checkShouldDisplayRoundResult() && <RoundResult teams={this.getMappedTeamCountries()} isAttackingTeam={isPlayerOnAttack} isTackled={isTackled} gameScore={gameScore} />
         }
         <Spinner isLoading={isBusy}>
           {
