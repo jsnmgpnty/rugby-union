@@ -181,7 +181,6 @@ io.on('connection', function (socket) {
       connectedClients.push({ userId: data.userId, socket: socket });
     }
 
-    connectedClient.join(data.gameId);
     socket.join(data.gameId);
   });
 
@@ -191,7 +190,6 @@ io.on('connection', function (socket) {
       connectedClients.push({ userId: data.userId, socket: socket });
     }
 
-    connectedClient.join(data.teamId);
     socket.join(data.teamId);
   });
 
