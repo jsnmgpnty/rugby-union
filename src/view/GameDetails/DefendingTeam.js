@@ -31,7 +31,7 @@ class DefendingTeam extends PureComponent {
 
   getDescription = () => {
     const roundResultClass = this.props.getRoundResultDisplay();
-    if (roundResultClass) {
+    if (roundResultClass !== 'default') {
       return <div className={`turnResultDisplay ${roundResultClass}`}></div>;
     }
 

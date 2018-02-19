@@ -3,7 +3,7 @@ const prod = {
 };
 
 const local = {
-  url: 'http://localhost:58426',
+  url: 'http://localhost:8080',
 };
 
 export { local, prod };

@@ -133,6 +133,7 @@ function onGameResult(data) {
       tacklingTeam: data.tacklingTeam,
       gameStatus: data.gameStatus,
       scores: data.scores,
+      roundResult: data.roundResult,
     });
   }
 
@@ -146,6 +147,7 @@ function onGameResult(data) {
       tacklingTeam: data.tacklingTeam,
       gameStatus: data.gameStatus,
       scores: data.scores,
+      roundResult: data.roundResult,
     });
   }
 }

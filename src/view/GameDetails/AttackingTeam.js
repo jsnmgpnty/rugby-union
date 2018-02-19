@@ -40,10 +40,10 @@ class AttackingTeam extends PureComponent {
   }
 
   getTurnDescription = () => {
-    const { ballHolder, ballReceiver, currentUser } = this.props;
+    const { ballHolder, ballReceiver, currentUser, turnLocked } = this.props;
     let objective = "The objective of your team is to successfully evade 6 waves without being tackled.";
 
-    if (ballReceiver) {
+    if (turnLocked) {
       return "Waiting for the other team to tackle";
     }
 
@@ -55,7 +55,7 @@ class AttackingTeam extends PureComponent {
 
   getDescription = () => {
     const roundResultClass = this.props.getRoundResultDisplay();
-    if (roundResultClass) {
+    if (roundResultClass !== 'default') {
       return <div className={`turnResultDisplay ${roundResultClass}`}></div>;
     }
 

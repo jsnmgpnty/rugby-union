@@ -3,7 +3,7 @@ const prod = {
 };
 
 const local = {
-  apiUrl: 'http://localhost:58747/api',
+  apiUrl: 'http://localhost:58247/api',
 };
 
 export { local, prod };

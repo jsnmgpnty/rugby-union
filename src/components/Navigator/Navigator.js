@@ -153,14 +153,16 @@ class Navigator extends PureComponent {
     await gameApi.tacklePlayer(game.gameId, user.userId, playerToTackle);
   }
 
-  async onPassBall(playerToReceiveBall = this.props.playerToReceiveBall) {
+  async onPassBall() {
     const { game, user } = this.props;
     this.props.lockTurn();
-    await gameApi.passBall(game.gameId, user.userId, playerToReceiveBall);
+    await gameApi.passBall(game.gameId, user.userId, this.props.playerToReceiveBall);
   }
 
   async onKeepBall() {
-    this.onPassBall(this.props.user.userId);
+    const { game, user } = this.props;
+    this.props.lockTurn();
+    await gameApi.passBall(game.gameId, user.userId, this.props.user.userId);
   }
 
   async onGameTransition() {
@@ -245,7 +247,7 @@ class Navigator extends PureComponent {
           }
           {
             currentPage === pageNames.gameDetails && !isGameTransitioning && isBallHandler &&
-            <Button className="btn-keep" onClick={this.onKeepBall} color="success" disabled={!playerToReceiveBall || turnLocked}>
+            <Button className="btn-keep" onClick={this.onKeepBall} color="primary" disabled={turnLocked}>
               <span className="keep" />
               <span className="btn-text-content">Keep</span>
             </Button>

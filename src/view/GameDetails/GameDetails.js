@@ -151,6 +151,16 @@ class GameDetails extends PureComponent {
         } else {
           this.setVotes(data.latestTurn);
         }
+
+        if (data.gameStatus === 4) {
+          const roundResult = data.roundResult;
+          const isTouchdown = roundResult === 1;
+          const isTackled = roundResult === 2;
+          const isSaved = roundResult === 3;
+          this.setState({ isTackled, isTouchdown, isSaved});
+        } else {
+          this.setState({ isTackled: false, isTouchdown: false, isSaved: false });
+        }
       }
 
       // set the current turn number
