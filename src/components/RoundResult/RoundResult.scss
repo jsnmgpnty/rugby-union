@@ -1,0 +1,77 @@
+@import '../../variables';
+
+.splash-screen{
+	width: 100%;
+	height: 100%;
+	z-index: 1000;
+	position: fixed;
+	color: $white;
+	background-color: rgba(2, 2, 2, 0.9);
+	
+	.splash-screen__overlay {
+		z-index: 1001;
+    filter: blur(15px);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    opacity: 0.4;
+	}
+
+	.splash-screen__contents {
+		z-index: 1002;
+    position: absolute;
+    width: 100%;
+		height: 100%;
+		
+		h2 {
+			padding: 10rem 2rem 1rem 2rem;
+			font-size: 2.10rem;
+			color: $yellow;
+			font-weight: 600;
+
+			span {
+				text-transform: capitalize;
+			}
+		}
+		
+		.per-team {
+			margin: 0 1.4rem;
+
+			&:nth-child(odd) {
+				.country {
+					border: 5px solid $danger;
+				}
+			}
+	
+			.country {
+				height: 115px;
+				width: 115px;
+				border: 5px solid $success;
+			}
+			
+			.team-score {
+				padding-top: 1.5rem;
+				font-size: 1.1rem;
+				line-height: 1;
+				text-transform: uppercase;
+				
+				p{
+					font-size: 4rem;
+					font-weight: 600;
+				}
+			}
+		}
+		
+		.footer-block{
+			background-color: $blue;
+			color: #fff;
+			width: 40%;
+			position:absolute;
+			bottom:0;
+			left: 31%;
+			margin-right: -50%;
+			font-size: 1rem;
+			padding: 1rem 1rem .5rem 1rem;
+		}
+	}
+}
