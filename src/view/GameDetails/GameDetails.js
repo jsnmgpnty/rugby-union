@@ -408,6 +408,7 @@ class GameDetails extends PureComponent {
   render() {
     const {
       isBusy,
+      isTouchdown,
       isTackled,
       game,
       isPlayerOnAttack,
@@ -446,6 +447,7 @@ class GameDetails extends PureComponent {
                 <Scoreboard
                   roundNumber={currentRoundNumber}
                   turnNumber={currentTurnNumber}
+                  isTouchdown={isTouchdown}
                   isTackled={isTackled}
                   teams={game.teams}
                   gameScore={gameScore}

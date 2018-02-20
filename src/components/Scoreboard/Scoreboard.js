@@ -1,16 +1,25 @@
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+import ContainerDimensions from 'react-container-dimensions'
 import { Country } from 'components';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+
+import ScoreboardPin from './ScoreboardPin';
 import './Scoreboard.scss';
-import PropTypes from 'prop-types';
 
 const mapStateToProps = (state) => ({
   countries: state.countries.countries,
 })
 
 class Scoreboard extends PureComponent {
+  state = {
+    turnNumber: this.props.turnNumber,
+    roundNumber: this.props.roundNumber,
+  };
+
   static propTypes = {
+    isTouchdown: PropTypes.bool.isRequired,
     isTackled: PropTypes.bool.isRequired,
     turnNumber: PropTypes.number.isRequired,
     roundNumber: PropTypes.number.isRequired,
@@ -24,20 +33,37 @@ class Scoreboard extends PureComponent {
     return country || { name: 'N/A' };
   }
 
-  getResultField = () => {
-    const { turnNumber, isTackled } = this.props;
-    if (turnNumber === 1) {
-      return "default";
+  updateTurn = () => {
+    let turn = this.state.turnNumber;
+    let round = this.state.roundNumber;
+
+    if (round === 4) {
+      return;
     }
 
-    let scoreFieldClassName = isTackled ? "tackled" : "safe";
-    scoreFieldClassName += turnNumber;
+    if (turn === 6) {
+      this.setState({ isTouchdown: true });
+      round += 1;
+      turn = 1;
+    } else {
+      this.setState({ isTouchdown: false });
+      turn += 1;
+    }
 
-    return scoreFieldClassName;
+    this.setState({
+      turnNumber: turn,
+      roundNumber: round,
+    });
   }
 
   render() {
-    const { teams } = this.props;
+    const {
+      teams,
+      isTackled,
+      isTouchdown,
+      turnNumber,
+      roundNumber,
+    } = this.props;
 
     return (
       <div>
@@ -46,7 +72,23 @@ class Scoreboard extends PureComponent {
           <span className="scoreTally">00:00</span>
           <Country country={this.getCountry(teams[1])} />
         </div>
-        <div className={`score-view__field ${this.getResultField()}`} />
+        <div className={`score-view__field default`}>
+          <ContainerDimensions>
+            {
+              ({ width, height }) =>
+                <ScoreboardPin
+                  width={width}
+                  height={height}
+                  isTouchdown={this.state.isTouchdown}
+                  isTackled={isTackled}
+                  turnNumber={this.state.turnNumber}
+                  roundNumber={this.state.roundNumber}
+                />
+            }
+          </ContainerDimensions>
+
+        </div>
+        <a onClick={this.updateTurn}>CLICK</a> 
       </div>
     )
   }
