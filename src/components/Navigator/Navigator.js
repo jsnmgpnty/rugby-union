@@ -7,6 +7,7 @@ import { reactLocalStorage } from 'reactjs-localstorage';
 
 import { isPageLoading, setGame } from 'actions/navigation';
 import { lockTurn } from 'actions/game';
+import { ButtonSound } from 'components';
 import pageNames from 'lib/pageNames';
 import gameApi from 'services/GameApi';
 import './Navigator.scss';
@@ -198,68 +199,68 @@ class Navigator extends PureComponent {
         <div className='rugby-navigator__top'>
           {
             currentPage !== pageNames.join &&
-            <Button color="info" onClick={this.onBackButtonClick} className={this.getBackButtonStyle()}>
+            <ButtonSound color="info" onClick={this.onBackButtonClick} className={this.getBackButtonStyle()}>
               <span className="back" />
               <span className="btn-text-content">Back</span>
-            </Button>
+            </ButtonSound>
           }
         </div>
         <div className='rugby-navigator__bottom'>
           {
             currentPage === pageNames.gameCreate &&
-            <Button color="success" disabled={!isTeamsSelectedOnGameCreate} onClick={this.onGameCreate}>
+            <ButtonSound color="success" disabled={!isTeamsSelectedOnGameCreate} onClick={this.onGameCreate}>
               <span className="create" />
               <span className="btn-text-content">Create</span>
-            </Button>
+            </ButtonSound>
           }
           { // disable view for now
             currentPage === pageNames.gameLobby && false &&
-            <Button className="btn-view" color="success" disabled={!isGameSelectedOnLobby}>
+            <ButtonSound className="btn-view" color="success" disabled={!isGameSelectedOnLobby}>
               <span className="view" />
               <span className="btn-text-content">View</span>
-            </Button>
+            </ButtonSound>
           }
           {
             currentPage === pageNames.gameLobby &&
-            <Button className="btn-join" onClick={this.onGameJoin} color="primary" disabled={!isGameSelectedOnLobby}>
+            <ButtonSound className="btn-join" onClick={this.onGameJoin} color="primary" disabled={!isGameSelectedOnLobby}>
               <span className="join" />
               <span className="btn-text-content">Join</span>
-            </Button>
+            </ButtonSound>
           }
           {
             currentPage === pageNames.gamePrepare &&
-            <Button className="btn-join" onClick={this.onGameStart} color="primary" disabled={!isGameReadyToStart || user.userId !== game.createdBy}>
+            <ButtonSound className="btn-join" onClick={this.onGameStart} color="primary" disabled={!isGameReadyToStart || user.userId !== game.createdBy}>
               <span className="start" />
               <span className="btn-text-content">Start</span>
-            </Button>
+            </ButtonSound>
           }
           {
             currentPage === pageNames.gameDetails && !isGameTransitioning && !isBallHandler &&
-            <Button className="btn-tackle" onClick={this.onTackle} color="success" disabled={!playerToTackle || turnLocked}>
+            <ButtonSound className="btn-tackle" onClick={this.onTackle} color="success" disabled={!playerToTackle || turnLocked}>
               <span className="tackle" />
               <span className="btn-text-content">Tackle</span>
-            </Button>
+            </ButtonSound>
           }
           {
             currentPage === pageNames.gameDetails && !isGameTransitioning && isBallHandler &&
-            <Button className="btn-pass" onClick={this.onPassBall} color="success" disabled={!playerToReceiveBall || turnLocked}>
+            <ButtonSound className="btn-pass" onClick={this.onPassBall} color="success" disabled={!playerToReceiveBall || turnLocked}>
               <span className="pass" />
               <span className="btn-text-content">Pass</span>
-            </Button>
+            </ButtonSound>
           }
           {
             currentPage === pageNames.gameDetails && !isGameTransitioning && isBallHandler &&
-            <Button className="btn-keep" onClick={this.onKeepBall} color="primary" disabled={turnLocked || ballHandler !== user.userId}>
+            <ButtonSound className="btn-keep" onClick={this.onKeepBall} color="primary" disabled={turnLocked || ballHandler !== user.userId}>
               <span className="keep" />
               <span className="btn-text-content">Keep</span>
-            </Button>
+            </ButtonSound>
           }
           {
             currentPage === pageNames.gameDetails && isGameTransitioning && game && user.userId === game.createdBy &&
-            <Button className="btn-next" onClick={this.onGameTransition} color="success">
+            <ButtonSound className="btn-next" onClick={this.onGameTransition} color="success">
               <span className="next" />
               <span className="btn-text-content">Next</span>
-            </Button>
+            </ButtonSound>
           }
         </div>
         {

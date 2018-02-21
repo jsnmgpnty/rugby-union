@@ -1,30 +1,68 @@
-.score-view__header{
-    margin: 0.5rem;
-    display: flex;
-    flex-direction: row; 
-    justify-content: center;
-    > * {
-        margin: 0 .5rem;
-    }
-    .scoreTally {
-        align-self: center;
-        font-size: 1.34rem;
-        color: #FFF;
-        font-weight: 700;
-    }
-}
+@import '../../variables';
 
-.score-view__field {
+.score-view {
     position: relative;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center top;
-    height: 200px;
-    width: 100%;
-    max-width: 290px;
-    margin: 0 auto;
+    height: 290px;
 
-    &.default {
-        background-image: url(../../assets/scoreboard-field.png);
+    .score-view__header{
+        margin: 1rem 0 0;
+        display: flex;
+        flex-direction: row; 
+        justify-content: space-around;
+        position: absolute;
+        width: 100%;
+    
+        > p {
+            color: $white;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin: 0;
+
+            label {
+                margin: 0;
+            }
+        }
+    
+        > .score-view__header-country {
+            margin: 0 .5rem;
+
+            .country {
+                border: .25rem solid $success;
+            }
+
+            &:nth-of-type(2) {
+                .country {
+                    border-color: $danger;
+                }
+            }
+
+            h3 {
+                color: $white;
+                font-weight: 700;
+            }
+        }
+    
+        .scoreTally {
+            align-self: center;
+            font-size: 1.34rem;
+            color: #FFF;
+            font-weight: 700;
+        }
+    }
+    
+    .score-view__field {
+        position: absolute;
+        bottom: 0;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center top;
+        height: 200px;
+        width: 100%;
+        max-width: 290px;
+        margin: 0 auto;
+    
+        &.default {
+            background-image: url(../../assets/scoreboard-field.png);
+        }
     }
 }

@@ -14,10 +14,22 @@ const propTypes = {
 
 const defaultProps = {
   isLoading: false,
-  hideContent: true,
+  hideContent: false,
   children: null,
   blur: 2,
 };
+
+const showContent = (props) => {
+  if (props.isLoading) {
+    if (props.hideContent) {
+      return null;
+    }
+
+    return props.children;
+  }
+
+  return props.children;
+}
 
 function Spinner(props) {
   const message = (
@@ -34,7 +46,7 @@ function Spinner(props) {
         contentBlur={props.contentBlur}
       >
         {
-          !props.isLoading && props.children
+          showContent(props)
         }
       </Loader>
     </div>

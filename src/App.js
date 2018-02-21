@@ -3,13 +3,16 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { reactLocalStorage } from 'reactjs-localstorage';
+import Sound from 'react-sound';
 
 import AppRoutes from './routes';
 import { setCountries } from 'actions/countries';
 import { setUser } from 'actions/user';
 import { initializeSession } from 'services/SocketClient';
 import { Navigator, Spinner } from 'components';
+import pageNames from 'lib/pageNames';
 
+import soundMainBg from './assets/snd-main-bg.mp3';
 import './App.scss';
 
 const mapDispatchToProps = dispatch => ({
@@ -19,6 +22,7 @@ const mapDispatchToProps = dispatch => ({
 
 const mapStateToProps = state => ({
 	isPageLoading: state.navigation.isPageLoading,
+	currentPage: state.navigation.currentPage,
 });
 
 class App extends Component {
@@ -244,6 +248,7 @@ class App extends Component {
 	render() {
 		const {
 			isPageLoading,
+			currentPage,
 		} = this.props;
 
 		return (
@@ -253,6 +258,14 @@ class App extends Component {
 						<Spinner isLoading={isPageLoading}>
 							{
 								this.state.hasInitialized && <AppRoutes setUser={this.props.setUser} />
+							}
+							{
+								currentPage !== pageNames.gameDetails && <Sound
+									url={soundMainBg}
+									loop
+									volume={50}
+									playStatus={Sound.status.PLAYING}
+								/>
 							}
 						</Spinner>
 					</div>

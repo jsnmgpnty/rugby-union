@@ -33,27 +33,10 @@ class Scoreboard extends PureComponent {
     return country || { name: 'N/A' };
   }
 
-  updateTurn = () => {
-    let turn = this.state.turnNumber;
-    let round = this.state.roundNumber;
-
-    if (round === 4) {
-      return;
-    }
-
-    if (turn === 6) {
-      this.setState({ isTouchdown: true });
-      round += 1;
-      turn = 1;
-    } else {
-      this.setState({ isTouchdown: false });
-      turn += 1;
-    }
-
-    this.setState({
-      turnNumber: turn,
-      roundNumber: round,
-    });
+  getTeamScore = (team) => {
+    const { gameScore } = this.props;
+    const score = gameScore.find(a => a.teamId === team.teamId);
+    return score ? score.score : 0;
   }
 
   render() {
@@ -66,11 +49,20 @@ class Scoreboard extends PureComponent {
     } = this.props;
 
     return (
-      <div>
+      <div className="score-view">
         <div className="score-view__header">
-          <Country country={this.getCountry(teams[0])} />
-          <span className="scoreTally">00:00</span>
-          <Country country={this.getCountry(teams[1])} />
+          <div className="score-view__header-country">
+            <Country country={this.getCountry(teams[0])} />
+            <h3>{this.getTeamScore(teams[0])}</h3>
+          </div>
+          <p>
+            <label>{`Round ${roundNumber}`}</label>
+            <label>{`Turn ${turnNumber}`}</label>
+          </p>
+          <div className="score-view__header-country">
+            <Country country={this.getCountry(teams[1])} />
+            <h3>{this.getTeamScore(teams[0])}</h3>
+          </div>
         </div>
         <div className={`score-view__field default`}>
           <ContainerDimensions>
@@ -79,16 +71,15 @@ class Scoreboard extends PureComponent {
                 <ScoreboardPin
                   width={width}
                   height={height}
-                  isTouchdown={this.state.isTouchdown}
+                  isTouchdown={isTouchdown}
                   isTackled={isTackled}
-                  turnNumber={this.state.turnNumber}
-                  roundNumber={this.state.roundNumber}
+                  turnNumber={turnNumber}
+                  roundNumber={roundNumber}
                 />
             }
           </ContainerDimensions>
 
         </div>
-        <a onClick={this.updateTurn}>CLICK</a> 
       </div>
     )
   }

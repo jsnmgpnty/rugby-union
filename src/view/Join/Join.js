@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Redirect } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Button, Form, FormGroup, Input } from 'reactstrap';
+import { Badge, Button, Form, FormGroup, Input } from 'reactstrap';
 import { reactLocalStorage } from 'reactjs-localstorage';
 
 import './Join.scss';
@@ -12,7 +12,7 @@ import { setCurrentPage } from 'actions/navigation';
 import pageNames from 'lib/pageNames';
 import gameApi from 'services/GameApi';
 import { initializeSession } from 'services/SocketClient';
-import { Spinner } from 'components';
+import { Spinner, ButtonSound } from 'components';
 
 const mapDispatchToProps = dispatch => ({
 	setUser: user => dispatch(setUser(user)),
@@ -35,11 +35,30 @@ class Join extends Component {
 			errorMessage: null,
 			isUsernameValid: false,
 			isUsernamePristine: true,
+			games: [],
 		};
 	}
 
-	componentDidMount() {
+	async componentDidMount() {
 		this.props.setCurrentPage(pageNames.join);
+		await this.getActiveGames();
+	}
+
+	async getActiveGames() {
+		const { isBusy } = this.state;
+		if (isBusy) {
+			return;
+		}
+
+		this.setState({ isBusy: true });
+
+		try {
+			const games = await gameApi.getGames();
+			this.setState({ games, isBusy: false });
+		} catch (error) {
+			this.setState({ isBusy: false });
+			console.log(error);
+		}
 	}
 
 	handleNameChange = (event) => {
@@ -65,6 +84,7 @@ class Join extends Component {
 
 	async signInUser(isCreatingGame) {
 		const { username } = this.state;
+		
 		this.setState({ isLoading: true, username, isCreatingGame });
 
 		try {
@@ -106,6 +126,7 @@ class Join extends Component {
 			errorMessage,
 			isCreatingGame,
 			isUsernameValid,
+			games,
 		} = this.state;
 
 		return (
@@ -128,20 +149,26 @@ class Join extends Component {
 								onChange={this.handleNameChange}
 							/>
 						</FormGroup>
-						<Button
+						<ButtonSound
 							color="success"
 							disabled={!isUsernameValid}
 							onClick={(e) => this.signInUser(true)}>
 							<span className="create" />
 							<span className="btn-text-content">Create Game</span>
-						</Button>
-						<Button
+						</ButtonSound>
+						<ButtonSound
 							color="primary"
+							type="submit"
 							disabled={!isUsernameValid}
 							onClick={(e) => this.signInUser(false)}>
 							<span className="join" />
-							<span className="btn-text-content">Join Game</span>
-						</Button>
+							<span className="btn-text-content">
+								Join Game
+								{
+									games && games.length > 0 && <Badge color="danger" pill>{games.length}</Badge>
+								}
+							</span>
+						</ButtonSound>
 						{
 							isSuccessSignIn && isCreatingGame && <Redirect to="/create" />
 						}

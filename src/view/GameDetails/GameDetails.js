@@ -431,7 +431,6 @@ class GameDetails extends PureComponent {
         {
           winningTeam && <SplashScreen teams={this.getMappedTeamCountries()} winningTeam={winningTeam} gameScore={gameScore} />
         }
-
         { 
           this.checkShouldDisplayRoundResult() && <RoundResult teams={this.getMappedTeamCountries()} isAttackingTeam={isPlayerOnAttack} isTackled={isTackled} gameScore={gameScore} />
         }
@@ -442,7 +441,6 @@ class GameDetails extends PureComponent {
                 <div className="gamedetails-view__header">
                   <h2>{game.name}</h2>
                   <p>{`${this.getCountryByTeam(game.teams[0]).name} vs ${this.getCountryByTeam(game.teams[1]).name}`}</p>
-                  <p>{`Round ${currentRoundNumber} of ${game.maxRoundsPerGame} - Turn ${currentTurnNumber}`}</p>
                 </div>
                 <Scoreboard
                   roundNumber={currentRoundNumber}

@@ -7,3 +7,4 @@ export { default as Country } from './Country/Country';
 export { default as Scoreboard } from './Scoreboard/Scoreboard';
 export { default as SplashScreen } from './SplashScreen/SplashScreen';
 export { default as RoundResult } from './RoundResult/RoundResult';
+export { default as ButtonSound } from './ButtonSound/ButtonSound';

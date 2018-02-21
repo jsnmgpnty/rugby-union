@@ -13,7 +13,7 @@ class GameApi extends ApiClient {
   }
 
   async getGames() {
-    return this.get('/game?skip=0&take=9999');
+    return this.get('/game/active?skip=0&take=9999');
   }
 
   async getGame(gameId) {

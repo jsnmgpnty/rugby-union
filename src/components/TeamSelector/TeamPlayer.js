@@ -17,12 +17,14 @@ const propTypes = {
   }),
   onClick: PropTypes.func,
   isClickable: PropTypes.bool,
+  isSelected: PropTypes.bool,
 };
 
 const defaultProps = {
   avatar: null,
   onClick: () => { },
   isClickable: true,
+  isSelected: false,
 };
 
 const getTeamPlayerId = (avatar) => {
@@ -52,6 +54,18 @@ const isCurrentUser = (user, currentUser) => {
   return user === currentUser;
 };
 
+const getHighlightStyle = (userId, currentUser, isClickable, isSelected) => {
+  if (isSelected || isCurrentUser(userId, currentUser)) {
+    return 'is-active';
+  }
+
+  if (!isClickable) {
+    return 'disabled';
+  }
+
+  return '';
+};
+
 function TeamPlayer(props) {
   const username = props.user ? props.user.username : null;
   const userId = props.user ? props.user.userId : null;
@@ -59,7 +73,7 @@ function TeamPlayer(props) {
   return (
     <div
       id={`team-player_${getTeamPlayerId(props.avatar)}`}
-      className={`team-player ${isCurrentUser(userId, props.currentUser) ? 'is-active' : null} ${!props.isClickable ? 'disabled' : null}`}
+      className={`team-player ${getHighlightStyle(userId, props.currentUser, props.isClickable, props.isSelected)}`}
     >
       <a onClick={() => props.onClick(props.teamId, props.avatar.playerId, userId)}>
         <div className="team-player__avatar">
