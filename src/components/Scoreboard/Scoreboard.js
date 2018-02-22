@@ -61,7 +61,7 @@ class Scoreboard extends PureComponent {
           </p>
           <div className="score-view__header-country">
             <Country country={this.getCountry(teams[1])} />
-            <h3>{this.getTeamScore(teams[0])}</h3>
+            <h3>{this.getTeamScore(teams[1])}</h3>
           </div>
         </div>
         <div className={`score-view__field default`}>

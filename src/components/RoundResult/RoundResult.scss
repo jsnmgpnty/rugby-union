@@ -34,30 +34,39 @@
 			}
 		}
 		
-		.per-team {
-			margin: 0 1.4rem;
+		.score-view__header {
+			margin: 1rem 0 0;
+			display: flex;
+			flex-direction: row; 
+			justify-content: space-around;
+			position: absolute;
+			width: 100%;
 
-			&:nth-child(odd) {
-				.country {
-					border: 5px solid $danger;
-				}
-			}
+			.per-team {
+				margin: 0 1.4rem;
 	
-			.country {
-				height: 115px;
-				width: 115px;
-				border: 5px solid $success;
-			}
-			
-			.team-score {
-				padding-top: 1.5rem;
-				font-size: 1.1rem;
-				line-height: 1;
-				text-transform: uppercase;
+				&:nth-child(odd) {
+					.country {
+						border: 5px solid $danger;
+					}
+				}
+		
+				.country {
+					height: 115px;
+					width: 115px;
+					border: 5px solid $success;
+				}
 				
-				p{
-					font-size: 4rem;
-					font-weight: 600;
+				.team-score {
+					padding-top: 1.5rem;
+					font-size: 1.1rem;
+					line-height: 1;
+					text-transform: uppercase;
+					
+					p{
+						font-size: 4rem;
+						font-weight: 600;
+					}
 				}
 			}
 		}

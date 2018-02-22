@@ -259,7 +259,7 @@ class App extends Component {
 							{
 								this.state.hasInitialized && <AppRoutes setUser={this.props.setUser} />
 							}
-							{
+							{/* {
 								currentPage !== pageNames.gameDetails && (
 									<Sound
 										ignoreMobileRestrictions
@@ -269,7 +269,7 @@ class App extends Component {
 										playStatus={Sound.status.PLAYING}
 									/>
 								)
-							}
+							} */}
 						</Spinner>
 					</div>
 					<div className="rugby-nav">

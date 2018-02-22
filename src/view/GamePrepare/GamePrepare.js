@@ -97,7 +97,7 @@ class GameLobby extends PureComponent {
   handleGameJoin = (data) => {
     const { game } = this.state;
 
-    if (data.teamId && data.game) {
+    if (data.teamId && data.game && game) {
       game.players = data.game.players;
 
       game.teams.forEach(team => {

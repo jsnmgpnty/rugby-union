@@ -9,6 +9,7 @@ import './SplashScreen.scss';
 
 const propTypes = {
 	teams: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
+	currentTeam: PropTypes.string.isRequired,
 	winningTeam: PropTypes.string.isRequired,
 	gameScore: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
 };
@@ -27,6 +28,11 @@ const SplashScreen = sizeMe({
 
 	state = {
 		goToLobby: false,
+	};
+
+	isUserWon = () => {
+		const { winningTeam, currentTeam } = this.props;
+		return winningTeam === currentTeam;
 	};
 
 	getWinningTeamTeamCountry = () => {
@@ -54,11 +60,13 @@ const SplashScreen = sizeMe({
 
 		return (
 			<div className="splash-screen">
-				<div className="splash-screen__overlay"></div>
+				<div className={`splash-screen__overlay ${!this.isUserWon() ? 'lost' : ''}`}></div>
 				<div className="splash-screen__contents">
-					<Confetti {...this.props.size} />
+					{
+						this.isUserWon() && <Confetti {...this.props.size} />
+					}
 					<h2>
-						<span>{this.getWinningTeamTeamCountry()}</span> Wins the Game!
+						<span>{this.getWinningTeamTeamCountry()}</span> won the Game!
 					</h2>
 					<div className="score-view__header">
 						{

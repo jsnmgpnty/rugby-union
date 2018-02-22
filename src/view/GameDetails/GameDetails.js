@@ -42,9 +42,11 @@ class GameDetails extends PureComponent {
     currentRoundNumber: 0,
     currentTurnNumber: 0,
     gameScore: [],
+    isRoundResultShown: false,
     // round or turn state
     ballHandlerTeam: null,
     winningTeam: null,
+    currentUserTeam: null,
     isTackled: false,
     isTouchdown: false,
     isPlayerOnAttack: false,
@@ -208,14 +210,6 @@ class GameDetails extends PureComponent {
 
       if (gameStateResult) {
         setGameStatus(gameStateResult.gameStatus);
-        switch (gameStateResult.gameStatus) {
-          case 3:
-            this.setState({ isGameCompleted: true });
-            return;
-          default:
-            break;
-        }
-
         this.props.setGame(gameStateResult);
         this.setState({ game: gameStateResult });
 
@@ -244,7 +238,7 @@ class GameDetails extends PureComponent {
 
           this.setState({ isPlayerOnAttack });
 
-          this.setState({ ballHandlerTeam, currentTurnNumber: gameStateResult.turnNumber, currentRoundNumber: gameStateResult.roundNumber, countryName });
+          this.setState({ ballHandlerTeam, currentUserTeam: currentTeam.teamId, currentTurnNumber: gameStateResult.turnNumber, currentRoundNumber: gameStateResult.roundNumber, countryName });
           onGameStart({ userId: user.userId, teamId: currentTeam.teamId });
         }
 
@@ -403,7 +397,11 @@ class GameDetails extends PureComponent {
 
   checkShouldDisplayRoundResult() {
     return this.state.isNewTurn && !this.state.isGameCompleted;
-  }
+  };
+
+  closeRoundResult = () => {
+    this.setState({ isNewTurn: false });
+  };
 
   render() {
     const {
@@ -419,6 +417,7 @@ class GameDetails extends PureComponent {
       currentRoundNumber,
       gameScore,
       winningTeam,
+      currentUserTeam,
       countryName,
       votes,
     } = this.state;
@@ -429,10 +428,19 @@ class GameDetails extends PureComponent {
     return (
       <div className="gamedetails-view">
         {
-          winningTeam && <SplashScreen teams={this.getMappedTeamCountries()} winningTeam={winningTeam} gameScore={gameScore} />
+          winningTeam && <SplashScreen teams={this.getMappedTeamCountries()} winningTeam={winningTeam} currentTeam={currentUserTeam} gameScore={gameScore} />
         }
-        { 
-          this.checkShouldDisplayRoundResult() && <RoundResult teams={this.getMappedTeamCountries()} isAttackingTeam={isPlayerOnAttack} isTackled={isTackled} gameScore={gameScore} />
+        {
+          this.checkShouldDisplayRoundResult() && (
+            <RoundResult
+              teams={this.getMappedTeamCountries()}
+              isAttackingTeam={isPlayerOnAttack}
+              isTackled={isTackled}
+              isTouchdown={isTouchdown}
+              gameScore={gameScore}
+              onButtonClick={this.closeRoundResult}
+            />
+          )
         }
         <Spinner isLoading={isBusy}>
           {
