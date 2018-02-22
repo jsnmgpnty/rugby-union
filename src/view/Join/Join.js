@@ -15,171 +15,170 @@ import { initializeSession } from 'services/SocketClient';
 import { Spinner, ButtonSound } from 'components';
 
 const mapDispatchToProps = dispatch => ({
-	setUser: user => dispatch(setUser(user)),
-	setCurrentPage: () => dispatch(setCurrentPage(pageNames.join)),
+  setUser: user => dispatch(setUser(user)),
+  setCurrentPage: () => dispatch(setCurrentPage(pageNames.join)),
 });
 
 class Join extends Component {
-	static propTypes = {
-		setUser: PropTypes.func.isRequired,
-	};
+  static propTypes = {
+    setUser: PropTypes.func.isRequired,
+  };
 
-	constructor(props) {
-		super(props);
+  constructor(props) {
+    super(props);
 
-		this.state = {
-			username: '',
-			isLoading: false,
-			isSuccessSignIn: false,
-			isCreatingGame: false,
-			errorMessage: null,
-			isUsernameValid: false,
-			isUsernamePristine: true,
-			games: [],
-		};
-	}
+    this.state = {
+      username: '',
+      isLoading: false,
+      isSuccessSignIn: false,
+      isCreatingGame: false,
+      errorMessage: null,
+      isUsernameValid: false,
+      isUsernamePristine: true,
+      games: [],
+    };
+  }
 
-	async componentDidMount() {
-		this.props.setCurrentPage(pageNames.join);
-		await this.getActiveGames();
-	}
+  async componentDidMount() {
+    this.props.setCurrentPage(pageNames.join);
+    await this.getActiveGames();
+  }
 
-	async getActiveGames() {
-		const { isBusy } = this.state;
-		if (isBusy) {
-			return;
-		}
+  async getActiveGames() {
+    const { isBusy } = this.state;
+    if (isBusy) {
+      return;
+    }
 
-		this.setState({ isBusy: true });
+    this.setState({ isBusy: true });
 
-		try {
-			const games = await gameApi.getGames();
-			this.setState({ games, isBusy: false });
-		} catch (error) {
-			this.setState({ isBusy: false });
-			console.log(error);
-		}
-	}
+    try {
+      const games = await gameApi.getGames();
+      this.setState({ games, isBusy: false });
+    } catch (error) {
+      this.setState({ isBusy: false });
+      console.log(error);
+    }
+  }
 
-	handleNameChange = (event) => {
-		if (!this.state.isUsernamePristine) {
-			this.validateUsername(event);
-		}
+  handleNameChange = (event) => {
+    if (!this.state.isUsernamePristine) {
+      this.validateUsername(event);
+    }
 
-		const username = event.target.value;
-		if (username.length >= 2) {
-			this.setState({ username, isUsernameValid: true });
-		} else {
-			this.setState({ username, isUsernameValid: false });
-		}
-	}
+    const username = event.target.value;
+    if (username.length >= 2) {
+      this.setState({ username, isUsernameValid: true });
+    } else {
+      this.setState({ username, isUsernameValid: false });
+    }
+  }
 
-	validateUsername = (event) => {
-		if (event.target.value.length < 2) {
-			this.setState({ isUsernameValid: false, errorMessage: 'Invalid username length', isUsernamePristine: false });
-		} else {
-			this.setState({ isUsernameValid: true, errorMessage: null, isUsernamePristine: false });
-		}
-	}
+  validateUsername = (event) => {
+    if (event.target.value.length < 2) {
+      this.setState({ isUsernameValid: false, errorMessage: 'Invalid username length', isUsernamePristine: false });
+    } else {
+      this.setState({ isUsernameValid: true, errorMessage: null, isUsernamePristine: false });
+    }
+  }
 
-	async signInUser(isCreatingGame) {
-		const { username } = this.state;
-		
-		this.setState({ isLoading: true, username, isCreatingGame });
+  async signInUser(isCreatingGame) {
+    const { username } = this.state;
+    
+    this.setState({ isLoading: true, username, isCreatingGame });
 
-		try {
-			const result = await gameApi.login(username);
-			if (result) {
-				if (!result.isSuccess) {
-					this.setState({
-						errorMessage: result.message,
-						isSuccessSignIn: false,
-					});
-					return;
-				}
+    try {
+      const result = await gameApi.login(username);
+      if (result) {
+        if (!result.isSuccess) {
+          this.setState({
+            errorMessage: result.message,
+            isSuccessSignIn: false,
+          });
+          return;
+        }
 
-				if (result.data) {
-					initializeSession(result.data);
-					this.props.setUser(result.data);
-					reactLocalStorage.setObject('user', result.data);
-					this.setState({
-						errorMessage: null,
-						isSuccessSignIn: true,
-					});
-				}
-			}
+        if (result.data) {
+          initializeSession(result.data);
+          this.props.setUser(result.data);
+          reactLocalStorage.setObject('user', result.data);
+          this.setState({
+            errorMessage: null,
+            isSuccessSignIn: true,
+          });
+        }
+      }
 
-			this.setState({ isLoading: false });
-		} catch (error) {
-			this.setState({
-				errorMessage: error,
-				isSuccessSignIn: false,
-				isLoading: false,
-			});
-		}
-	}
+      this.setState({ isLoading: false });
+    } catch (error) {
+      this.setState({
+        errorMessage: error,
+        isSuccessSignIn: false,
+        isLoading: false,
+      });
+    }
+  }
 
-	render() {
-		const {
-			isLoading,
-			isSuccessSignIn,
-			errorMessage,
-			isCreatingGame,
-			isUsernameValid,
-			games,
-		} = this.state;
+  render() {
+    const {
+      isLoading,
+      isSuccessSignIn,
+      errorMessage,
+      isCreatingGame,
+      isUsernameValid,
+      games,
+    } = this.state;
 
-		return (
-			<div className="join-view">
-				<Spinner isLoading={isLoading}>
-					<div className="join-view__hero" />
-					<div className="join-view__title">
-						<h2>Six Nations</h2>
-						<h4>Touchdown</h4>
-					</div>
-					<Form>
-						<FormGroup>
-							<Input
-								className={errorMessage && 'has-error'}
-								type="text"
-								name="name"
-								id="name"
-								placeholder="Enter Name"
-								onBlur={this.validateUsername}
-								onChange={this.handleNameChange}
-							/>
-						</FormGroup>
-						<ButtonSound
-							color="success"
-							disabled={!isUsernameValid}
-							onClick={(e) => this.signInUser(true)}>
-							<span className="create" />
-							<span className="btn-text-content">Create Game</span>
-						</ButtonSound>
-						<ButtonSound
-							color="primary"
-							type="submit"
-							disabled={!isUsernameValid}
-							onClick={(e) => this.signInUser(false)}>
-							<span className="join" />
-							<span className="btn-text-content">
-								Join Game
-								{
-									games && games.length > 0 && <Badge color="danger" pill>{games.length}</Badge>
-								}
-							</span>
-						</ButtonSound>
-						{
-							isSuccessSignIn && isCreatingGame && <Redirect to="/create" />
-						}
-						{
-							isSuccessSignIn && !isCreatingGame && <Redirect to="/" />
-						}
-					</Form>
-				</Spinner>
-			</div>
-		);
-	}
+    return (
+      <div className="join-view">
+        <Spinner isLoading={isLoading}>
+          <div className="join-view__hero" />
+          <div className="join-view__title">
+            <h2>Six Nations</h2>
+            <h4>Touchdown</h4>
+          </div>
+          <Form>
+            <FormGroup>
+              <Input
+                className={errorMessage && 'has-error'}
+                type="text"
+                name="name"
+                id="name"
+                placeholder="Enter Name"
+                onBlur={this.validateUsername}
+                onChange={this.handleNameChange}
+              />
+            </FormGroup>
+            <ButtonSound
+              color="success"
+              disabled={!isUsernameValid}
+              onClick={(e) => this.signInUser(true)}>
+              <span className="create" />
+              <span className="btn-text-content">Create Game</span>
+            </ButtonSound>
+            <ButtonSound
+              color="primary"
+              disabled={!isUsernameValid}
+              onClick={(e) => this.signInUser(false)}>
+              <span className="join" />
+              <span className="btn-text-content">
+                Join Game
+                {
+                  games && games.length > 0 && <Badge color="danger" pill>{games.length}</Badge>
+                }
+              </span>
+            </ButtonSound>
+            {
+              isSuccessSignIn && isCreatingGame && <Redirect to="/create" />
+            }
+            {
+              isSuccessSignIn && !isCreatingGame && <Redirect to="/" />
+            }
+          </Form>
+        </Spinner>
+      </div>
+    );
+  }
 }
 
 export default withRouter(connect(null, mapDispatchToProps)(Join));

@@ -228,7 +228,7 @@ class GameLobby extends PureComponent {
             game ? (
               <div className="game-prepare__content">
                 <div className="game-prepare__header">
-                  <h2>{game.gameId}</h2>
+                  <h2>{game.name}</h2>
                   <h4>{this.getLobbySubTitle()}</h4>
                 </div>
                 <div className="game-prepare__teams">

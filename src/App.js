@@ -260,12 +260,15 @@ class App extends Component {
 								this.state.hasInitialized && <AppRoutes setUser={this.props.setUser} />
 							}
 							{
-								currentPage !== pageNames.gameDetails && <Sound
-									url={soundMainBg}
-									loop
-									volume={50}
-									playStatus={Sound.status.PLAYING}
-								/>
+								currentPage !== pageNames.gameDetails && (
+									<Sound
+										ignoreMobileRestrictions
+										url={soundMainBg}
+										loop
+										volume={50}
+										playStatus={Sound.status.PLAYING}
+									/>
+								)
 							}
 						</Spinner>
 					</div>

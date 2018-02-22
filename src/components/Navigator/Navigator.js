@@ -23,6 +23,7 @@ const mapStateToProps = (state) => ({
   game: state.navigation.game,
   // create game state
   teams: state.createGame.teams,
+  gameName: state.createGame.gameName,
   // user state
   user: state.user.user,
   currentTeam: state.user.currentTeam,
@@ -129,12 +130,13 @@ class Navigator extends PureComponent {
       teams,
       isPageLoading,
       setGame,
+      gameName,
     } = this.props;
 
     isPageLoading(true);
 
     try {
-      const result = await gameApi.createGame(null, user.userId, teams[0], teams[1]);
+      const result = await gameApi.createGame(gameName, user.userId, teams[0], teams[1]);
       if (result && result.isSuccess) {
         setGame(result.data);
         this.setState({ goToGameDetails: false, goToGamePrepare: true, goToJoin: false, goToLobby: false });

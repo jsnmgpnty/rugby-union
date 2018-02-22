@@ -24,7 +24,7 @@ export default class GameCard extends PureComponent {
         <a onClick={() => this.props.onSelect(this.props.game)}>
           <div className="game-bg"></div>
           <div className={`game-details ${this.props.isSelected ? 'is-selected' : ''}`}>
-            <span className="game-number">Game {this.props.number}</span>
+            <span className="game-number">{this.props.game.name}</span>
             <span className="game-matchup caps">{this.props.home.name} vs {this.props.away.name}</span>
             <span className="player-requirements">{this.props.playerCount} Players Inside</span>
           </div>

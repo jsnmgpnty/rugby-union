@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+import { Form, FormGroup, Input } from 'reactstrap';
 
 import './GameCreate.scss';
 import pageNames from 'lib/pageNames';
@@ -9,112 +10,149 @@ import { setCurrentPage, isTeamsSelectedOnGameCreate } from 'actions/navigation'
 import { setTeams } from 'actions/createGame';
 
 const mapStateToProps = state => ({
-	countries: state.countries.countries,
-	user: state.user.user,
+  countries: state.countries.countries,
+  user: state.user.user,
 });
 
 const mapDispatchToProps = dispatch => ({
-	setTeams: (teams) => dispatch(setTeams(teams)),
-	setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameCreate)),
-	isTeamsSelectedOnGameCreate: (isSelected) => dispatch(isTeamsSelectedOnGameCreate(isSelected)),
+  setTeams: (teams) => dispatch(setTeams(teams)),
+  setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameCreate)),
+  isTeamsSelectedOnGameCreate: (isSelected) => dispatch(isTeamsSelectedOnGameCreate(isSelected)),
 });
 
 class GameCreate extends Component {
-	static propTypes = {
-		setCurrentPage: PropTypes.func.isRequired,
-	};
+  static propTypes = {
+    setCurrentPage: PropTypes.func.isRequired,
+  };
 
-	constructor(props) {
-		super(props);
+  constructor(props) {
+    super(props);
 
-		this.addNewRow = this.addNewRow.bind(this);
-		this.state = {
-			rules: []
-		}
-	}
+    this.addNewRow = this.addNewRow.bind(this);
+    this.state = {
+      rules: [],
+      name: '',
+      isNamePristine: true,
+      isNameValid: true,
+      errorMessage: null,
+    };
+  }
 
-	addNewRow(e) {
-		const rules = this.state.rules;
+  componentDidMount() {
+    const {
+      setCurrentPage,
+    } = this.props;
 
-		if (rules.length > 1) {
-			rules.shift();
-		}
+    setCurrentPage();
+  }
 
-		const updated = rules.slice(0, 2);
-		updated.push(e);
-		if (updated.length === 2) {
-			this.props.setTeams(updated);
-			this.props.isTeamsSelectedOnGameCreate(true);
-		}
+  addNewRow(e) {
+    const rules = this.state.rules;
 
-		this.setState({ rules: updated });
-	}
+    if (rules.length > 1) {
+      rules.shift();
+    }
 
-	isCountryActive(country) {
-		const countriesSelected = this.state.rules;
-		if (countriesSelected.indexOf(country.countryId) !== -1) {
-			return country.name + '_on';
-		}
-		else
-			return '';
-	}
+    const updated = rules.slice(0, 2);
+    updated.push(e);
+    if (updated.length === 2) {
+      this.props.setTeams(updated);
+      this.props.isTeamsSelectedOnGameCreate(true);
+    }
 
-	displayTeamLabal(countryID) {
-		const countriesSelected = this.state.rules;
+    this.setState({ rules: updated });
+  }
 
-		if (countriesSelected[0] === countryID) {
-			return (
-				<span>
-					Team
-				<label> A </label>
-				</span>
-			)
-		}
-		if (countriesSelected[1] === countryID) {
-			return (
-				<span>
-					Team
-				<label> B </label>
-				</span>
-			)
-		}
-		else
-			return ' ';
-	}
+  isCountryActive(country) {
+    const countriesSelected = this.state.rules;
+    if (countriesSelected.indexOf(country.countryId) !== -1) {
+      return country.name + '_on';
+    }
+    else
+      return '';
+  }
 
-	componentDidMount() {
-		const {
-			setCurrentPage,
-		} = this.props;
+  displayTeamLabal(countryID) {
+    const countriesSelected = this.state.rules;
 
-		setCurrentPage();
-	}
+    if (countriesSelected[0] === countryID) {
+      return (
+        <span>
+          Team
+        <label> A </label>
+        </span>
+      )
+    }
+    if (countriesSelected[1] === countryID) {
+      return (
+        <span>
+          Team
+        <label> B </label>
+        </span>
+      )
+    }
+    else
+      return ' ';
+  }
 
-	render() {
-		const { countries } = this.props;
+  handleNameChange = (event) => {
+    if (!this.state.isNamePristine) {
+      this.validateName(event);
+    }
 
-		return (
-			<div>
-				<div className="gamecreate-header">
-					<h2>Create Game</h2>
-					<p>Select 2 teams</p>
-				</div>
-				<div className="teamlist-div">
-					{
-						countries && countries.length > 0 && countries.map((country) =>
-							<div key={country.countryId} className={`team-div ${country.name}_off ${this.isCountryActive(country)}`} onClick={() => this.addNewRow(country.countryId)}>
-								<label className="team-name">{country.name}</label>
-								<img src={require('../../assets/teams/' + country.name + '_icon.png')} alt={country.name} />
-								<div className="team-label">
-									{this.displayTeamLabal(country.countryId)}
-								</div>
-							</div>
-						)
-					}
-				</div>
-			</div>
-		);
-	}
+    const name = event.target.value;
+    if (name.length >= 2) {
+      this.setState({ name, isNameValid: true });
+    } else {
+      this.setState({ name, isNameValid: false });
+    }
+  }
+
+  validateName = (event) => {
+    if (event.target.value.length < 2) {
+      this.setState({ isNameValid: false, errorMessage: 'Invalid name length', isNamePristine: false });
+    } else {
+      this.setState({ isNameValid: true, errorMessage: null, isNamePristine: false });
+    }
+  }
+
+  render() {
+    const { countries } = this.props;
+    const { errorMessage } = this.state;
+
+    return (
+      <div>
+        <div className="gamecreate-header">
+          <Form>
+            <FormGroup>
+              <Input
+                className={errorMessage && 'has-error'}
+                type="text"
+                name="name"
+                id="name"
+                placeholder="Create Game"
+                onChange={this.handleNameChange}
+              />
+            </FormGroup>
+          </Form>
+          <p>Select 2 teams</p>
+        </div>
+        <div className="teamlist-div">
+          {
+            countries && countries.length > 0 && countries.map((country) =>
+              <div key={country.countryId} className={`team-div ${country.name}_off ${this.isCountryActive(country)}`} onClick={() => this.addNewRow(country.countryId)}>
+                <label className="team-name">{country.name}</label>
+                <img src={require('../../assets/teams/' + country.name + '_icon.png')} alt={country.name} />
+                <div className="team-label">
+                  {this.displayTeamLabal(country.countryId)}
+                </div>
+              </div>
+            )
+          }
+        </div>
+      </div>
+    );
+  }
 }
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(GameCreate));

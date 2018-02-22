@@ -27,11 +27,14 @@ class ButtonSound extends PureComponent {
           {this.props.children}
         </Button>
         {
-          this.state.soundPlaying === Sound.status.PLAYING && <Sound
-            url={clickSound}
-            playStatus={Sound.status.PLAYING}
-            onFinishedPlaying={this.onSoundEnd}
-          />
+          this.state.soundPlaying === Sound.status.PLAYING && (
+            <Sound
+              ignoreMobileRestrictions
+              url={clickSound}
+              playStatus={Sound.status.PLAYING}
+              onFinishedPlaying={this.onSoundEnd}
+            />
+          )
         }
 
       </Fragment>
