@@ -4,4 +4,4 @@ const setTeams = (payload) => ({ type: SET_TEAMS, payload });
 
 const setGameName = (payload) => ({ type: SET_GAME_NAME, payload });
 
-export { setTeams };
+export { setTeams, setGameName };

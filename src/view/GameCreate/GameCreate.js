@@ -7,7 +7,7 @@ import { Form, FormGroup, Input } from 'reactstrap';
 import './GameCreate.scss';
 import pageNames from 'lib/pageNames';
 import { setCurrentPage, isTeamsSelectedOnGameCreate } from 'actions/navigation';
-import { setTeams } from 'actions/createGame';
+import { setTeams, setGameName } from 'actions/createGame';
 
 const mapStateToProps = state => ({
   countries: state.countries.countries,
@@ -15,6 +15,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
+  setGameName: (name) => dispatch(setGameName(name)),
   setTeams: (teams) => dispatch(setTeams(teams)),
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameCreate)),
   isTeamsSelectedOnGameCreate: (isSelected) => dispatch(isTeamsSelectedOnGameCreate(isSelected)),
@@ -106,6 +107,8 @@ class GameCreate extends Component {
     } else {
       this.setState({ name, isNameValid: false });
     }
+
+    this.props.setGameName(name);
   }
 
   validateName = (event) => {
