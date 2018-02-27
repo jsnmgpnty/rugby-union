@@ -1,0 +1,22 @@
+version: '2'
+
+services:
+  whg.engagementapp.api:
+    image: jsnmgpnty/whg-app
+    ports:
+      - "58747:80"
+    depends_on:
+      - mongo
+      - redis
+  mongo: 
+    image: mongo:latest
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+volumes:
+  mongo-data:
