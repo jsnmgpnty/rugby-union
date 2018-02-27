@@ -6,7 +6,7 @@ import { Country } from 'components';
 import './RoundResult.scss';
 
 const propTypes = {
-  isAttackingTeam: PropTypes.bool.isRequired,
+  isRoundWinner: PropTypes.bool.isRequired,
   isTackled: PropTypes.bool.isRequired,
   isTouchdown: PropTypes.bool.isRequired,
   teams: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
@@ -14,18 +14,28 @@ const propTypes = {
   onButtonClick: PropTypes.func.isRequired,
 };
 
-const getRoundResult = (isAttackingTeam, isTackled, isTouchdown) => {
+const getRoundResult = (isRoundWinner, isTackled, isTouchdown) => {
   let result = "You lost this round!";
   let message = "Your team was tackled!";
-  if (!isAttackingTeam && isTouchdown) {
-    message = "You were not able to tackle the attacking team!";
-  } else if (isAttackingTeam && isTouchdown) {
+
+  if (isRoundWinner && isTouchdown) {
     result = "You won this round!";
     message = "You were not tackled";
-  } else if (!isAttackingTeam && isTackled) {
+  }
+
+  if (isRoundWinner && isTackled) {
     result = "You won this round!";
     message = "You successfully tackled the attacking team";
   }
+
+  if (!isRoundWinner && isTouchdown) {
+    message = "You were not able to tackle the attacking team!";
+  }
+
+  if (!isRoundWinner && isTackled) {
+    message = "You were not able to try!";
+  }
+
   return { result, message }
 };
 
@@ -35,7 +45,7 @@ const getTeamScore = (team, gameScore) => {
 };
 
 function RoundResult(props) {
-  const isAttackingTeam = props.winningTeam;
+  const isRoundWinner = props.isRoundWinner;
   const isTackled = props.isTackled;
   const isTouchdown = props.isTouchdown;
   const teams = props.teams;
@@ -44,8 +54,8 @@ function RoundResult(props) {
   return (<div className="splash-screen">
     <div className="splash-screen__overlay"></div>
     <div className="splash-screen__contents">
-      <h2>{getRoundResult(isAttackingTeam, isTackled, isTouchdown).result}</h2>
-      <h3>{getRoundResult(isAttackingTeam, isTackled, isTouchdown).message}</h3>
+      <h2>{getRoundResult(isRoundWinner, isTackled, isTouchdown).result}</h2>
+      <h3>{getRoundResult(isRoundWinner, isTackled, isTouchdown).message}</h3>
       <div className="score-view__header">
         {
           teams.map(team => (

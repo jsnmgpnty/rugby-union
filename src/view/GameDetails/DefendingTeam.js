@@ -15,6 +15,16 @@ class DefendingTeam extends PureComponent {
     votes: PropTypes.array,
   };
 
+  defaultProps = {
+    getRoundResultDisplay: () => {},
+    country: null,
+    players: [],
+    currentUser: null,
+    onPlayerSelected: () => {},
+    turnLocked: true,
+    votes: [],
+  }
+
   getVotePerPlayerBadge = (userId) => {
     if (!userId) {
       return null;
@@ -29,16 +39,48 @@ class DefendingTeam extends PureComponent {
     return <div className="player-badge vote"><span>{voters}</span></div>;
   };
 
+  getCurrentPlayerVote = () => {
+    const { currentUser, votes, players } = this.props;
+
+    if (votes && votes.length > 0) {
+      const playerVote = votes.find(a => a.sender === currentUser.userId);
+      if (playerVote) {
+        const player = players.find(a => a.user.userId === playerVote.toTackle);
+        return player;
+      }
+    }
+
+    return null;
+  }
+
   getDescription = () => {
     const roundResultClass = this.props.getRoundResultDisplay();
     if (roundResultClass !== 'default') {
       return <div className={`turnResultDisplay ${roundResultClass}`}></div>;
     }
 
+    let votedPlayerModel = null;
+
+    const currentPlayerVote = this.getCurrentPlayerVote();
+
     return (
       <Fragment>
         <p className="team-description defense">Defending Team <span className="country-name">{`(${this.props.country})`}</span></p>
-        <p className="teamMissionDescription">Guess 1 player you think is the ball bearer. If majority of the team guesses the right person your team wins the round.</p>
+        {
+          !currentPlayerVote && (
+            <p className="teamMissionDescription">
+              Guess 1 player you think is the ball bearer. 
+              If majority of the team guesses the right person your team wins the round.
+            </p>
+          )
+        }
+        {
+          currentPlayerVote && (
+            <p className="teamMissionDescription">
+              You selected <span className="text-primary">{currentPlayerVote.player.name} <b>({currentPlayerVote.user.username})</b></span> to tackle.
+            </p>
+          )
+        }
       </Fragment>
     );
   }
