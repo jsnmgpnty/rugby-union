@@ -210,6 +210,13 @@ class GameDetails extends PureComponent {
     }
   }
 
+  displayBallRecipientAlert(){
+    const { ballHandler, ballReceiver } = this.state;
+    if(!(this.props.user.userId === this.state.ballHandler === ballReceiver) && (this.props.user.userId === ballReceiver)){
+      alert("You are now holding the ball you motherfucker! Run motherfucker! Run!")	
+   }
+  }
+
   getGameState = async (gameId, bypassBusyState = false) => {
     const { user, setBallHandler, lockTurn, unlockTurn, setGameStatus } = this.props;
     const { isBusy } = this.state;
@@ -240,8 +247,9 @@ class GameDetails extends PureComponent {
             const ballHolder = gameStateResult.latestTurn[0].sender;
             const ballReceiver = gameStateResult.latestTurn[0].passedTo;
             this.setState({ ballHolder, ballReceiver });
-
+            
             if (ballReceiver) {
+              this.displayBallRecipientAlert();
               lockTurn();
             } else {
               unlockTurn();
