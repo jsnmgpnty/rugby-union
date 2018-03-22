@@ -3,7 +3,6 @@ import { Redirect } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
-import { reactLocalStorage } from 'reactjs-localstorage';
 
 import { isPageLoading, setGame } from 'actions/navigation';
 import { lockTurn } from 'actions/game';
@@ -62,6 +61,11 @@ class Navigator extends PureComponent {
     this.onGameTransition = this.onGameTransition.bind(this);
   }
 
+  componentWillReceiveProps(nextProps) {
+    // reset state of navigation redirects
+    this.setState({ goToJoin: false, goToGamePrepare: false, goToLobby: false, goToGameDetails: false });
+  }
+
   getBackButtonStyle = () => {
     const { currentPage } = this.props;
     return currentPage === pageNames.join ? 'disabled-link' : null;
@@ -76,12 +80,10 @@ class Navigator extends PureComponent {
     const { currentPage, game, user, currentTeam } = this.props;
 
     if (currentPage === pageNames.gameLobby) {
-      reactLocalStorage.setObject('user', null);
       this.setState({ goToJoin: true, goToGamePrepare: false, goToLobby: false, goToGameDetails: false });
     }
 
     if (currentPage === pageNames.gameCreate) {
-      reactLocalStorage.setObject('user', null);
       this.setState({ goToJoin: true, goToGamePrepare: false, goToLobby: false, goToGameDetails: false });
     }
 
@@ -266,16 +268,16 @@ class Navigator extends PureComponent {
           }
         </div>
         {
-          goToGamePrepare && (game && game.gameId) && <Redirect to={`/game/${game.gameId}`} />
+          goToGamePrepare && (game && game.gameId) && <Redirect to={`/game/${game.gameId}`} key="nav-game-prepare" />
         }
         {
-          goToLobby && <Redirect to="/" />
+          goToLobby && <Redirect to="/" key="nav-lobby" />
         }
         {
-          goToJoin && <Redirect to="/join" />
+          goToJoin && <Redirect to="/join" key="nav-join" />
         }
         {
-          goToGameDetails && <Redirect to={`/game/${game.gameId}/details`} />
+          goToGameDetails && <Redirect to={`/game/${game.gameId}/details`} key="nav-game-details" />
         }
       </div>
     )

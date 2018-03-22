@@ -113,7 +113,7 @@ class Lobby extends PureComponent {
           </div>
         </Spinner>
         {
-          activeGameId && <Redirect to={`/game/${activeGameId}`} />
+          activeGameId && <Redirect to={`/game/${activeGameId}`} key="lobby-game-details" />
         }
       </div>
     );

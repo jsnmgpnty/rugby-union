@@ -40,6 +40,7 @@ class Join extends Component {
   }
 
   async componentDidMount() {
+    reactLocalStorage.setObject('user', null);
     this.props.setCurrentPage(pageNames.join);
     await this.getActiveGames();
   }
@@ -94,6 +95,7 @@ class Join extends Component {
           this.setState({
             errorMessage: result.message,
             isSuccessSignIn: false,
+            isLoading: false,
           });
           return;
         }
@@ -105,11 +107,10 @@ class Join extends Component {
           this.setState({
             errorMessage: null,
             isSuccessSignIn: true,
+            isLoading: false,
           });
         }
       }
-
-      this.setState({ isLoading: false });
     } catch (error) {
       this.setState({
         errorMessage: error,
@@ -169,10 +170,10 @@ class Join extends Component {
               </span>
             </ButtonSound>
             {
-              isSuccessSignIn && isCreatingGame && <Redirect to="/create" />
+              isSuccessSignIn && isCreatingGame && <Redirect to="/create" key="join-create" />
             }
             {
-              isSuccessSignIn && !isCreatingGame && <Redirect to="/" />
+              isSuccessSignIn && !isCreatingGame && <Redirect to="/" key="join-lobby" />
             }
           </Form>
         </Spinner>

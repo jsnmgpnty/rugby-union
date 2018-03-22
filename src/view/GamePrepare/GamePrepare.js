@@ -250,10 +250,10 @@ class GameLobby extends PureComponent {
             ) : <p>No game found</p>
           }
           {
-            isGameStarted && <Redirect to={`/game/${gameId}/details`} />
+            isGameStarted && <Redirect to={`/game/${gameId}/details`} key="prep-details" />
           }
           {
-            (isGameCompleted || goToLobby) && <Redirect to="/" />
+            (isGameCompleted || goToLobby) && <Redirect to="/" key="prep-lobby" />
           }
         </Spinner>
       </div>
