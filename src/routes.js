@@ -29,8 +29,8 @@ function AppRoutes(props) {
       <Route exact path="/" render={() => isUserSignedIn(Lobby)} />
       <Route path="/create" render={() => isUserSignedIn(GameCreate)} />
       <Route path="/join" component={Join} />
-      <Route path="/game/:gameId" render={() => isUserSignedIn(GamePrepare)} />
-      <Route path="/game/:gameId/details" render={() => isUserSignedIn(GameDetails)} />
+      <Route exact path="/game/:gameId" render={() => isUserSignedIn(GamePrepare)} />
+      <Route exact path="/game/:gameId/details" render={() => isUserSignedIn(GameDetails)} />
     </Switch>
   );
 }

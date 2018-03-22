@@ -45,6 +45,7 @@ class GameDetails extends PureComponent {
     isRoundResultShown: false,
     isRoundWinner: false,
     // round or turn state
+    roundResults: [],
     ballHandlerTeam: null,
     winningTeam: null,
     currentUserTeam: null,
@@ -125,7 +126,13 @@ class GameDetails extends PureComponent {
       unlockTurn();
 
       // finally we set the current round and turn number (we reset the turn number as its a new round)
-      this.setState({ currentTurnNumber: 1, currentRoundNumber: data.roundNumber });
+      this.setState({
+        currentTurnNumber: 1,
+        currentRoundNumber: data.roundNumber,
+        isTackled: false,
+        isTouchdown: false,
+        isSaved: false,
+      });
     } else {
       // let's check first if this is a new turn
       if (data.turnNumber > currentTurnNumber) {
@@ -162,16 +169,28 @@ class GameDetails extends PureComponent {
           const isTouchdown = roundResult === 1;
           const isTackled = roundResult === 2;
           const isSaved = roundResult === 3;
+          let isRoundWinner = false;
 
           // we set round winner flag if player holds ball and we receive touchdown status
           if (isPlayerOnAttack && isTouchdown) {
-            this.setState({ isRoundWinner: true });
+            isRoundWinner = true;
           }
 
           // we set round winner flag if player is defending and we receive tackled status
           if (!isPlayerOnAttack && isTackled) {
-            this.setState({ isRoundWinner: true });
+            isRoundWinner = true;
           }
+
+          this.setState({
+            roundResults: [
+              ...this.state.roundResults, {
+                isTouchdown,
+                isTackled,
+                isSaved,
+                isRoundWinner,
+              }
+            ],
+          });
 
           this.setState({ isTackled, isTouchdown, isSaved });
         } else {
@@ -387,6 +406,16 @@ class GameDetails extends PureComponent {
     return true;
   };
 
+  getLastRoundResult = () => {
+    const { roundResults } = this.state;
+
+    if (roundResults && roundResults.length > 1) {
+      return this.state.roundResults[this.state.roundResults.length - 1];
+    }
+
+    return null;
+  };
+
   getRoundResultDisplay = () => {
     if (!this.props.isGameTransitioning) {
       return "default";
@@ -452,8 +481,9 @@ class GameDetails extends PureComponent {
       countryName,
       votes,
     } = this.state;
-    const { user, turnLocked } = this.props;
 
+    const { user, turnLocked } = this.props;
+    const lastRoundResult = this.getLastRoundResult();
     const mappedPlayers = this.getMappedPlayers(ballHandlerTeam);
 
     return (
@@ -462,12 +492,12 @@ class GameDetails extends PureComponent {
           winningTeam && <SplashScreen teams={this.getMappedTeamCountries()} winningTeam={winningTeam} currentTeam={currentUserTeam} gameScore={gameScore} />
         }
         {
-          this.checkShouldDisplayRoundResult() && (
+          this.checkShouldDisplayRoundResult() && lastRoundResult && (
             <RoundResult
               teams={this.getMappedTeamCountries()}
-              isRoundWinner={isRoundWinner}
-              isTackled={isTackled}
-              isTouchdown={isTouchdown}
+              isRoundWinner={lastRoundResult.isRoundWinner}
+              isTackled={lastRoundResult.isTackled}
+              isTouchdown={lastRoundResult.isTouchdown}
               gameScore={gameScore}
               onButtonClick={this.closeRoundResult}
             />
