@@ -8,6 +8,10 @@ import {
   SET_CURRENT_PAGE,
   SET_GAME,
   SET_PLAYER_AVATAR,
+  GO_TO_GAMEPREPARE,
+  GO_TO_LOBBY,
+  GO_TO_JOIN,
+  RESET_NAV_REDIRECTS,
 } from 'lib/actionNames';
 
 const initialState = {
@@ -20,6 +24,9 @@ const initialState = {
   currentPage: null,
   gameId: null,
   avatar: null,
+  goToJoin: false,
+  goToGamePrepare: false,
+  goToLobby: false,
 };
 
 const navigation = (state = initialState, action) => {
@@ -80,6 +87,34 @@ const navigation = (state = initialState, action) => {
       return { ...state, game: action.payload };
     case SET_PLAYER_AVATAR:
       return { ...state, avatar: action.payload };
+    case RESET_NAV_REDIRECTS:
+      return {
+        ...state,
+        goToGamePrepare: false,
+        goToJoin: false,
+        goToLobby: false,
+      };
+    case GO_TO_GAMEPREPARE:
+      return {
+        ...state,
+        goToGamePrepare: true,
+        goToJoin: false,
+        goToLobby: false,
+      };
+    case GO_TO_LOBBY:
+      return {
+        ...state,
+        goToGamePrepare: false,
+        goToJoin: false,
+        goToLobby: true,
+      };
+    case GO_TO_JOIN:
+      return {
+        ...state,
+        goToGamePrepare: false,
+        goToJoin: true,
+        goToLobby: false,
+      };
     default:
       return state;
   }

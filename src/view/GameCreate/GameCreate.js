@@ -4,10 +4,10 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { Form, FormGroup, Input } from 'reactstrap';
 
-import './GameCreate.scss';
 import pageNames from 'lib/pageNames';
-import { setCurrentPage, isTeamsSelectedOnGameCreate } from 'actions/navigation';
+import { setCurrentPage, isTeamsSelectedOnGameCreate, resetNavRedirects } from 'actions/navigation';
 import { setTeams, setGameName } from 'actions/createGame';
+import './GameCreate.scss';
 
 const mapStateToProps = state => ({
   countries: state.countries.countries,
@@ -18,6 +18,7 @@ const mapDispatchToProps = dispatch => ({
   setGameName: (name) => dispatch(setGameName(name)),
   setTeams: (teams) => dispatch(setTeams(teams)),
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameCreate)),
+  resetNavRedirects: () => dispatch(resetNavRedirects()),
   isTeamsSelectedOnGameCreate: (isSelected) => dispatch(isTeamsSelectedOnGameCreate(isSelected)),
 });
 
@@ -42,9 +43,11 @@ class GameCreate extends Component {
   componentDidMount() {
     const {
       setCurrentPage,
+      resetNavRedirects,
     } = this.props;
 
     setCurrentPage();
+    resetNavRedirects();
   }
 
   addNewRow(e) {

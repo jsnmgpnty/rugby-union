@@ -40,7 +40,7 @@ class AttackingTeam extends PureComponent {
   }
 
   getTurnDescription = () => {
-    const { ballHolder, ballReceiver, currentUser, turnLocked } = this.props;
+    const { ballHolder, currentUser, turnLocked } = this.props;
     let objective = "The objective of your team is to successfully evade 6 waves without being tackled.";
 
     if (turnLocked) {

@@ -2,24 +2,16 @@ import React, { PureComponent } from 'react';
 import { Redirect } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Button } from 'reactstrap';
 
-import { isPageLoading, setGame } from 'actions/navigation';
-import { lockTurn } from 'actions/game';
+import { isPageLoading, setGame, resetNavRedirects, navigateToJoin, navigateToGamePrepare, navigateToLobby } from 'actions/navigation';
+import { leaveGame, startGame, createGame } from 'actions/createGame';
+import { lockTurn, passBall, tacklePlayer, transitionGame } from 'actions/game';
 import { ButtonSound } from 'components';
 import pageNames from 'lib/pageNames';
-import gameApi from 'services/GameApi';
 import './Navigator.scss';
 
 const mapStateToProps = (state) => ({
-  isCreatingGame: state.navigation.isCreatingGame,
-  isTeamsSelectedOnGameCreate: state.navigation.isTeamsSelectedOnGameCreate,
-  isGameSelectedOnLobby: state.navigation.isGameSelectedOnLobby,
-  isDeleteEnabledOnLobby: state.navigation.isDeleteEnabledOnLobby,
-  isGameWaitingForPlayers: state.navigation.isGameWaitingForPlayers,
-  isGameReadyToStart: state.navigation.isGameReadyToStart,
-  currentPage: state.navigation.currentPage,
-  game: state.navigation.game,
+  ...state.navigation,
   // create game state
   teams: state.createGame.teams,
   gameName: state.createGame.gameName,
@@ -33,22 +25,26 @@ const mapStateToProps = (state) => ({
   ballHandler: state.game.ballHandler,
   turnLocked: state.game.turnLocked,
   isGameTransitioning: state.game.status === 4,
+  currentGame: state.game.currentGame,
 });
 
 const mapDispatchToProps = dispatch => ({
   isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
   setGame: (game) => dispatch(setGame(game)),
   lockTurn: () => dispatch(lockTurn()),
+  navigateToJoin: () => dispatch(navigateToJoin()),
+  navigateToLobby: () => dispatch(navigateToLobby()),
+  navigateToGamePrepare: () => dispatch(navigateToGamePrepare()),
+  resetNavRedirects: () => dispatch(resetNavRedirects()),
+  createGame: (gameName, userId, firstTeam, secondTeam) => dispatch(createGame(gameName, userId, firstTeam, secondTeam)),
+  startGame: (gameId, firstTeam, secondTeam) => dispatch(startGame(gameId, firstTeam, secondTeam)),
+  leaveGame: (gameId, teamId, userId) => dispatch(leaveGame(gameId, teamId, userId)),
+  tacklePlayer: (gameId, userId, playerToTackle) => dispatch(tacklePlayer(gameId, userId, playerToTackle)),
+  passBall: (gameId, userId, playerToReceiveBall) => dispatch(passBall(gameId, userId, playerToReceiveBall)),
+  transitionGame: (gameId) => dispatch(transitionGame(gameId)),
 });
 
 class Navigator extends PureComponent {
-  state = {
-    goToGamePrepare: false,
-    goToLobby: false,
-    goToJoin: false,
-    goToGameDetails: false,
-  };
-
   constructor(props) {
     super(props);
 
@@ -62,8 +58,9 @@ class Navigator extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    // reset state of navigation redirects
-    this.setState({ goToJoin: false, goToGamePrepare: false, goToLobby: false, goToGameDetails: false });
+    if (nextProps.location.pathname !== this.props.location.pathname) {
+      resetNavRedirects();
+    }
   }
 
   getBackButtonStyle = () => {
@@ -77,52 +74,38 @@ class Navigator extends PureComponent {
   };
 
   async onBackButtonClick() {
-    const { currentPage, game, user, currentTeam } = this.props;
+    const {
+      currentPage,
+      currentGame,
+      user,
+      currentTeam,
+      navigateToJoin,
+      navigateToLobby,
+      leaveGame,
+    } = this.props;
 
     if (currentPage === pageNames.gameLobby) {
-      this.setState({ goToJoin: true, goToGamePrepare: false, goToLobby: false, goToGameDetails: false });
+      navigateToJoin();
     }
 
     if (currentPage === pageNames.gameCreate) {
-      this.setState({ goToJoin: true, goToGamePrepare: false, goToLobby: false, goToGameDetails: false });
+      navigateToJoin();
     }
 
     if (currentPage === pageNames.gameDetails) {
-      this.setState({ goToJoin: false, goToGamePrepare: false, goToLobby: true, goToGameDetails: false });
+      navigateToLobby();
     }
 
     if (currentPage === pageNames.gamePrepare) {
-      isPageLoading(true);
-
-      try {
-        const result = await gameApi.leaveGame(game.gameId, currentTeam, user.userId);
-        if (result && result.isSuccess) {
-          this.setState({ goToGameDetails: false, goToGamePrepare: false, goToJoin: false, goToLobby: true });
-        }
-        isPageLoading(false);
-      } catch (error) {
-        isPageLoading(false);
-      }
+      leaveGame(currentGame.gameId, currentTeam, user.userId);
     }
   };
 
   async onGameStart() {
-    const {
-      game,
-      isPageLoading,
-    } = this.props;
+    const { startGame, currentGame } = this.props;
 
-    isPageLoading(true);
-
-    try {
-      const result = await gameApi.startGame(game.gameId, game.teams[0].teamId, game.teams[1].teamId);
-      if (result && result.game) {
-        setGame(result.game);
-        this.setState({ goToGameDetails: true, goToGamePrepare: false, goToJoin: false, goToLobby: false });
-      }
-      isPageLoading(false);
-    } catch (error) {
-      isPageLoading(false);
+    if (currentGame) {
+      startGame(currentGame.gameId, currentGame.teams[0].teamId, currentGame.teams[1].teamId);
     }
   };
 
@@ -130,49 +113,35 @@ class Navigator extends PureComponent {
     const {
       user,
       teams,
-      isPageLoading,
-      setGame,
+      createGame,
       gameName,
     } = this.props;
 
-    isPageLoading(true);
-
-    try {
-      const result = await gameApi.createGame(gameName, user.userId, teams[0], teams[1]);
-      if (result && result.isSuccess) {
-        setGame(result.data);
-        this.setState({ goToGameDetails: false, goToGamePrepare: true, goToJoin: false, goToLobby: false });
-      }
-      isPageLoading(false);
-    } catch (error) {
-      isPageLoading(false);
-    }
+    createGame(gameName, user.userId, teams[0], teams[1]);
   };
 
   onGameJoin = () => {
-    this.setState({ goToGamePrepare: true, goToLobby: false, goToJoin: false, goToGameDetails: false });
+    this.props.navigateToGamePrepare();
   };
 
   async onTackle() {
-    const { game, user, playerToTackle } = this.props;
-    this.props.lockTurn();
-    await gameApi.tacklePlayer(game.gameId, user.userId, playerToTackle);
+    const { currentGame, user, playerToTackle, tacklePlayer } = this.props;
+    tacklePlayer(currentGame.gameId, user.userId, playerToTackle);
   }
 
   async onPassBall() {
-    const { game, user } = this.props;
-    this.props.lockTurn();
-    await gameApi.passBall(game.gameId, user.userId, this.props.playerToReceiveBall);
+    const { currentGame, user, playerToReceiveBall, passBall } = this.props;
+    passBall(currentGame.gameId, user.userId, playerToReceiveBall);
   }
 
   async onKeepBall() {
-    const { game, user } = this.props;
-    this.props.lockTurn();
-    await gameApi.passBall(game.gameId, user.userId, this.props.user.userId);
+    const { currentGame, user, passBall } = this.props;
+    passBall(currentGame.gameId, user.userId, user.userId);
   }
 
   async onGameTransition() {
-    await gameApi.transitionGame(this.props.game.gameId);
+    const { currentGame, transitionGame } = this.props;
+    transitionGame(currentGame.gameId);
   }
 
   render() {
@@ -181,7 +150,7 @@ class Navigator extends PureComponent {
       isGameSelectedOnLobby,
       isGameReadyToStart,
       currentPage,
-      game,
+      currentGame,
       user,
       playerToTackle,
       playerToReceiveBall,
@@ -189,14 +158,10 @@ class Navigator extends PureComponent {
       ballHandler,
       turnLocked,
       isGameTransitioning,
-    } = this.props;
-
-    const {
       goToGamePrepare,
       goToLobby,
       goToJoin,
-      goToGameDetails,
-    } = this.state;
+    } = this.props;
 
     return (
       <div id='rugby-navigator'>
@@ -233,7 +198,7 @@ class Navigator extends PureComponent {
           }
           {
             currentPage === pageNames.gamePrepare &&
-            <ButtonSound className="btn-join" onClick={this.onGameStart} color="primary" disabled={!isGameReadyToStart || user.userId !== game.createdBy}>
+            <ButtonSound className="btn-join" onClick={this.onGameStart} color="primary" disabled={!isGameReadyToStart || user.userId !== currentGame.createdBy}>
               <span className="start" />
               <span className="btn-text-content">Start</span>
             </ButtonSound>
@@ -260,7 +225,7 @@ class Navigator extends PureComponent {
             </ButtonSound>
           }
           {
-            currentPage === pageNames.gameDetails && isGameTransitioning && game && user.userId === game.createdBy &&
+            currentPage === pageNames.gameDetails && isGameTransitioning && currentGame && user.userId === currentGame.createdBy &&
             <ButtonSound className="btn-next" onClick={this.onGameTransition} color="success">
               <span className="next" />
               <span className="btn-text-content">Next</span>
@@ -268,16 +233,13 @@ class Navigator extends PureComponent {
           }
         </div>
         {
-          goToGamePrepare && (game && game.gameId) && <Redirect to={`/game/${game.gameId}`} key="nav-game-prepare" />
+          goToGamePrepare && currentPage !== pageNames.gamePrepare && (currentGame && currentGame.gameId) && <Redirect to={`/game/${currentGame.gameId}`} key="nav-game-prepare" />
         }
         {
-          goToLobby && <Redirect to="/" key="nav-lobby" />
+          goToLobby && currentPage !== pageNames.gameLobby && <Redirect to="/" key="nav-lobby" />
         }
         {
-          goToJoin && <Redirect to="/join" key="nav-join" />
-        }
-        {
-          goToGameDetails && <Redirect to={`/game/${game.gameId}/details`} key="nav-game-details" />
+          goToJoin && currentPage !== pageNames.join && <Redirect to="/join" key="nav-join" />
         }
       </div>
     )

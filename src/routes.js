@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { reactLocalStorage } from 'reactjs-localstorage';
@@ -20,7 +20,7 @@ function AppRoutes(props) {
     if (user && user.userId && user.username) {
       return <RenderableComponent {...props.location} />;
     } else {
-      return <Join />;
+      return <Redirect to="/join" />;
     }
   };
 

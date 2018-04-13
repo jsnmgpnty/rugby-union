@@ -1,4 +1,4 @@
-import { 
+import {
   IS_TEAMS_SELECTED_ON_GAME_CREATE,
   IS_GAME_SELECTED_ON_LOBBY,
   IS_DELETE_ENABLED_ON_LOBBY,
@@ -8,6 +8,11 @@ import {
   SET_CURRENT_PAGE,
   SET_GAME,
   SET_PLAYER_AVATAR,
+  GO_TO_GAMEPREPARE,
+  GO_TO_LOBBY,
+  GO_TO_JOIN,
+  RESET_NAV_REDIRECTS,
+  SET_USER,
 } from 'lib/actionNames';
 
 const isTeamsSelectedOnGameCreate = (payload) => ({ type: IS_TEAMS_SELECTED_ON_GAME_CREATE, payload });
@@ -28,6 +33,27 @@ const setGame = (payload) => ({ type: SET_GAME, payload });
 
 const setPlayerAvatar = (payload) => ({ type: SET_PLAYER_AVATAR, payload });
 
+const navigateToJoin = () => {
+  return (dispatch) => {
+    dispatch({ type: SET_USER, payload: null });
+    dispatch({ type: GO_TO_JOIN });
+  };
+};
+
+const navigateToGamePrepare = () => {
+  return (dispatch) => {
+    dispatch({ type: GO_TO_GAMEPREPARE });
+  };
+};
+
+const navigateToLobby = () => {
+  return (dispatch) => {
+    dispatch({ type: GO_TO_LOBBY });
+  };
+};
+
+const resetNavRedirects = () => ({ type: RESET_NAV_REDIRECTS });
+
 export {
   isTeamsSelectedOnGameCreate,
   isGameSelectedOnLobby,
@@ -38,4 +64,8 @@ export {
   setCurrentPage,
   setGame,
   setPlayerAvatar,
+  navigateToGamePrepare,
+  navigateToJoin,
+  navigateToLobby,
+  resetNavRedirects,
 };

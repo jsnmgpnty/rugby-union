@@ -15,7 +15,7 @@ class DefendingTeam extends PureComponent {
     votes: PropTypes.array,
   };
 
-  defaultProps = {
+  static defaultProps = {
     getRoundResultDisplay: () => {},
     country: null,
     players: [],
@@ -58,8 +58,6 @@ class DefendingTeam extends PureComponent {
     if (roundResultClass !== 'default') {
       return <div className={`turnResultDisplay ${roundResultClass}`}></div>;
     }
-
-    let votedPlayerModel = null;
 
     const currentPlayerVote = this.getCurrentPlayerVote();
 

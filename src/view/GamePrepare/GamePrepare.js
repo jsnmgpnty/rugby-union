@@ -1,30 +1,39 @@
-import React, { PureComponent } from 'react';
+import React, { Fragment, PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import { remove } from 'lodash';
 
-import gameApi from 'services/GameApi';
 import pageNames from 'lib/pageNames';
 import { onGameJoin, onGameJoined, onGameLeft, onGameStarted } from 'services/SocketClient';
-import { TeamSelector, Spinner } from 'components';
-import { setCurrentTeam } from 'actions/user';
-import { setCurrentPage, setGame, isGameReadyToStart, isPageLoading } from 'actions/navigation';
+import { TeamSelector, Spinner, FullDialog } from 'components';
+import { getGame, setGame, setCurrentTeam } from 'actions/game';
+import { toggleTeamSpinners, joinGame } from 'actions/createGame';
+import { setCurrentPage, isGameReadyToStart, isPageLoading, resetNavRedirects } from 'actions/navigation';
+import TeamSpinner from './TeamSpinner';
 import './GamePrepare.scss';
 
 const defaultNumberOfPlayersPerTeam = 2;
 
 const mapDispatchToProps = dispatch => ({
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gamePrepare)),
+  resetNavRedirects: () => dispatch(resetNavRedirects()),
   isGameReadyToStart: (ready) => dispatch(isGameReadyToStart(ready)),
   isPageLoading: (isLoading) => dispatch(isPageLoading(isLoading)),
   setGame: (game) => dispatch(setGame(game)),
   setCurrentTeam: (team) => dispatch(setCurrentTeam(team)),
+  getGame: (gameId) => dispatch(getGame(gameId)),
+  toggleTeamSpinners: (gameId, showTeamSpinners) => dispatch(toggleTeamSpinners(gameId, showTeamSpinners)),
+  joinGame: (gameId, teamId, userId, avatarId) => dispatch(joinGame(gameId, teamId, userId, avatarId)),
 });
 
 const mapStateToProps = state => ({
   countries: state.countries.countries,
   user: state.user.user,
+  isGetGameRequestBusy: state.game.isGetGameRequestBusy,
+  getGameRequestError: state.game.getGameRequestError,
+  currentGame: state.game.currentGame,
+  ...state.createGame,
 });
 
 class GameLobby extends PureComponent {
@@ -40,67 +49,38 @@ class GameLobby extends PureComponent {
 
   state = {
     gameId: null,
-    game: null,
-    isBusy: false,
-    currentAvatarId: null,
-    currentTeamId: null,
-    isGameStarted: false,
-    isGameCompleted: false,
     goToLobby: false,
+    goToGameProper: false,
   };
 
-  async componentDidMount() {
-    const { setCurrentPage, user } = this.props;
+  componentDidMount() {
+    const { setCurrentPage, resetNavRedirects, user } = this.props;
     const { params } = this.props.match;
 
     setCurrentPage();
+    resetNavRedirects();
     onGameJoin({ gameId: params.gameId, userId: user.userId });
     isGameReadyToStart(false);
     this.setState({ gameId: params.gameId });
-    await this.getGame(params.gameId);
+    this.getGame(params.gameId);
   }
 
-  getGame = async (gameId) => {
-    const { isBusy } = this.state;
-    if (isBusy) {
+  getGame = (gameId) => {
+    const { isGetGameRequestBusy, getGame } = this.props;
+    if (isGetGameRequestBusy) {
       return;
     }
 
-    this.setState({ isBusy: true });
-
-    try {
-      const game = await gameApi.getGame(gameId);
-
-      if (game) {
-        switch (game.gameStatus) {
-          case 1:
-          case 2:
-          case 4:
-            this.setState({ isGameStarted: true });
-            break;
-          case 3:
-            this.setState({ isGameCompleted: true });
-            break;
-          default:
-            break;
-        }
-
-        this.props.setGame(game);
-        this.setState({ game, isBusy: false }, this.isGameReady);
-      }
-    } catch (error) {
-      this.setState({ isBusy: false });
-      console.log(error);
-    }
+    getGame(gameId);
   };
 
   handleGameJoin = (data) => {
-    const { game } = this.state;
+    const { currentGame, setGame } = this.props;
 
-    if (data.teamId && data.game && game) {
-      game.players = data.game.players;
+    if (data.teamId && data.game && currentGame) {
+      currentGame.players = data.game.players;
 
-      game.teams.forEach(team => {
+      currentGame.teams.forEach(team => {
         if (team.teamId === data.teamId) {
           if (!team.users) {
             team.users = [];
@@ -121,25 +101,26 @@ class GameLobby extends PureComponent {
         }
       });
 
-      const player = game.players.find(a => a.userId === data.userAvatar.userId);
+      const player = currentGame.players.find(a => a.userId === data.userAvatar.userId);
       if (player) {
         if (player.playerId !== data.userAvatar.playerId) {
           player.playerId = data.userAvatar.playerId;
         }
       }
 
-      this.setState({ game: {...game} }, this.isGameReady);
+      setGame(currentGame);
+      this.isGameReady();
     }
   };
 
   handleGameLeft = (data) => {
-    const { game } = this.state;
+    const { currentGame } = this.props;
 
-    remove(game.players, (player) => {
+    remove(currentGame.players, (player) => {
       return player.username === data.username;
     });
 
-    game.teams.forEach((team) => {
+    currentGame.teams.forEach((team) => {
       remove(team.players, (player) => {
         return player.username === data.username;
       });
@@ -150,19 +131,22 @@ class GameLobby extends PureComponent {
     }
   };
 
-  handleGameStarted = (data) => {
+  handleGameStarted = async (data) => {
     if (!data.error) {
-      this.props.isPageLoading(false);
-      this.setState({ isGameStarted: true });
+      const { currentGame, isPageLoading, toggleTeamSpinners } = this.props;
+
+      if (currentGame) {
+        isPageLoading(false);
+        toggleTeamSpinners(currentGame.gameId, true);
+      }
     }
   };
 
   isGameReady = () => {
-    const { game } = this.state;
-    const { isGameReadyToStart } = this.props;
+    const { isGameReadyToStart, currentGame } = this.props;
 
-    const firstTeamPlayers = game.teams[0].users ? game.teams[0].users.length : 0;
-    const secondTeamPlayers = game.teams[1].users ? game.teams[1].users.length : 0;
+    const firstTeamPlayers = currentGame.teams[0].users ? currentGame.teams[0].users.length : 0;
+    const secondTeamPlayers = currentGame.teams[1].users ? currentGame.teams[1].users.length : 0;
 
     if (firstTeamPlayers >= defaultNumberOfPlayersPerTeam
       && secondTeamPlayers >= defaultNumberOfPlayersPerTeam
@@ -172,10 +156,9 @@ class GameLobby extends PureComponent {
   };
 
   async joinGame(teamId, avatarId) {
-    const { game } = this.state;
-    const { user } = this.props;
+    const { user, currentGame, joinGame } = this.props;
 
-    const isAvatarInUse = game.teams.some((team) => {
+    const isAvatarInUse = currentGame.teams.some((team) => {
       if (team.teamId !== teamId) {
         return false;
       }
@@ -184,8 +167,7 @@ class GameLobby extends PureComponent {
     });
 
     if (!isAvatarInUse) {
-      const result = await gameApi.joinGame(game.gameId, teamId, user.userId, avatarId);
-      this.props.setCurrentTeam(result.teamId);
+      joinGame(currentGame.gameId, teamId, user.userId, avatarId);
     }
   };
 
@@ -209,51 +191,82 @@ class GameLobby extends PureComponent {
     return `${firstCountry.name} vs ${secondCountry.name}`;
   };
 
+  onCloseTeamSpinner = () => {
+    const { currentGame, toggleTeamSpinners } = this.props;
+    toggleTeamSpinners(currentGame.gameId);
+    this.setState({ goToGameProper: true });
+  }
+
+  getCurrentUserTeam = () => {
+    const { user, currentGame } = this.props;
+
+    let teamId = null;
+
+    currentGame.teams.forEach((team) => {
+      const tUser = team.users.find(a => a.userId === user.userId);
+      if (tUser) {
+        teamId = team.teamId;
+      }
+    });
+
+    return teamId;
+  }
+
   render() {
     const {
       gameId,
-      game,
-      isBusy,
-      isGameStarted,
-      isGameCompleted,
       goToLobby,
+      goToGameProper,
     } = this.state;
 
-    const { user } = this.props;
+    const {
+      isTeamSpinnersVisible,
+      isGetGameRequestBusy,
+      currentGame,
+      user,
+    } = this.props;
 
     return (
       <div id={`game-prepare__${gameId}`} className="game-prepare__view">
-        <Spinner isLoading={isBusy}>
+        <Spinner isLoading={isGetGameRequestBusy}>
           {
-            game ? (
-              <div className="game-prepare__content">
-                <div className="game-prepare__header">
-                  <h2>{game.name}</h2>
-                  <h4>{this.getLobbySubTitle()}</h4>
+            currentGame ? (
+              <Fragment>
+                <div className="game-prepare__content">
+                  <div className="game-prepare__header">
+                    <h2>{currentGame.name}</h2>
+                    <h4>{this.getLobbySubTitle()}</h4>
+                  </div>
+                  <div className="game-prepare__teams">
+                    {
+                      currentGame.teams.map((team) => (
+                        <div className="game-prepare__teams-item" key={team.teamId}>
+                          <TeamSelector
+                            currentUser={user.userId}
+                            teamId={team.teamId}
+                            players={team.users}
+                            country={this.getCountry(team.countryId)}
+                            onJoin={this.joinGame}
+                          />
+                        </div>
+                      ))
+                    }
+                  </div>
                 </div>
-                <div className="game-prepare__teams">
-                  {
-                    game.teams.map((team) => (
-                      <div className="game-prepare__teams-item" key={team.teamId}>
-                        <TeamSelector
-                          currentUser={user.userId}
-                          teamId={team.teamId}
-                          players={team.users}
-                          country={this.getCountry(team.countryId)}
-                          onJoin={this.joinGame}
-                        />
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
+                {
+                  goToGameProper && currentGame.gameStatus === 1 && <Redirect to={`/game/${gameId}/details`} key="prep-details" />
+                }
+                {
+                  (currentGame.gameStatus === 3 || goToLobby) && <Redirect to="/" key="prep-lobby" />
+                }
+                {
+                  isTeamSpinnersVisible &&
+                  <FullDialog buttonText="OK, I'm ready" onButtonClick={this.onCloseTeamSpinner}>
+                    <TeamSpinner teams={currentGame.teams} currentTeam={this.getCurrentUserTeam()} />
+                  </FullDialog>
+                }
+              </Fragment>
             ) : <p>No game found</p>
-          }
-          {
-            isGameStarted && <Redirect to={`/game/${gameId}/details`} key="prep-details" />
-          }
-          {
-            (isGameCompleted || goToLobby) && <Redirect to="/" key="prep-lobby" />
           }
         </Spinner>
       </div>

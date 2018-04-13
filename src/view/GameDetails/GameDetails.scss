@@ -4,21 +4,21 @@
     padding: 1rem 1rem 0 1rem;
     text-align: left;
 
-    h2{
-		color: #FFF200;
-		font-weight: 700;
+    h2 {
+        color: $wh-primary-text-color;
+        font-weight: 700;
         margin-bottom: 0;
         @include ellipsis-text;
     }
 
     p{
         text-transform: uppercase;
-		font-size: 1.125rem;
-		color: #FFF;
+        font-size: 1.125rem;
+        color: $white;
         font-weight: 700;
         margin: 0;
         line-height: 1.2;
-	}
+    }
 }
 
 .team-description {
@@ -29,11 +29,11 @@
     margin-bottom: 0;
 
     &.defense {
-        color: #00974C;
+        color: $green;
     }
 
     &.offense {
-        color: #ec1b24
+        color: $red;
     }
 }
 
@@ -42,7 +42,7 @@
     padding-right: 1rem;
     font-size: 00.85rem;
     font-weight: 700;
-    color: #FFF;
+    color: $white;
     text-align: justify;
     line-height: 1.2;
 }

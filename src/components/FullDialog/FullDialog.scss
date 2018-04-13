@@ -5,6 +5,7 @@
   height: 100%;
   z-index: 1000;
   position: fixed;
+  top: 0;
   color: $white;
   background-color: rgba(2, 2, 2, 0.9);
   
@@ -33,6 +34,7 @@
       margin-right: -50%;
       font-size: 1rem;
       padding: 1rem 1rem .5rem 1rem;
+      cursor: pointer;
     }
   }
 }

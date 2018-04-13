@@ -1,0 +1,133 @@
+@import '../../variables';
+
+#team-spinner {
+  padding: 2rem;
+  background: url(../../assets/bg_home.png) no-repeat center center fixed;
+  width: 100%;
+  height: 100%;
+
+  .team-spinner__header {
+    margin-bottom: 2rem;
+
+    h2 {
+      color: $wh-primary-text-color;
+      font-weight: 700;
+    }
+
+    h5 {
+      color: $white;
+      font-weight: 700;
+    }
+  }
+
+  .team-spinner__content {
+    .team-spinner__content-teams {
+      display: flex;
+      margin-bottom: 2rem;
+
+      .team-spinner__team {
+        position: relative;
+        margin: 0 auto;
+        width: 120px;
+        height: 120px;
+        cursor: pointer;
+        transition: transform 1s ease-in;
+        transform-style: preserve-3d;
+    
+        > .team-spinner__team-country {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          box-shadow: inset 0 0 45px rgba(255,255,255,.3), 0 12px 20px -10px rgba(0,0,0,.4);
+          position: absolute;
+  
+          > .country {
+            width: 100%;
+            height: 100%;
+          }
+    
+          &.side-a {
+            z-index: 100;
+          }
+    
+          &.side-b {
+            transform: rotateY(-180deg);
+          }
+    
+          &.attacking {
+            animation: flipHeads 3s ease-out forwards;
+            border: 0.5rem solid $red;
+          }
+    
+          &.defending {
+            animation: flipTails 3s ease-out forwards;
+            border: 0.5rem solid $green;
+          }
+        }
+      }
+    }
+
+    .team-spinner__content-texts {
+      .nav-tabs {
+        border: none;
+
+        .nav-item {
+          border: none;
+          margin: 0;
+        }
+
+        .nav-link {
+          display: none;
+
+          &.active {
+            display: block;
+            border: none;
+            background-color: rgba(0,0,0,.4);
+            border-top-left-radius: .5rem;
+            border-top-right-radius: .5rem;
+            font-weight: 700;
+            
+            &.attack {
+              color: $red;
+            }
+
+            &.defend {
+              color: $green;
+            }
+          }
+        }
+      }
+
+      .tab-content {
+        padding: 1rem;
+        background-color: rgba(0,0,0,.4);
+        border-top-left-radius: .5rem;
+        border-bottom-left-radius: .5rem;
+        border-bottom-right-radius: .5rem;
+
+        .tab-pane {
+          text-align: left;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+
+  @keyframes flipHeads {
+    from {
+      transform: rotateY(0);
+    }
+    to {
+      transform: rotateY(1800deg);
+    }
+  }
+
+  @keyframes flipTails {
+    from {
+      transform: rotateY(0);
+    }
+    to {
+      transform: rotateY(2160deg);
+    }
+  }
+}

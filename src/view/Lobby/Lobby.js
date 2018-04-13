@@ -1,33 +1,39 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { Redirect } from 'react-router';
 import { withRouter } from 'react-router-dom';
 
 import './Lobby.scss';
 import pageNames from 'lib/pageNames';
-import gameApi from 'services/GameApi';
 import { onGameCreated } from 'services/SocketClient';
-import { setCurrentPage, setGame, isGameSelectedOnLobby } from 'actions/navigation';
+import { setCurrentPage, setGame, isGameSelectedOnLobby, resetNavRedirects } from 'actions/navigation';
+import { getActiveGames, getLatestGameByUser, resetGameDetails } from 'actions/game';
 import LobbyHeader from './LobbyHeader';
 import { GameCard, Spinner } from 'components';
 
 const mapDispatchToProps = dispatch => ({
   setCurrentPage: () => dispatch(setCurrentPage(pageNames.gameLobby)),
+  resetNavRedirects: () => dispatch(resetNavRedirects()),
   setGame: (game) => dispatch(setGame(game)),
   isGameSelectedOnLobby: (isSelected) => dispatch(isGameSelectedOnLobby(isSelected)),
+  getActiveGames: () => dispatch(getActiveGames()),
+  getLatestGameByUser: (userId) => dispatch(getLatestGameByUser(userId)),
+  resetGameDetails: () => dispatch(resetGameDetails()),
 });
 
 const mapStateToProps = state => ({
+  activeGames: state.game.activeGames,
+  isGetActiveGamesBusy: state.game.isGetActiveGamesBusy,
+  getActiveGamesError: state.game.getActiveGamesError,
   countries: state.countries.countries,
-  game: state.navigation.game,
-  user: state.user,
+  user: state.user.user,
 });
 
 class Lobby extends PureComponent {
   async componentDidMount() {
     this.props.setCurrentPage(pageNames.gamePrepare);
-    this.props.setGame(null);
-    await this.getCurrentGameByUser();
+    this.props.resetNavRedirects();
+    this.props.resetGameDetails();
+    this.getActiveGames();
 
     onGameCreated(this.handleGameCreated);
   }
@@ -43,38 +49,18 @@ class Lobby extends PureComponent {
     this.setState({ games: this.state.games.concat(data) });
   }
 
-  async getCurrentGameByUser() {
-    const { user } = this.props;
-
-    try {
-      const game = await gameApi.getLatestGameByUser(user.userId);
-      if (game && game.gameId) {
-        this.props.setGame(game);
-        this.setState({ activeGameId: game.gameId });
-      } else {
-        setCurrentPage();
-        await this.getActiveGames();
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  getCurrentGameByUser() {
+    const { user, getLatestGameByUser } = this.props;
+    getLatestGameByUser(user.userId);
   }
 
-  async getActiveGames() {
-    const { isBusy } = this.state;
-    if (isBusy) {
+  getActiveGames() {
+    const { isGetActiveGamesBusy, getActiveGames } = this.props;
+    if (isGetActiveGamesBusy) {
       return;
     }
 
-    this.setState({ isBusy: true });
-
-    try {
-      const games = await gameApi.getGames();
-      this.setState({ games, isBusy: false });
-    } catch (error) {
-      this.setState({ isBusy: false });
-      console.log(error);
-    }
+    getActiveGames();
   }
 
   onGameSelect = (game) => {
@@ -89,15 +75,16 @@ class Lobby extends PureComponent {
   }
 
   render() {
-    const { games, isBusy, selectedGameId, activeGameId } = this.state;
+    const { isGetActiveGamesBusy, activeGames } = this.props;
+    const { selectedGameId } = this.state;
 
     return (
       <div className="lobby">
         <LobbyHeader />
-        <Spinner isLoading={isBusy}>
+        <Spinner isLoading={isGetActiveGamesBusy}>
           <div className="game-list">
             {
-              games && games.length > 0 && games.map((game, index) =>
+              activeGames && activeGames.length > 0 && activeGames.map((game, index) =>
                 <GameCard
                   key={index}
                   number={index + 1}
@@ -112,9 +99,6 @@ class Lobby extends PureComponent {
             }
           </div>
         </Spinner>
-        {
-          activeGameId && <Redirect to={`/game/${activeGameId}`} key="lobby-game-details" />
-        }
       </div>
     );
   }

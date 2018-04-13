@@ -1,5 +1,4 @@
 import React, { PureComponent, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { Button } from 'reactstrap';
 import Sound from 'react-sound';
 
@@ -36,7 +35,6 @@ class ButtonSound extends PureComponent {
             />
           )
         }
-
       </Fragment>
     )
   }
