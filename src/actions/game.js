@@ -25,7 +25,10 @@ import {
   SET_VOTES,
   SET_IS_PLAYER_ON_ATTACK,
   SET_ROUND_RESULTS,
+  ADD_NEW_ACTIVE_GAME,
 } from 'lib/actionNames';
+
+const addNewActiveGame = payload => ({ type: ADD_NEW_ACTIVE_GAME, payload });
 
 const setCurrentTeam = payload => ({ type: SET_CURRENT_TEAM, payload });
 
@@ -194,6 +197,7 @@ const getGameState = (gameId, userId) => {
 };
 
 export {
+  addNewActiveGame,
   resetGameDetails,
   setCurrentTeam,
   setPlayerToTackle,

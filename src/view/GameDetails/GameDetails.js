@@ -178,7 +178,7 @@ class GameDetails extends PureComponent {
       if (data.turnNumber > currentTurnNumber) {
         // if it's a new turn, we set the new ball holder and reset the votes
         if (isPlayerOnAttack) {
-          setBallHandler(data.latestTurn[0].sender);
+          setBallHandler(user.userId === data.latestTurn[0].sender, data.latestTurn[0].sender);
           setPlayerToReceiveBall(null);
         } else {
           setVotes([], null);

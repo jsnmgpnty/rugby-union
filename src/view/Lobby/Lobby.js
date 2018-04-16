@@ -6,7 +6,7 @@ import './Lobby.scss';
 import pageNames from 'lib/pageNames';
 import { onGameCreated } from 'services/SocketClient';
 import { setCurrentPage, setGame, isGameSelectedOnLobby, resetNavRedirects } from 'actions/navigation';
-import { getActiveGames, getLatestGameByUser, resetGameDetails } from 'actions/game';
+import { getActiveGames, getLatestGameByUser, resetGameDetails, addNewActiveGame } from 'actions/game';
 import LobbyHeader from './LobbyHeader';
 import { GameCard, Spinner } from 'components';
 
@@ -18,6 +18,7 @@ const mapDispatchToProps = dispatch => ({
   getActiveGames: () => dispatch(getActiveGames()),
   getLatestGameByUser: (userId) => dispatch(getLatestGameByUser(userId)),
   resetGameDetails: () => dispatch(resetGameDetails()),
+  addNewActiveGame: (game) => dispatch(addNewActiveGame(game)),
 });
 
 const mapStateToProps = state => ({
@@ -29,6 +30,10 @@ const mapStateToProps = state => ({
 });
 
 class Lobby extends PureComponent {
+  state = {
+    selectedGameId: null,
+  };
+
   async componentDidMount() {
     this.props.setCurrentPage(pageNames.gamePrepare);
     this.props.resetNavRedirects();
@@ -38,15 +43,8 @@ class Lobby extends PureComponent {
     onGameCreated(this.handleGameCreated);
   }
 
-  state = {
-    isBusy: false,
-    games: [],
-    selectedGameId: null,
-    activeGameId: null,
-  };
-
   handleGameCreated = (data) => {
-    this.setState({ games: this.state.games.concat(data) });
+    this.props.addNewActiveGame(data);
   }
 
   getCurrentGameByUser() {

@@ -23,6 +23,7 @@ import {
   SET_IS_PLAYER_ON_ATTACK,
   SET_ROUND_RESULTS,
   RESET_GAME_DETAILS,
+  ADD_NEW_ACTIVE_GAME,
 } from 'lib/actionNames';
 
 const initialState = {
@@ -98,6 +99,11 @@ export default function game(state = initialState, action) {
       return { ...state, getGameRequestError: action.payload };
     case GET_GAME_REQUEST_BUSY:
       return { ...state, isGetGameRequestBusy: action.payload };
+    case ADD_NEW_ACTIVE_GAME:
+      return {
+        ...state,
+        activeGames: [...state.activeGames.concat(action.payload)],
+      };
     case GET_ACTIVE_GAMES_SUCCESS:
       return { ...state, activeGames: [...action.payload] };
     case GET_ACTIVE_GAMES_ERROR:
